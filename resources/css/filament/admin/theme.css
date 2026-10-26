@@ -1,0 +1,283 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+/* =========================================
+   MotoHub Admin — Premium Design System
+   ========================================= */
+
+:root {
+    --mh-accent: #2589ff;
+    --mh-accent-hover: #0874f9;
+    --mh-accent-soft: rgba(37, 137, 255, 0.12);
+    --mh-border: rgba(148, 163, 184, 0.14);
+    --mh-radius: 14px;
+}
+
+/* Global typography and transitions */
+
+.fi-body {
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    letter-spacing: -0.01em;
+}
+
+.fi-sidebar,
+.fi-topbar,
+.fi-main,
+.fi-section,
+.fi-ta,
+.fi-wi {
+    transition:
+        background-color 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease;
+}
+
+/* Sidebar */
+
+.fi-sidebar {
+    border-right: 1px solid var(--mh-border);
+}
+
+.fi-sidebar-header {
+    padding-top: 22px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--mh-border);
+}
+
+.fi-sidebar-header .fi-logo {
+    font-weight: 850;
+    letter-spacing: -0.045em;
+}
+
+.fi-sidebar-nav {
+    padding: 14px 10px;
+}
+
+.fi-sidebar-item {
+    margin-block: 3px;
+}
+
+.fi-sidebar-item a {
+    border-radius: 10px;
+    transition:
+        background-color 160ms ease,
+        color 160ms ease,
+        transform 160ms ease;
+}
+
+.fi-sidebar-item a:hover {
+    background: var(--mh-accent-soft);
+}
+
+.fi-sidebar-item.fi-active > a,
+.fi-sidebar-item a[aria-current="page"] {
+    background: var(--mh-accent-soft);
+    color: var(--mh-accent);
+    box-shadow: inset 3px 0 0 var(--mh-accent);
+    font-weight: 700;
+}
+
+.fi-sidebar-group-label {
+    font-size: 0.7rem;
+    font-weight: 750;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+/* Top navigation */
+
+.fi-topbar {
+    border-bottom: 1px solid var(--mh-border);
+    backdrop-filter: blur(16px);
+}
+
+/* Page headings */
+
+.fi-header-heading {
+    font-weight: 800;
+    letter-spacing: -0.045em;
+}
+
+.fi-header-subheading {
+    opacity: 0.72;
+}
+
+/* Cards and sections */
+
+.fi-section,
+.fi-wi-stats-overview-stat,
+.fi-ta-ctn {
+    border: 1px solid var(--mh-border);
+    border-radius: var(--mh-radius);
+    overflow: hidden;
+}
+
+.fi-section-header {
+    padding-block: 18px;
+}
+
+.fi-wi-stats-overview-stat {
+    padding: 20px;
+    transition:
+        transform 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease;
+}
+
+.fi-wi-stats-overview-stat:hover {
+    transform: translateY(-2px);
+    border-color: rgba(37, 137, 255, 0.42);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Tables */
+
+.fi-ta-header-cell {
+    font-size: 0.72rem;
+    font-weight: 750;
+    letter-spacing: 0.055em;
+    text-transform: uppercase;
+}
+
+.fi-ta-row {
+    transition: background-color 140ms ease;
+}
+
+.fi-ta-row:hover {
+    background-color: var(--mh-accent-soft);
+}
+
+.fi-ta-cell {
+    padding-block: 15px;
+}
+
+/* Buttons */
+
+.fi-btn {
+    border-radius: 10px;
+    font-weight: 650;
+    transition:
+        transform 150ms ease,
+        box-shadow 150ms ease;
+}
+
+.fi-btn:active {
+    transform: scale(0.98);
+}
+
+.fi-btn-color-primary {
+    box-shadow: 0 3px 12px rgba(37, 137, 255, 0.15);
+}
+
+/* Form controls */
+
+.fi-input-wrp,
+.fi-select-input,
+.fi-fo-textarea {
+    border-radius: 10px;
+}
+
+.fi-input-wrp:focus-within {
+    border-color: var(--mh-accent);
+    box-shadow: 0 0 0 3px rgba(37, 137, 255, 0.12);
+}
+
+/* Status badges */
+
+.fi-badge {
+    border-radius: 999px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+/* Dark theme */
+
+.dark .fi-body {
+    background-color: #080d17;
+}
+
+.dark .fi-sidebar {
+    background-color: #0b1220;
+}
+
+.dark .fi-topbar {
+    background-color: rgba(11, 18, 32, 0.92);
+}
+
+.dark .fi-main {
+    background-color: #080d17;
+}
+
+.dark .fi-section,
+.dark .fi-wi-stats-overview-stat,
+.dark .fi-ta-ctn {
+    background-color: #101a2b;
+    border-color: rgba(148, 163, 184, 0.13);
+}
+
+.dark .fi-section-header {
+    border-bottom-color: var(--mh-border);
+}
+
+.dark .fi-ta-header {
+    background-color: #0d1727;
+}
+
+.dark .fi-ta-row:hover {
+    background-color: rgba(37, 137, 255, 0.08);
+}
+
+.dark .fi-sidebar-item.fi-active > a,
+.dark .fi-sidebar-item a[aria-current="page"] {
+    background: rgba(37, 137, 255, 0.13);
+    color: #58a6ff;
+    box-shadow: inset 3px 0 0 #2589ff;
+}
+
+/* Login screen */
+
+.fi-simple-layout {
+    background:
+        radial-gradient(
+            ellipse at 50% 0%,
+            rgba(37, 137, 255, 0.13),
+            transparent 55%
+        );
+}
+
+.fi-simple-main {
+    border: 1px solid var(--mh-border);
+    border-radius: 20px;
+}
+
+/* Responsive refinements */
+
+@media (max-width: 768px) {
+    .fi-header-heading {
+        letter-spacing: -0.025em;
+    }
+
+    .fi-section,
+    .fi-wi-stats-overview-stat,
+    .fi-ta-ctn {
+        border-radius: 12px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+    }
+}

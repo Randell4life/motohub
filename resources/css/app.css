@@ -1,0 +1,109 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+/* MotoHub — shared design foundation */
+:root {
+    --mh-bg: #080b10;
+    --mh-surface: #101722;
+    --mh-surface-raised: #151f2d;
+    --mh-border: #263448;
+    --mh-blue: #1677ff;
+    --mh-blue-light: #58a8ff;
+    --mh-text: #f4f7fc;
+    --mh-muted: #96a5ba;
+    --mh-green: #43d9a5;
+    --mh-radius: 14px;
+    --mh-shadow: 0 16px 42px rgba(0, 0, 0, .22);
+}
+
+html {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: var(--mh-bg);
+    color: var(--mh-text);
+}
+
+.mh-panel {
+    background: var(--mh-surface);
+    border: 1px solid var(--mh-border);
+    border-radius: var(--mh-radius);
+}
+
+.mh-panel-raised {
+    background: var(--mh-surface-raised);
+    border: 1px solid var(--mh-border);
+    border-radius: var(--mh-radius);
+}
+
+.mh-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 17px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: var(--mh-blue);
+    color: #fff;
+    font: inherit;
+    font-weight: 650;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .2s ease, transform .2s ease;
+}
+
+.mh-button:hover {
+    background: var(--mh-blue-light);
+    transform: translateY(-1px);
+}
+
+.mh-button-secondary {
+    background: var(--mh-surface-raised);
+    border-color: var(--mh-border);
+    color: var(--mh-text);
+}
+
+.mh-button-secondary:hover {
+    background: #1c2a3c;
+}
+
+.mh-muted {
+    color: var(--mh-muted);
+}
+
+.mh-input {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid var(--mh-border);
+    border-radius: 9px;
+    background: var(--mh-surface);
+    color: var(--mh-text);
+}
+
+.mh-input:focus-visible,
+.mh-button:focus-visible {
+    outline: 2px solid var(--mh-blue-light);
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    .mh-button {
+        transition: none;
+    }
+}

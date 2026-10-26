@@ -1,0 +1,615 @@
+<?php
+
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MotorcycleAccountController;
+use App\Http\Controllers\MotorcycleCatalogController;
+use App\Http\Controllers\PartController;
+use App\Http\Controllers\PartRequestController;
+use App\Http\Controllers\RentalController;
+use App\Http\Controllers\Workshop1BookingController;
+use App\Http\Controllers\Workshop1Controller;
+use App\Http\Controllers\WorkshopApplicationController;
+use App\Http\Controllers\WorkshopBookingController;
+use App\Http\Controllers\WorkshopCatalogController;
+use App\Http\Controllers\WorkshopCustomerController;
+use App\Http\Controllers\WorkshopDashboardController;
+use App\Http\Controllers\MotorcycleServiceRecordController;
+use App\Http\Controllers\WorkshopMotorcycleController;
+use App\Http\Controllers\WorkshopServiceRecordController;
+use App\Models\Motorcycle;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MyServiceCenterController;
+use App\Http\Controllers\ServiceBookingController;
+use App\Http\Controllers\ServiceCenterController;
+use App\Http\Controllers\MyServiceBookingsController;
+use App\Http\Controllers\TransportController;
+use App\Http\Controllers\TransportPartnerController;
+use App\Http\Controllers\TransportAccountController;
+
+
+/*
+|--------------------------------------------------------------------------
+| მთავარი გვერდი
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/', function (Request $request) {
+    $motorcycles = Motorcycle::with('images')
+        ->where('status', 'published')
+        ->when($request->filled('q'), function ($query) use ($request) {
+            $search = trim($request->input('q'));
+
+            $query->where(function ($subQuery) use ($search) {
+                $subQuery->where('title', 'like', "%{$search}%")
+                    ->orWhere('brand', 'like', "%{$search}%")
+                    ->orWhere('model', 'like', "%{$search}%");
+            });
+        })
+        ->when(
+            $request->filled('budget')
+                && is_numeric($request->input('budget'))
+                && (float) $request->input('budget') >= 0,
+            function ($query) use ($request) {
+                $query->where('price', '<=', (float) $request->input('budget'));
+            }
+        )
+        ->when(
+            in_array($request->input('type'), ['new', 'used'], true),
+            function ($query) use ($request) {
+                $query->where('condition', $request->input('type'));
+            }
+        )
+        ->orderByDesc('is_featured')
+        ->orderByDesc('published_at')
+        ->orderByDesc('created_at')
+        ->limit(4)
+        ->get();
+
+    return view('home', compact('motorcycles'));
+})->name('home');
+
+
+/*
+|--------------------------------------------------------------------------
+| სათადარიგო ნაწილების მოთხოვნები
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/part-requests', [PartRequestController::class, 'create'])
+    ->name('part-requests.create');
+
+Route::post('/part-requests', [PartRequestController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('part-requests.store');
+
+
+/*
+|--------------------------------------------------------------------------
+| გაქირავება
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/rentals', [RentalController::class, 'index'])
+    ->name('rentals.index');
+
+Route::get('/rentals/{rentalScooter:slug}', [
+    RentalController::class,
+    'show',
+])->name('rentals.show');
+
+Route::post('/rentals/{rentalScooter:slug}/bookings', [
+    RentalController::class,
+    'store',
+])->middleware(['auth', 'throttle:5,1'])
+    ->name('rentals.bookings.store');
+
+
+/*
+|--------------------------------------------------------------------------
+| MotoTransport — მოტოციკლების ტრანსპორტირება
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/transport', [TransportController::class, 'index'])
+    ->name('transport.index');
+
+Route::get('/transport/companies', [
+    TransportController::class,
+    'companies',
+])->name('transport.companies');    
+
+Route::get('/transport/companies/{slug}', [
+    TransportController::class,
+    'company',
+])->name('transport.companies.show');
+
+Route::get('/transport/create', [TransportController::class, 'create'])
+    ->name('transport.create');
+
+Route::post('/transport', [TransportController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('transport.store');
+
+// გადამზიდავის პანელი
+Route::middleware('auth')
+    ->prefix('transport/partner')
+    ->name('transport.partner.')
+    ->group(function () {
+        Route::get('/', [
+            TransportPartnerController::class,
+            'index',
+        ])->name('index');
+
+        Route::get('/offers', [
+            TransportPartnerController::class,
+            'offers',
+        ])->name('offers');
+
+        Route::get('/orders', [
+    TransportPartnerController::class,
+    'orders',
+])->name('orders');
+
+
+Route::get('/orders/{transportRequest}', [
+    TransportPartnerController::class,
+    'showOrder',
+])->whereNumber('transportRequest')
+    ->name('orders.show');
+
+
+        Route::post('/requests/{transportRequest}/offers', [
+            TransportPartnerController::class,
+            'storeOffer',
+        ])->whereNumber('transportRequest')
+            ->middleware('throttle:10,1')
+            ->name('offers.store');
+        Route::patch('/requests/{transportRequest}/status', [
+    TransportPartnerController::class,
+    'updateStatus',
+])->whereNumber('transportRequest')
+    ->middleware('throttle:10,1')
+    ->name('requests.status');    
+    });
+
+// მომხმარებლის პირადი ტრანსპორტირების გვერდები
+Route::middleware('auth')
+    ->prefix('account')
+    ->name('account.')
+    ->group(function () {
+        Route::get('/transport', [
+            TransportAccountController::class,
+            'index',
+        ])->name('transport.index');
+
+Route::get('/transport/{transportRequest}', [
+    TransportAccountController::class,
+    'show',
+])->whereNumber('transportRequest')
+    ->name('transport.show');
+
+        Route::post('/transport/offers/{offer}/accept', [
+            TransportAccountController::class,
+            'acceptOffer',
+        ])->whereNumber('offer')
+            ->middleware('throttle:10,1')
+            ->name('transport.offers.accept');
+    });
+
+
+/*    |--------------------------------------------------------------------------
+| მოტოციკლების კატალოგი
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/motorcycles', [MotorcycleCatalogController::class, 'index'])
+    ->name('motorcycles.index');
+
+Route::get('/motorcycles/{motorcycle:slug}', function (Motorcycle $motorcycle) {
+    abort_unless($motorcycle->status === 'published', 404);
+
+    $motorcycle->load(['images', 'user', 'partner']);
+
+    return view('motorcycles.show', compact('motorcycle'));
+})->name('motorcycles.show');
+
+
+/*
+|--------------------------------------------------------------------------
+| რეგისტრაცია და ავტორიზაცია
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('guest')->group(function () {
+    Route::get('/register', [AuthController::class, 'showRegister'])
+        ->name('register');
+
+    Route::post('/register', [AuthController::class, 'register'])
+        ->middleware('throttle:5,1')
+        ->name('register.store');
+
+    Route::get('/login', [AuthController::class, 'showLogin'])
+        ->name('login');
+
+    Route::post('/login', [AuthController::class, 'login'])
+        ->middleware('throttle:5,1')
+        ->name('login.store');
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| სათადარიგო ნაწილების კატალოგი
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/parts', [PartController::class, 'index'])
+    ->name('parts.index');
+
+Route::post('/logout', [AuthController::class, 'logout'])
+    ->middleware('auth')
+    ->name('logout');
+
+
+/*
+|--------------------------------------------------------------------------
+| მომხმარებლის პირადი კაბინეტი
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')
+    ->prefix('account')
+    ->name('account.')
+    ->group(function () {
+        Route::get('/', [MotorcycleAccountController::class, 'index'])
+            ->name('index');
+
+        Route::get('/motorcycles/create', [MotorcycleAccountController::class, 'create'])
+            ->name('motorcycles.create');
+
+        Route::post('/motorcycles', [MotorcycleAccountController::class, 'store'])
+            ->name('motorcycles.store');
+
+        Route::get('/motorcycles/{motorcycle}/service', [
+            MotorcycleServiceRecordController::class,
+            'index',
+        ])->whereNumber('motorcycle')
+            ->name('motorcycles.service.index');
+
+        Route::post('/motorcycles/{motorcycle}/service', [
+            MotorcycleServiceRecordController::class,
+            'store',
+        ])->whereNumber('motorcycle')
+            ->name('motorcycles.service.store');
+
+        Route::get('/motorcycles/{motorcycle}/edit', [MotorcycleAccountController::class, 'edit'])
+            ->whereNumber('motorcycle')
+            ->name('motorcycles.edit');
+
+        Route::put('/motorcycles/{motorcycle}', [MotorcycleAccountController::class, 'update'])
+            ->whereNumber('motorcycle')
+            ->name('motorcycles.update');
+
+        Route::delete('/motorcycles/{motorcycle}', [MotorcycleAccountController::class, 'destroy'])
+            ->whereNumber('motorcycle')
+            ->name('motorcycles.destroy');
+
+        Route::put('/profile', [MotorcycleAccountController::class, 'updateProfile'])
+            ->name('profile.update');
+ 
+    });
+
+
+/*
+|--------------------------------------------------------------------------
+| ძველი საჯარო სახელოსნოების სისტემა
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/workshops', function (Request $request) {
+    $workshops = \App\Models\Partner::query()
+        ->where('type', 'workshop')
+        ->where('application_status', 'approved')
+        ->where('is_active', true)
+        ->when($request->filled('q'), function ($query) use ($request) {
+            $search = trim($request->input('q'));
+
+            $query->where(function ($subQuery) use ($search) {
+                $subQuery->where('name', 'like', "%{$search}%")
+                    ->orWhere('address', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        })
+        ->withCount([
+            'services as active_services_count' => function ($query) {
+                $query->where('is_active', true);
+            },
+        ])
+        ->orderBy('name')
+        ->paginate(9)
+        ->withQueryString();
+
+    return view('workshops.catalog_rebuilt', compact('workshops'));
+})->name('workshops.index');
+
+Route::get('/workshops/{slug}', [WorkshopCatalogController::class, 'show'])
+    ->name('workshops.show');
+
+Route::get('/workshops/{slug}/booking', [
+    WorkshopBookingController::class,
+    'create',
+])->name('workshops.booking.create');
+
+Route::post('/workshops/{slug}/booking', [
+    WorkshopBookingController::class,
+    'store',
+])->middleware('throttle:5,1')
+    ->name('workshops.booking.store');
+
+
+/*
+|--------------------------------------------------------------------------
+| ავტორიზებული სახელოსნოს მართვის სისტემა
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')
+    ->prefix('workshop')
+    ->name('workshop.')
+    ->group(function () {
+        Route::get('/apply', [WorkshopApplicationController::class, 'create'])
+            ->name('apply');
+
+        Route::post('/apply', [WorkshopApplicationController::class, 'store'])
+            ->middleware('throttle:5,1')
+            ->name('apply.store');
+
+        Route::get('/dashboard', [WorkshopDashboardController::class, 'index'])
+            ->name('dashboard');
+
+        Route::get('/customers', [WorkshopCustomerController::class, 'index'])
+            ->name('customers.index');
+
+        Route::post('/customers', [WorkshopCustomerController::class, 'store'])
+            ->middleware('throttle:10,1')
+            ->name('customers.store');
+
+        Route::get('/customers/{customer}/edit', [WorkshopCustomerController::class, 'edit'])
+            ->name('customers.edit');
+
+        Route::put('/customers/{customer}', [WorkshopCustomerController::class, 'update'])
+            ->name('customers.update');
+
+        Route::delete('/customers/{customer}', [WorkshopCustomerController::class, 'destroy'])
+            ->name('customers.destroy');
+
+        Route::post('/customers/{customer}/motorcycles', [
+            WorkshopMotorcycleController::class,
+            'attach',
+        ])->middleware('throttle:10,1')
+            ->whereNumber('customer')
+            ->name('customers.motorcycles.attach');
+
+        Route::delete('/customers/{customer}/motorcycles/{motorcycle}', [
+            WorkshopMotorcycleController::class,
+            'detach',
+        ])->whereNumber('customer')
+            ->whereNumber('motorcycle')
+            ->name('customers.motorcycles.detach');
+
+        Route::get(
+            '/customers/{customer}/motorcycles/{motorcycle}/service',
+            [WorkshopServiceRecordController::class, 'index']
+        )->whereNumber('customer')
+            ->whereNumber('motorcycle')
+            ->name('customers.motorcycles.service.index');
+
+        Route::get(
+            '/customers/{customer}/motorcycles/{motorcycle}/service/{record}/edit',
+            [WorkshopServiceRecordController::class, 'edit']
+        )->whereNumber('customer')
+            ->whereNumber('motorcycle')
+            ->whereNumber('record')
+            ->name('customers.motorcycles.service.edit');
+
+        Route::put(
+            '/customers/{customer}/motorcycles/{motorcycle}/service/{record}',
+            [WorkshopServiceRecordController::class, 'update']
+        )->middleware('throttle:10,1')
+            ->whereNumber('customer')
+            ->whereNumber('motorcycle')
+            ->whereNumber('record')
+            ->name('customers.motorcycles.service.update');
+
+        Route::delete(
+            '/customers/{customer}/motorcycles/{motorcycle}/service/{record}',
+            [WorkshopServiceRecordController::class, 'destroy']
+        )->middleware('throttle:10,1')
+            ->whereNumber('customer')
+            ->whereNumber('motorcycle')
+            ->whereNumber('record')
+            ->name('customers.motorcycles.service.destroy');
+
+        Route::post(
+            '/customers/{customer}/motorcycles/{motorcycle}/service',
+            [WorkshopServiceRecordController::class, 'store']
+        )->middleware('throttle:10,1')
+            ->whereNumber('customer')
+            ->whereNumber('motorcycle')
+            ->name('customers.motorcycles.service.store');  
+    });
+
+
+/*
+|--------------------------------------------------------------------------
+| MotoHub — მომხმარებლის სერვისის ჯავშნები
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')
+    ->prefix('account')
+    ->name('account.')
+    ->group(function () {
+        Route::get('/service-bookings', [
+            MyServiceBookingsController::class,
+            'index',
+        ])->name('service-bookings.index');
+
+        Route::patch('/service-bookings/{booking}/cancel', [
+            MyServiceBookingsController::class,
+            'cancel',
+        ])->whereNumber('booking')
+            ->name('service-bookings.cancel');
+    });    
+
+
+/*
+|--------------------------------------------------------------------------
+| Workshops1 — ახალი, დამოუკიდებელი სისტემა
+|--------------------------------------------------------------------------
+| ეს მარშრუტები განზრახ მოთავსებულია auth ჯგუფის გარეთ.
+*/
+
+Route::get('/workshops1', [
+    Workshop1Controller::class,
+    'index',
+])->name('workshops1.index');
+
+Route::get('/workshops1/{slug}', [
+    Workshop1Controller::class,
+    'show',
+])->name('workshops1.show');
+
+Route::get('/workshops1/{slug}/booking', [
+    Workshop1BookingController::class,
+    'create',
+])->name('workshops1.booking.create');
+
+Route::post('/workshops1/{slug}/booking', [
+    Workshop1BookingController::class,
+    'store',
+])->name('workshops1.booking.store');
+
+Route::patch(
+    '/my-service-center/work-orders/{workOrder}/status',
+    [\App\Http\Controllers\WorkOrderController::class, 'updateStatus']
+)->name('my-service-center.work-orders.status');
+
+/*
+|--------------------------------------------------------------------------
+| MotoHub — სახელოსნოები და ონლაინ დაჯავშნა
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/service-centers', [ServiceCenterController::class, 'index'])
+    ->name('service-centers.index');
+
+Route::get('/service-centers/{serviceCenter:slug}', [
+    ServiceCenterController::class,
+    'show',
+])->name('service-centers.show');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/my-service-center', [
+        MyServiceCenterController::class,
+        'dashboard',
+    ])->name('my-service-center.dashboard');
+
+    
+Route::get('/my-service-center/bookings', [
+    MyServiceCenterController::class,
+    'bookings',
+])->name('my-service-center.bookings');
+
+Route::get('/my-service-center/services', [
+    MyServiceCenterController::class,
+    'services',
+])->name('my-service-center.services');
+
+Route::get('/my-service-center/hours', [
+    MyServiceCenterController::class,
+    'hours',
+])->name('my-service-center.hours');
+
+Route::get('/my-service-center/profile', [
+    MyServiceCenterController::class,
+    'profile',
+])->name('my-service-center.profile');
+
+
+    Route::get('/my-service-center/register', [
+        MyServiceCenterController::class,
+        'register',
+    ])->name('my-service-center.register');
+
+    Route::post('/my-service-center/register', [
+        MyServiceCenterController::class,
+        'store',
+    ])->name('my-service-center.store');
+
+    Route::post('/my-service-center/services', [
+        MyServiceCenterController::class,
+        'storeService',
+    ])->name('my-service-center.services.store');
+
+    Route::put('/my-service-center/services/{service}', [
+        MyServiceCenterController::class,
+        'updateService',
+    ])->name('my-service-center.services.update');
+
+    Route::delete('/my-service-center/services/{service}', [
+        MyServiceCenterController::class,
+        'deleteService',
+    ])->name('my-service-center.services.delete');
+
+    Route::put('/my-service-center/hours', [
+        MyServiceCenterController::class,
+        'updateHours',
+    ])->name('my-service-center.hours.update');
+
+    Route::patch('/my-service-center/bookings/{booking}/status', [
+        MyServiceCenterController::class,
+        'updateBookingStatus',
+    ])->name('my-service-center.bookings.status');
+
+    Route::post('/service-centers/{serviceCenter:slug}/bookings', [
+        ServiceBookingController::class,
+        'store',
+    ])->middleware('throttle:5,1')
+      ->name('service-centers.bookings.store');
+    
+   Route::get('/service-centers/{serviceCenter:slug}/availability', [
+    ServiceCenterController::class,
+    'availability',
+])->name('service-centers.availability');   
+
+Route::get(
+    '/my-service-center/work-orders',
+    [\App\Http\Controllers\WorkOrderController::class, 'index']
+)->name('my-service-center.work-orders.index');
+
+Route::post(
+    '/my-service-center/work-orders',
+    [\App\Http\Controllers\WorkOrderController::class, 'store']
+)->name('my-service-center.work-orders.store');
+
+Route::get(
+    '/my-service-center/work-orders/{workOrder}',
+    [\App\Http\Controllers\WorkOrderController::class, 'show']
+)->whereNumber('workOrder')
+  ->name('my-service-center.work-orders.show');
+
+  Route::get(
+    '/my-service-center/work-orders/{workOrder}/edit',
+    [\App\Http\Controllers\WorkOrderController::class, 'edit']
+)->whereNumber('workOrder')
+  ->name('my-service-center.work-orders.edit');
+
+Route::put(
+    '/my-service-center/work-orders/{workOrder}',
+    [\App\Http\Controllers\WorkOrderController::class, 'update']
+)->whereNumber('workOrder')
+  ->name('my-service-center.work-orders.update');
+
+});

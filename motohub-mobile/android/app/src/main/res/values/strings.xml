@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Garage33</string>
+    <string name="title_activity_main">Garage33</string>
+    <string name="package_name">com.garage33.app</string>
+    <string name="custom_url_scheme">com.garage33.app</string>
+</resources>
