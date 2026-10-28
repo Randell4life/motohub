@@ -533,11 +533,6 @@ Route::post('/workshops1/{slug}/booking', [
     'store',
 ])->name('workshops1.booking.store');
 
-Route::patch(
-    '/my-service-center/work-orders/{workOrder}/status',
-    [\App\Http\Controllers\WorkOrderController::class, 'updateStatus']
-)->name('my-service-center.work-orders.status');
-
 /*
 |--------------------------------------------------------------------------
 | MotoHub — სახელოსნოები და ონლაინ დაჯავშნა
@@ -635,6 +630,12 @@ Route::post(
     '/my-service-center/work-orders',
     [\App\Http\Controllers\WorkOrderController::class, 'store']
 )->name('my-service-center.work-orders.store');
+
+Route::patch(
+    '/my-service-center/work-orders/{workOrder}/status',
+    [\App\Http\Controllers\WorkOrderController::class, 'updateStatus']
+)->whereNumber('workOrder')
+  ->name('my-service-center.work-orders.status');
 
 Route::get(
     '/my-service-center/work-orders/{workOrder}',

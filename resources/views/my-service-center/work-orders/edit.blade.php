@@ -8,13 +8,13 @@
 
 @php
     $statusLabels = [
-        'new' => 'ახალი',
-        'diagnosing' => 'დიაგნოსტიკა',
-        'in_progress' => 'მიმდინარე სამუშაო',
-        'waiting_for_parts' => 'ნაწილების მოლოდინი',
-        'completed' => 'დასრულებული',
-        'handed_over' => 'ჩაბარებული',
-        'cancelled' => 'გაუქმებული',
+        'received' => 'მიღებულია',
+        'diagnostics' => 'დიაგნოსტიკა',
+        'waiting_for_parts' => 'ნაწილებს ელოდება',
+        'in_repair' => 'შეკეთების პროცესშია',
+        'completed' => 'შეკეთებულია',
+        'handed_over' => 'კლიენტს გადაეცა',
+        'cancelled' => 'გაუქმებულია',
     ];
 
     $currentStatus = $workOrder->status;
