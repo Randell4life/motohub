@@ -22,7 +22,7 @@
             <a href="{{ route('home') }}">მთავარი</a>
             <a href="{{ route('service-centers.index') }}" class="active">სახელოსნოები</a>
             <a href="{{ route('motorcycles.index') }}">მოტოციკლები</a>
-            <a href="{{ route('rentals.index') }}">გაქირავება</a>
+            <a href="{{ route('rentals.index') }}">გაქირავება</a><a href="{{ route('parts.index') }}">ნაწილები</a><a href="{{ route('moto-assistant.index') }}">მოტო ასისტენტი</a>
         </nav>
         <div class="nav-actions" id="scNavActions">
             @auth
