@@ -17,7 +17,7 @@ class MessageController extends Controller
         $user = $request->user();
 
         $conversations = $user->conversations()
-            ->with(['participants', 'motorcycle', 'messages' => fn ($query) => $query->latest()->limit(1)])
+            ->with(['participants', 'motorcycle', 'latestMessage'])
             ->withCount(['messages as unread_count' => fn ($query) => $query
                 ->whereNull('read_at')
                 ->where('sender_id', '!=', $user->id)])
@@ -109,8 +109,7 @@ class MessageController extends Controller
             'last_read_at' => now(),
         ]);
 
-        return redirect()->route('messages.show', $conversation.'#message-'.$message->id)
-            ->withFragment('message-'.$message->id);
+        return redirect()->to(route('messages.show', $conversation).'#message-'.$message->id);
     }
 
     private function authorizeParticipant(Request $request, Conversation $conversation): void
