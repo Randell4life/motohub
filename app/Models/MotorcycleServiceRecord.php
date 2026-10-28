@@ -9,6 +9,7 @@ class MotorcycleServiceRecord extends Model
 {
     protected $fillable = [
         'motorcycle_id',
+        'service_center_id',
         'service_date',
         'mileage',
         'category',
@@ -16,6 +17,10 @@ class MotorcycleServiceRecord extends Model
         'description',
         'cost',
         'notes',
+        'verification_status',
+        'verified_at',
+        'verified_by_user_id',
+        'verification_note',
     ];
 
 protected function casts(): array
@@ -24,8 +29,19 @@ protected function casts(): array
         'service_date' => 'date',
         'mileage' => 'integer',
         'cost' => 'decimal:2',
+        'verified_at' => 'datetime',
     ];
 }
+    public function serviceCenter(): BelongsTo
+    {
+        return $this->belongsTo(ServiceCenter::class);
+    }
+
+    public function verifiedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'verified_by_user_id');
+    }
+
     public function motorcycle(): BelongsTo
     {
         return $this->belongsTo(Motorcycle::class);
