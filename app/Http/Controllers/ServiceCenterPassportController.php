@@ -42,7 +42,7 @@ class ServiceCenterPassportController extends Controller
             'verification_note' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        $motorcycle = Motorcycle::query()->findOrFail($data['motorcycle_id']);
+        $motorcycle = Motorcycle::query()->where('status', 'published')->findOrFail($data['motorcycle_id']);
 
         $motorcycle->serviceRecords()->create([
             'service_center_id' => $center->id,
