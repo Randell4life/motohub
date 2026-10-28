@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#080b10">
-    <title>Garage33 — შენი მოტოსამყარო</title>
-    <meta name="description" content="აღმოაჩინე მოტოციკლები, შეარჩიე სასურველი მოდელი და იპოვე მოტოსერვისები Garage33-ზე.">
+    <title>MotoHub — შენი მოტოსამყარო</title>
+    <meta name="description" content="აღმოაჩინე მოტოციკლები, შეარჩიე სასურველი მოდელი და იპოვე მოტოსერვისები MotoHub-ზე.">
 
     <style>
         :root {
             --bg: #080b10;
             --panel: #10151d;
             --panel2: #141b25;
-            --red: #1677ff;
-            --red2: #38a5ff;
+            --blue: #1677ff;
+            --blue2: #38a5ff;
             --text: #f7f8fb;
             --muted: #9ca7b7;
             --border: #27313f;
@@ -204,7 +204,7 @@
         button, a { -webkit-tap-highlight-color: transparent; }
 
         button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
-            outline: 2px solid var(--red2);
+            outline: 2px solid var(--blue2);
             outline-offset: 3px;
         }
 
@@ -237,7 +237,7 @@
             letter-spacing: -1.5px;
         }
 
-        .logo span { color: var(--red); }
+        .logo span { color: var(--blue); }
 
         .nav-links {
             display: flex;
@@ -255,7 +255,7 @@
         }
 
         .nav-links a:hover,
-        .nav-links a.active { color: var(--red2); }
+        .nav-links a.active { color: var(--blue2); }
 
         .auth-nav {
             display: flex;
@@ -281,7 +281,7 @@
             padding: 11px 17px;
             border: 1px solid transparent;
             border-radius: 8px;
-            background: var(--red);
+            background: var(--blue);
             color: white;
             font-size: 13px;
             font-weight: 800;
@@ -290,7 +290,7 @@
         }
 
         .btn:hover {
-            background: var(--red2);
+            background: var(--blue2);
             transform: translateY(-1px);
         }
 
@@ -332,7 +332,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            color: var(--red2);
+            color: var(--blue2);
             font-size: 11px;
             font-weight: 900;
             letter-spacing: 2.5px;
@@ -343,7 +343,7 @@
             content: "";
             width: 45px;
             height: 2px;
-            background: var(--red);
+            background: var(--blue);
         }
 
         h1 {
@@ -355,7 +355,7 @@
             font-weight: 950;
         }
 
-        h1 span { color: var(--red); }
+        h1 span { color: var(--blue); }
 
         .hero-copy {
             max-width: 500px;
@@ -468,7 +468,7 @@
 
         .category:hover .category-icon,
         .category.selected .category-icon {
-            border-color: var(--red);
+            border-color: var(--blue);
             color: white;
             box-shadow: 0 0 0 4px rgba(22,119,255,.09);
         }
@@ -490,7 +490,7 @@
             height: 43px;
             border: 1px solid rgba(22,119,255,.45);
             border-radius: 12px;
-            color: var(--red2);
+            color: var(--blue2);
             font-size: 21px;
         }
 
@@ -538,7 +538,7 @@
             white-space: nowrap;
         }
 
-        .text-link:hover { color: var(--red2); }
+        .text-link:hover { color: var(--blue2); }
 
         .bikes {
             display: grid;
@@ -616,7 +616,7 @@
 }
 
 .bike-image .slide-arrow:hover {
-    background: var(--red);
+    background: var(--blue);
 }
 
 .bike-image .slide-prev { left: 10px; }
@@ -646,7 +646,7 @@
 
 .bike-image .slide-dot.is-active {
     width: 19px;
-    background: var(--red2);
+    background: var(--blue2);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -792,7 +792,7 @@
             width: 44px;
             height: 44px;
             border-radius: 50%;
-            background: var(--red);
+            background: var(--blue);
             color: white;
             font-size: 19px;
             font-weight: 900;
@@ -903,7 +903,7 @@
             color: white;
         }
 
-        .footer-logo span { color: var(--red); }
+        .footer-logo span { color: var(--blue); }
 
         .footer-links {
             display: flex;
@@ -1013,7 +1013,7 @@
             }
         }
 
-        /* Garage33 — premium navigation */
+        /* MotoHub — premium navigation */
         .topbar {
             background: rgba(7, 10, 16, .88);
             border-bottom: 1px solid rgba(75, 143, 255, .18);
@@ -1286,6 +1286,271 @@
                 transition: none !important;
             }
         }
+
+        /* MotoHub — aggressive brutalist visual layer */
+        :root {
+            --bg: #070a12;
+            --panel: #0d1422;
+            --panel2: #121d30;
+            --blue: #1677ff;
+            --blue2: #42a5ff;
+            --text: #f4f8ff;
+            --muted: #98a8c2;
+            --border: #243653;
+            --green: #38d69b;
+            --radius: 8px;
+            color-scheme: dark;
+        }
+
+        body {
+            background:
+                radial-gradient(ellipse at 80% 0%, rgba(22,119,255,.10), transparent 34rem),
+                var(--bg);
+            letter-spacing: .01em;
+        }
+
+        .topbar {
+            background: rgba(7,10,18,.88);
+            border-bottom-color: rgba(66,165,255,.16);
+        }
+
+        .nav { min-height: 76px; }
+
+        .logo {
+            font-size: 30px;
+            font-weight: 1000;
+            letter-spacing: -1.8px;
+            text-transform: uppercase;
+        }
+
+        .logo span {
+            color: var(--blue2);
+            text-shadow: 0 0 24px rgba(22,119,255,.38);
+        }
+
+        .nav-links { gap: clamp(12px, 1.7vw, 25px); }
+
+        .nav-links a:hover,
+        .nav-links a.active { color: var(--blue2); }
+
+        .btn {
+            border-radius: 6px;
+            background: linear-gradient(135deg, #1677ff, #0756d8);
+            box-shadow: 0 8px 22px rgba(22,119,255,.16);
+            letter-spacing: .025em;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #42a5ff, #1677ff);
+            box-shadow: 0 10px 28px rgba(22,119,255,.28);
+        }
+
+        .btn-outline {
+            background: rgba(13,20,34,.78);
+            border-color: #2c4263;
+            box-shadow: none;
+        }
+
+        .btn-outline:hover {
+            background: rgba(22,119,255,.12);
+            border-color: var(--blue2);
+        }
+
+        .hero {
+            min-height: clamp(500px, 57vw, 680px);
+            border-bottom-color: rgba(66,165,255,.24);
+            background:
+                linear-gradient(90deg, rgba(7,10,18,.99) 0%, rgba(7,10,18,.90) 35%, rgba(7,10,18,.42) 68%, rgba(7,10,18,.18) 100%),
+                linear-gradient(0deg, #070a12 0%, transparent 30%),
+                linear-gradient(135deg, rgba(22,119,255,.14), transparent 55%),
+                url('https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=2200&q=90') center 55% / cover no-repeat;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: min(28vw, 390px);
+            height: 100%;
+            pointer-events: none;
+            background: linear-gradient(135deg, transparent 49.7%, rgba(22,119,255,.14) 50%, transparent 50.5%);
+            border-right: 1px solid rgba(66,165,255,.25);
+        }
+
+        .hero-content { position: relative; z-index: 1; }
+
+        .eyebrow {
+            letter-spacing: 2.8px;
+            color: var(--blue2);
+        }
+
+        .eyebrow::after {
+            width: 54px;
+            background: var(--blue);
+        }
+
+        h1 {
+            max-width: 760px;
+            font-size: clamp(46px, 7vw, 92px);
+            line-height: .99;
+            letter-spacing: -3.5px;
+            text-transform: uppercase;
+            text-wrap: balance;
+        }
+
+        h1 span {
+            color: var(--blue2);
+            text-shadow: 0 0 34px rgba(22,119,255,.22);
+        }
+
+        .hero-copy {
+            max-width: 540px;
+            color: #c1cde0;
+            font-size: 15px;
+        }
+
+        .search-wrap { margin-top: -36px; }
+
+        .search-panel {
+            padding: 20px;
+            border-color: rgba(66,165,255,.30);
+            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(13,20,34,.98), rgba(8,13,23,.98));
+            box-shadow: 0 24px 70px rgba(0,0,0,.40), 0 0 36px rgba(22,119,255,.06);
+        }
+
+        .field input,
+        .field select {
+            border-radius: 5px;
+            border-color: #2b3e5b;
+            background: #080e19;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            border-color: var(--blue2);
+            box-shadow: 0 0 0 3px rgba(22,119,255,.12);
+            outline: none;
+        }
+
+        .categories {
+            gap: 8px;
+            padding-top: 28px;
+            padding-bottom: 30px;
+            border-bottom-color: rgba(66,165,255,.18);
+        }
+
+        .category {
+            border-radius: 7px;
+            background: rgba(13,20,34,.30);
+        }
+
+        .category-icon {
+            border-radius: 10px;
+            border-color: #2a3e5d;
+            background: #0c1525;
+        }
+
+        .category:hover,
+        .category.selected {
+            border-color: rgba(66,165,255,.48);
+            background: linear-gradient(145deg, rgba(22,119,255,.13), rgba(13,20,34,.48));
+        }
+
+        .trust-item { border-left-color: #2b3e5b; }
+
+        .section { padding: clamp(44px, 5vw, 72px) 0; }
+
+        .section-heading { margin-bottom: 28px; }
+
+        .section-heading h2 {
+            font-size: clamp(26px, 3.3vw, 38px);
+            letter-spacing: -1.1px;
+            text-transform: uppercase;
+        }
+
+        .bike-card {
+            border-radius: 8px;
+            border-color: #1d2d46;
+            background: linear-gradient(155deg, #101a2b, #0a101b);
+        }
+
+        .bike-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(66,165,255,.62);
+            box-shadow: 0 22px 46px rgba(0,0,0,.38), 0 0 0 1px rgba(22,119,255,.10);
+        }
+
+        .bike-image { background: #0c1422; }
+
+        .bike-image img { filter: saturate(.92) contrast(1.04); }
+
+        .bike-info { padding: 18px; }
+
+        .bike-info h3 {
+            letter-spacing: -.35px;
+            font-size: 16px;
+        }
+
+        .listing-badge {
+            border: 1px solid rgba(66,165,255,.42);
+            border-radius: 4px;
+            background: rgba(7,10,18,.86);
+            color: #d9eaff;
+            backdrop-filter: blur(10px);
+        }
+
+        .price {
+            color: #f5f9ff;
+            font-weight: 950;
+        }
+
+        .price-currency { color: var(--blue2); }
+
+        .feature-strip,
+        .partner-banner {
+            border-color: rgba(66,165,255,.22);
+            border-radius: 8px;
+            background:
+                linear-gradient(120deg, rgba(22,119,255,.10), transparent 48%),
+                linear-gradient(145deg, #101a2b, #0a101b);
+        }
+
+        .feature-icon,
+        .trust-icon {
+            border-radius: 8px;
+            background: rgba(22,119,255,.09);
+        }
+
+        .text-link { color: #dceaff; }
+
+        .text-link:hover { color: var(--blue2); }
+
+        .empty {
+            border: 1px dashed #2b4264;
+            border-radius: 8px;
+            background: rgba(13,20,34,.5);
+        }
+
+        @media (max-width: 900px) {
+            .hero { min-height: 500px; }
+            h1 { letter-spacing: -2.2px; }
+            .categories { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        }
+
+        @media (max-width: 600px) {
+            .nav { min-height: 66px; }
+            .hero { min-height: 490px; background-position: 60% center; }
+            .hero-content { padding-top: 48px; padding-bottom: 62px; }
+            h1 { font-size: clamp(42px, 12vw, 60px); letter-spacing: -1.8px; }
+            .hero-copy { font-size: 14px; line-height: 1.75; }
+            .search-panel { padding: 14px; gap: 10px; }
+            .categories { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+            .trust-item { grid-column: 1 / -1; justify-content: flex-start; border-left: 0; border-top: 1px solid #2b3e5b; padding-top: 16px; }
+            .bike-image { height: 190px; }
+        }
+
 </style>
 </head>
 <body>
@@ -1294,7 +1559,7 @@
     <nav class="container nav" aria-label="მთავარი ნავიგაცია">
 
         <a href="{{ route('home') }}" class="logo">
-            GARAGE<span>33</span>
+            MOTO<span>HUB</span>
         </a>
 
         <button
@@ -1385,7 +1650,7 @@
     <section class="hero">
         <div class="container">
             <div class="hero-content">
-                <div class="eyebrow">Garage33 · შენი მოტოსამყარო</div>
+                <div class="eyebrow">MotoHub · შენი მოტოსამყარო</div>
 
                 <h1>იპოვე შენი<br><span>თავისუფლება.</span></h1>
 
@@ -1721,7 +1986,7 @@
     <div class="container">
         <div class="partner-banner parts-request-banner">
             <div>
-                <div class="eyebrow">Garage33 PARTS</div>
+                <div class="eyebrow">MotoHub PARTS</div>
                 <h2>ეძებ კონკრეტულ მოტო-ნაწილს?</h2>
                 <p>
                     ვერ იპოვე საჭირო ნაწილი? გამოგვიგზავნე მოთხოვნა
@@ -1740,7 +2005,7 @@
         <div class="container">
             <div class="partner-banner">
                 <div>
-                    <div class="eyebrow">Garage33 პარტნიორები</div>
+                    <div class="eyebrow">MotoHub პარტნიორები</div>
                     <h2>შენი ბიზნესი მოტოსამყაროში</h2>
                     <p>
                         წარმოაჩინე შენი მოტოსერვისი და გახადე ის უფრო ხელმისაწვდომი
@@ -1758,7 +2023,7 @@
                 <div class="eyebrow">ჩვენ შესახებ</div>
                 <h2>ყველაფერი მოტოციკლების შესახებ — ერთ სივრცეში.</h2>
                 <p>
-                    Garage33 აერთიანებს მოტოციკლების განცხადებებსა და გაქირავების
+                    MotoHub აერთიანებს მოტოციკლების განცხადებებსა და გაქირავების
                     შესაძლებლობებს ერთ მოსახერხებელ სივრცეში. იპოვე სასურველი
                     მოდელი, გაეცანი ინფორმაციას და დაგეგმე შენი შემდეგი გასეირნება.
                 </p>
@@ -1789,8 +2054,8 @@
 
 <footer>
     <div class="container footer-inner">
-        <a href="{{ route('home') }}" class="footer-logo">GARAGE<span>33</span></a>
-        <div>© {{ date('Y') }} Garage33. ყველა უფლება დაცულია.</div>
+        <a href="{{ route('home') }}" class="footer-logo">MOTO<span>HUB</span></a>
+        <div>© {{ date('Y') }} MotoHub. ყველა უფლება დაცულია.</div>
         <div class="footer-links">
             <a href="#motorcycles">მოტოციკლები</a>
             <a href="{{ route('rentals.index') }}">გაქირავება</a>
