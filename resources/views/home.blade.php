@@ -1359,6 +1359,11 @@
         რეგისტრაცია
     </a>
 @else
+                <a href="{{ route('messages.index') }}" class="account-link">
+                    <span aria-hidden="true">✉</span>
+                    <span>შეტყობინებები</span>
+                </a>
+
                 <a href="{{ route('account.index') }}" class="account-link">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                         <circle cx="12" cy="8" r="3.5"></circle>
