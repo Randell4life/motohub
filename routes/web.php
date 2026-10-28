@@ -555,10 +555,10 @@ Route::get('/service-centers/{serviceCenter:slug}', [
 ])->name('service-centers.show');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/my-service-center/passport-records/create', [\\App\\Http\\Controllers\\ServiceCenterPassportController::class, 'create'])
+    Route::get('/my-service-center/passport-records/create', [\App\Http\Controllers\ServiceCenterPassportController::class, 'create'])
         ->name('my-service-center.passport-records.create');
 
-    Route::post('/my-service-center/passport-records', [\\App\\Http\\Controllers\\ServiceCenterPassportController::class, 'store'])
+    Route::post('/my-service-center/passport-records', [\App\Http\Controllers\ServiceCenterPassportController::class, 'store'])
         ->middleware('throttle:10,1')
         ->name('my-service-center.passport-records.store');
 
