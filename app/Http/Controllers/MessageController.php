@@ -31,20 +31,38 @@ class MessageController extends Controller
     public function show(Request $request, Conversation $conversation): View
     {
         $this->authorizeParticipant($request, $conversation);
+        $user = $request->user();
 
         $conversation->load(['participants', 'motorcycle']);
         $messages = $conversation->messages()->with('sender')->oldest()->paginate(60);
 
         $conversation->messages()
-            ->where('sender_id', '!=', $request->user()->id)
+            ->where('sender_id', '!=', $user->id)
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
 
-        $conversation->participants()->updateExistingPivot($request->user()->id, [
+        $conversation->participants()->updateExistingPivot($user->id, [
             'last_read_at' => now(),
         ]);
 
-        return view('messages.show', compact('conversation', 'messages'));
+        $sidebarConversations = $user->conversations()
+            ->with(['participants', 'motorcycle', 'latestMessage'])
+            ->withCount(['messages as unread_count' => fn ($query) => $query
+                ->whereNull('read_at')
+                ->where('sender_id', '!=', $user->id)])
+            ->orderByDesc('last_message_at')
+            ->orderByDesc('updated_at')
+            ->limit(20)
+            ->get();
+
+        $unreadTotal = $user->conversations()
+            ->withCount(['messages as unread_count' => fn ($query) => $query
+                ->whereNull('read_at')
+                ->where('sender_id', '!=', $user->id)])
+            ->get()
+            ->sum('unread_count');
+
+        return view('messages.show', compact('conversation', 'messages', 'sidebarConversations', 'unreadTotal'));
     }
 
     public function start(Request $request): RedirectResponse
