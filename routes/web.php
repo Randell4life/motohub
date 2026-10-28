@@ -26,6 +26,9 @@ use App\Http\Controllers\MyServiceBookingsController;
 use App\Http\Controllers\TransportController;
 use App\Http\Controllers\TransportPartnerController;
 use App\Http\Controllers\TransportAccountController;
+use App\Http\Controllers\PartListingController;
+use App\Models\PartListing;
+
 
 
 /*
@@ -33,6 +36,7 @@ use App\Http\Controllers\TransportAccountController;
 | მთავარი გვერდი
 |--------------------------------------------------------------------------
 */
+
 
 Route::get('/', function (Request $request) {
     $motorcycles = Motorcycle::with('images')
@@ -66,8 +70,15 @@ Route::get('/', function (Request $request) {
         ->limit(4)
         ->get();
 
-    return view('home', compact('motorcycles'));
+    $partListings = PartListing::query()
+        ->where('status', 'published')
+        ->latest()
+        ->limit(4)
+        ->get();
+
+    return view('home', compact('motorcycles', 'partListings'));
 })->name('home');
+
 
 
 /*
@@ -250,7 +261,15 @@ Route::get('/parts', [PartController::class, 'index'])
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
+    
+// ახალი და მეორადი ნაწილების განცხადებები
+Route::get('/parts/new', [PartListingController::class, 'index'])
+    ->defaults('condition', 'new')
+    ->name('part-listings.new');
 
+Route::get('/parts/used', [PartListingController::class, 'index'])
+    ->defaults('condition', 'used')
+    ->name('part-listings.used');
 
 /*
 |--------------------------------------------------------------------------
@@ -298,6 +317,29 @@ Route::middleware('auth')
         Route::put('/profile', [MotorcycleAccountController::class, 'updateProfile'])
             ->name('profile.update');
  
+
+        // ნაწილების განცხადებების მართვა
+Route::get('/part-listings', [PartListingController::class, 'accountIndex'])
+    ->name('part-listings.index');
+
+Route::get('/part-listings/create', [PartListingController::class, 'create'])
+    ->name('part-listings.create');
+
+Route::post('/part-listings', [PartListingController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('part-listings.store');
+
+Route::get('/part-listings/{partListing}/edit', [PartListingController::class, 'edit'])
+    ->whereNumber('partListing')
+    ->name('part-listings.edit');
+
+Route::put('/part-listings/{partListing}', [PartListingController::class, 'update'])
+    ->whereNumber('partListing')
+    ->name('part-listings.update');
+
+Route::delete('/part-listings/{partListing}', [PartListingController::class, 'destroy'])
+    ->whereNumber('partListing')
+    ->name('part-listings.destroy');    
     });
 
 

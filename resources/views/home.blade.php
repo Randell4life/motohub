@@ -1621,6 +1621,102 @@
         </div>
     </div>
 
+    
+<section class="section" id="parts">
+    <div class="container">
+        <div class="section-heading">
+            <div>
+                <div class="eyebrow">MOTOHUB PARTS</div>
+                <h2>მოტოციკლის ნაწილები</h2>
+                <p>იპოვე საჭირო დეტალი — ახალი ან მეორადი, შენს ბიუჯეტზე მორგებული.</p>
+            </div>
+
+            <a class="text-link" href="{{ route('part-listings.new') }}">
+                ყველა ნაწილის ნახვა <span>→</span>
+            </a>
+        </div>
+
+        <div class="bikes">
+            @forelse ($partListings as $partListing)
+                <a href="{{ route(
+                    $partListing->condition === 'new'
+                        ? 'part-listings.new'
+                        : 'part-listings.used'
+                ) }}">
+                    <article class="bike-card">
+                        <div class="bike-image">
+                            @if ($partListing->image_path)
+                                <img
+                                    src="{{ \Illuminate\Support\Facades\Storage::url($partListing->image_path) }}"
+                                    alt="{{ $partListing->title }}"
+                                    loading="lazy"
+                                >
+                            @else
+                                <img
+                                    src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=900&q=85"
+                                    alt="მოტოციკლის ნაწილი"
+                                    loading="lazy"
+                                >
+                            @endif
+
+                            <div class="image-shade"></div>
+
+                            <span class="listing-badge">
+                                {{ $partListing->condition === 'new' ? 'ახალი ნაწილი' : 'მეორადი ნაწილი' }}
+                            </span>
+                        </div>
+
+                        <div class="bike-info">
+                            <h3>{{ $partListing->title }}</h3>
+
+                            <div class="bike-meta">
+                                @if ($partListing->brand)
+                                    <span>{{ $partListing->brand }}</span>
+                                @endif
+
+                                @if ($partListing->category)
+                                    <span>{{ $partListing->category }}</span>
+                                @endif
+                            </div>
+
+                            <div class="bike-specs">
+                                @if ($partListing->compatible_motorcycle)
+                                    <span>{{ $partListing->compatible_motorcycle }}</span>
+                                @endif
+
+                                @if ($partListing->part_number)
+                                    <span>კოდი: {{ $partListing->part_number }}</span>
+                                @endif
+                            </div>
+
+                            <div class="bike-bottom">
+                                <div class="price">
+                                    {{ number_format((float) $partListing->price, 0, '.', ' ') }}
+                                    <span class="price-currency">₾</span>
+                                </div>
+
+                                <span class="btn details-btn">
+                                    ნახვა →
+                                </span>
+                            </div>
+                        </div>
+                    </article>
+                </a>
+            @empty
+                <div class="empty">
+                    <h3>ნაწილების განცხადებები ჯერ არ არის</h3>
+                    <p>როგორც კი გამოქვეყნებული ნაწილები დაემატება, ისინი აქ გამოჩნდება.</p>
+
+                    <a class="btn" href="{{ route('part-listings.new') }}">
+                        ნაწილების დათვალიერება →
+                    </a>
+                </div>
+            @endforelse
+        </div>
+    </div>
+</section>
+
+
     <section class="section" id="parts-request">
     <div class="container">
         <div class="partner-banner parts-request-banner">

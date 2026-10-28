@@ -21,6 +21,11 @@ public function motorcycles(): HasMany
     return $this->hasMany(Motorcycle::class);
 }
 
+public function partListings(): HasMany
+{
+    return $this->hasMany(PartListing::class);
+}
+
 public function canAccessPanel(\Filament\Panel $panel): bool
 {
     return (bool) $this->is_admin
