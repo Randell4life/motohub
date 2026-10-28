@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\MotorcycleAccountController;
 use App\Http\Controllers\MotorcycleCatalogController;
 use App\Http\Controllers\PartController;
@@ -655,4 +656,28 @@ Route::put(
 )->whereNumber('workOrder')
   ->name('my-service-center.work-orders.update');
 
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| MotoHub — პირადი შეტყობინებები
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
+    Route::get('/messages', [MessageController::class, 'index'])
+        ->name('messages.index');
+
+    Route::post('/messages', [MessageController::class, 'start'])
+        ->middleware('throttle:10,1')
+        ->name('messages.start');
+
+    Route::get('/messages/{conversation}', [MessageController::class, 'show'])
+        ->whereNumber('conversation')
+        ->name('messages.show');
+
+    Route::post('/messages/{conversation}', [MessageController::class, 'store'])
+        ->whereNumber('conversation')
+        ->middleware('throttle:30,1')
+        ->name('messages.store');
 });
