@@ -1035,6 +1035,11 @@
         </div>
     </section>
 
+    <section style="display:flex;flex-wrap:wrap;gap:10px;margin:0 0 24px">
+        <a href="{{ route('motorcycles.passport', $motorcycle->slug) }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 15px;border:1px solid #243653;border-radius:9px;background:#0d1422;color:#f4f8ff;font-weight:700">📘 ციფრული პასპორტი</a>
+        <a href="{{ route('moto-assistant.index') }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 15px;border:1px solid #1677ff;border-radius:9px;background:#0b1c36;color:#42a5ff;font-weight:700">✦ მოტო ასისტენტი</a>
+    </section>
+
     @php
         $allPhotos = collect();
 
