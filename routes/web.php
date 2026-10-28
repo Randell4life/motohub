@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\MotoAssistantController;
+use App\Http\Controllers\MotorcyclePassportController;
 use App\Http\Controllers\MotorcycleAccountController;
 use App\Http\Controllers\MotorcycleCatalogController;
 use App\Http\Controllers\PartController;
