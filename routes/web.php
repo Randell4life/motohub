@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\MotoAssistantController;
+use App\Http\Controllers\MotorcyclePassportController;
 use App\Http\Controllers\MotorcycleAccountController;
 use App\Http\Controllers\MotorcycleCatalogController;
 use App\Http\Controllers\PartController;
@@ -214,6 +216,10 @@ Route::get('/transport/{transportRequest}', [
 | მოტოციკლების კატალოგი
 |--------------------------------------------------------------------------
 */
+
+Route::get('/moto-assistant', [MotoAssistantController::class, 'index'])->name('moto-assistant.index');
+Route::post('/moto-assistant/diagnose', [MotoAssistantController::class, 'diagnose'])->middleware('throttle:10,1')->name('moto-assistant.diagnose');
+Route::get('/motorcycles/{motorcycle:slug}/passport', [MotorcyclePassportController::class, 'show'])->name('motorcycles.passport');
 
 Route::get('/motorcycles', [MotorcycleCatalogController::class, 'index'])
     ->name('motorcycles.index');
