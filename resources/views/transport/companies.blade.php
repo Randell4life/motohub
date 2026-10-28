@@ -268,7 +268,7 @@
 <header>
     <div class="container nav">
         <a class="logo" href="{{ route('home') }}">MOTO<span>HUB</span></a>
-        <a class="nav-link" href="{{ route('transport.index') }}">← ტრანსპორტის მოთხოვნები</a>
+        <nav style="display:flex;gap:14px;flex-wrap:wrap;align-items:center"><a class="nav-link" href="{{ route('home') }}">მთავარი</a><a class="nav-link" href="{{ route('motorcycles.index') }}">მოტოციკლები</a><a class="nav-link" href="{{ route('rentals.index') }}">გაქირავება</a><a class="nav-link" href="{{ route('parts.index') }}">ნაწილები</a><a class="nav-link" href="{{ route('service-centers.index') }}">სახელოსნოები</a><a class="nav-link" href="{{ route('transport.index') }}">← ტრანსპორტის მოთხოვნები</a></nav>
     </div>
 </header>
 

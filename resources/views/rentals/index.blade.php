@@ -910,7 +910,7 @@
                     <a href="{{ route('motorcycles.index') }}">მოტოციკლები</a>
                 @endif
 
-                <a href="{{ url('/rentals') }}" class="active">გაქირავება</a>
+                <a href="{{ route('parts.index') }}">ნაწილები</a><a href="{{ route('service-centers.index') }}">სახელოსნოები</a><a href="{{ route('transport.index') }}">ტრანსპორტი</a><a href="{{ route('moto-assistant.index') }}">მოტო ასისტენტი</a><a href="{{ route('rentals.index') }}" class="active">გაქირავება</a>
             </div>
 
             @auth

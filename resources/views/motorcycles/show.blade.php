@@ -980,23 +980,23 @@
 
         <nav class="main-nav" aria-label="მთავარი მენიუ">
             <a href="{{ route('home') }}">მთავარი</a>
-            <a href="{{ route('home') }}">განცხადებები</a>
-            <a href="{{ route('home') }}">კატეგორიები</a>
-            <a href="{{ route('home') }}">შესახებ</a>
-            <a href="{{ route('home') }}">კონტაქტი</a>
+            <a href="{{ route('motorcycles.index') }}">მოტოციკლები</a>
+            <a href="{{ route('parts.index') }}">ნაწილები</a>
+            <a href="{{ route('rentals.index') }}">გაქირავება</a>
+            <a href="{{ route('service-centers.index') }}">სახელოსნოები</a>
         </nav>
 
         <div class="header-actions">
-            <a class="header-icon" href="{{ route('home') }}" aria-label="ძიება">⌕</a>
-            <a class="header-icon" href="{{ route('home') }}" aria-label="რჩეულები">♡</a>
+            <a class="header-icon" href="{{ route('motorcycles.index') }}" aria-label="მოტოციკლების ძიება">⌕</a>
+            <a class="header-icon" href="{{ route('messages.index') }}" aria-label="შეტყობინებები">✉</a>
 
             @auth
-                <a class="login-link" href="{{ route('home') }}">ჩემი ანგარიში</a>
+                <a class="login-link" href="{{ route('account.index') }}">ჩემი ანგარიში</a>
             @else
-                <a class="login-link" href="{{ route('home') }}">შესვლა</a>
+                <a class="login-link" href="{{ route('login') }}">შესვლა</a>
             @endauth
 
-            <a class="primary-button" href="{{ route('home') }}">განცხადების დამატება</a>
+            <a class="primary-button" href="{{ route('account.motorcycles.create') }}">განცხადების დამატება</a>
         </div>
     </div>
 </header>
@@ -1007,7 +1007,7 @@
         <span class="breadcrumb-separator">›</span>
         <a href="{{ route('home') }}">მთავარი</a>
         <span class="breadcrumb-separator">›</span>
-        <a href="{{ route('home') }}">მოტოციკლები</a>
+        <a href="{{ route('motorcycles.index') }}">მოტოციკლები</a>
         <span class="breadcrumb-separator">›</span>
         <span>{{ $motorcycle->title }}</span>
     </nav>

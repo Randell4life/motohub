@@ -101,7 +101,7 @@
 </head>
 <body>
 <header>
-    <a class="logo" href="{{ route('home') }}">MOTO<span>HUB</span></a>
+    <a class="logo" href="{{ route('home') }}">MOTO<span>HUB</span></a><nav style="display:flex;gap:14px;flex-wrap:wrap"><a href="{{ route('motorcycles.index') }}">მოტოციკლები</a><a href="{{ route('rentals.index') }}">გაქირავება</a><a href="{{ route('parts.index') }}">ნაწილები</a><a href="{{ route('service-centers.index') }}">სახელოსნოები</a><a href="{{ route('transport.index') }}">ტრანსპორტი</a></nav>
 </header>
 
 <main>

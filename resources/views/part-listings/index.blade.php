@@ -462,8 +462,8 @@
         <a href="{{ url('/') }}" class="logo">MOTO<span>HUB</span></a>
 
         <nav class="navlinks">
-            <a href="{{ url('/') }}">მთავარი</a>
-            <a href="{{ url('/parts') }}">ნაწილების კატალოგი</a>
+            <a href="{{ route('home') }}">მთავარი</a>
+            <a href="{{ route('parts.index') }}">ნაწილების კატალოგი</a><a href="{{ route('motorcycles.index') }}">მოტოციკლები</a><a href="{{ route('rentals.index') }}">გაქირავება</a><a href="{{ route('service-centers.index') }}">სახელოსნოები</a>
             <a href="{{ route('account.part-listings.index') }}">ჩემი განცხადებები</a>
             <a class="btn" href="{{ route('account.part-listings.create') }}">+ განცხადება</a>
         </nav>
