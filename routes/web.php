@@ -217,6 +217,10 @@ Route::get('/transport/{transportRequest}', [
 |--------------------------------------------------------------------------
 */
 
+Route::get('/moto-assistant', [MotoAssistantController::class, 'index'])->name('moto-assistant.index');
+Route::post('/moto-assistant/diagnose', [MotoAssistantController::class, 'diagnose'])->middleware('throttle:10,1')->name('moto-assistant.diagnose');
+Route::get('/motorcycles/{motorcycle:slug}/passport', [MotorcyclePassportController::class, 'show'])->name('motorcycles.passport');
+
 Route::get('/motorcycles', [MotorcycleCatalogController::class, 'index'])
     ->name('motorcycles.index');
 
