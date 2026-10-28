@@ -1359,9 +1359,21 @@
         რეგისტრაცია
     </a>
 @else
-                <a href="{{ route('messages.index') }}" class="account-link">
+                @php
+                    $unreadMessagesCount = \App\Models\Message::query()
+                        ->whereNull('read_at')
+                        ->where('sender_id', '!=', auth()->id())
+                        ->whereHas('conversation.participants', fn ($query) => $query->where('users.id', auth()->id()))
+                        ->count();
+                @endphp
+                <a href="{{ route('messages.index') }}" class="account-link" aria-label="შეტყობინებები{{ $unreadMessagesCount > 0 ? ', წაუკითხავი: ' . $unreadMessagesCount : '' }}">
                     <span aria-hidden="true">✉</span>
                     <span>შეტყობინებები</span>
+                    @if ($unreadMessagesCount > 0)
+                        <span style="display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#1677ff;color:#fff;font-size:11px;font-weight:800;line-height:1;">
+                            {{ $unreadMessagesCount > 99 ? '99+' : $unreadMessagesCount }}
+                        </span>
+                    @endif
                 </a>
 
                 <a href="{{ route('account.index') }}" class="account-link">
