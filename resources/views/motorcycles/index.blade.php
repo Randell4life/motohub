@@ -905,7 +905,7 @@
         <nav class="nav-links" aria-label="მთავარი ნავიგაცია">
             <a href="{{ route('home') }}">მთავარი</a>
             <a href="{{ route('motorcycles.index') }}">მოტოციკლები</a>
-            <a class="optional" href="{{ route('parts.index') }}">ნაწილები</a>
+            <a class="optional" href="{{ route('parts.index') }}">ნაწილები</a><a class="optional" href="{{ route('rentals.index') }}">გაქირავება</a><a class="optional" href="{{ route('service-centers.index') }}">სახელოსნოები</a><a class="optional" href="{{ route('moto-assistant.index') }}">მოტო ასისტენტი</a>
 
             @auth
                 <a class="nav-button" href="{{ route('account.index') }}">ჩემი ანგარიში</a>
