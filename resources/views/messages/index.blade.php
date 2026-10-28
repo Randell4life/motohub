@@ -14,7 +14,7 @@
 @if ($conversations->count())
 <div class="list">
 @foreach ($conversations as $conversation)
-@php $other = $conversation->participants->firstWhere('id', '!=', auth()->id()); $last = $conversation->messages->first(); @endphp
+@php $other = $conversation->participants->firstWhere('id', '!=', auth()->id()); $last = $conversation->latestMessage; @endphp
 <a class="item" href="{{ route('messages.show', $conversation) }}"><div class="avatar">{{ mb_strtoupper(mb_substr($other?->name ?? 'M', 0, 1)) }}</div><div class="details"><div class="title">{{ $other?->name ?? 'MotoHub მომხმარებელი' }} @if($conversation->motorcycle)<span class="meta"> · {{ $conversation->motorcycle->title }}</span>@endif</div><div class="preview">{{ $last?->body ?? 'საუბარი ჯერ არ დაწყებულა' }}</div><div class="meta">{{ optional($conversation->last_message_at)->format('d.m.Y H:i') ?? $conversation->created_at->format('d.m.Y H:i') }}</div></div>@if($conversation->unread_count)<span class="badge">{{ $conversation->unread_count }}</span>@endif</a>
 @endforeach
 </div>
