@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -35,6 +36,13 @@ public function canAccessPanel(\Filament\Panel $panel): bool
 public function rentalBookings(): HasMany
 {
     return $this->hasMany(RentalBooking::class);
+}
+
+public function conversations(): BelongsToMany
+{
+    return $this->belongsToMany(Conversation::class)
+        ->withPivot('last_read_at')
+        ->withTimestamps();
 }
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
