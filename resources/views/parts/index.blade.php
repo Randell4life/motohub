@@ -700,7 +700,7 @@
             </a>
 
             <nav class="nav-links" aria-label="მთავარი ნავიგაცია">
-                <a href="{{ route('home') }}">მოტოციკლები</a>
+                <a href="{{ route('motorcycles.index') }}">მოტოციკლები</a>
                 <a href="{{ route('rentals.index') }}">გაქირავება</a>
                 <a href="{{ route('parts.index') }}" class="current">ნაწილები</a>
             </nav>
