@@ -19,15 +19,15 @@ Route::prefix('mobile')->group(function () {
 
     Route::middleware(AuthenticateMobileToken::class)->group(function () {
         Route::get('/me', [MobileAccountController::class, 'show']);
-        Route::patch('/me', [MobileAccountController::class, 'update']);
+        Route::patch('/me', [MobileAccountController::class, 'update'])->middleware('throttle:10,1');
         Route::post('/logout', [MobileAuthController::class, 'logout']);
         Route::get('/my-listings', [MobileAccountController::class, 'listings']);
-        Route::post('/my-listings', [MobileAccountController::class, 'storeListing']);
-        Route::put('/my-listings/{motorcycle}', [MobileAccountController::class, 'updateListing']);
-        Route::delete('/my-listings/{motorcycle}', [MobileAccountController::class, 'deleteListing']);
+        Route::post('/my-listings', [MobileAccountController::class, 'storeListing'])->middleware('throttle:5,1');
+        Route::put('/my-listings/{motorcycle}', [MobileAccountController::class, 'updateListing'])->middleware('throttle:10,1');
+        Route::delete('/my-listings/{motorcycle}', [MobileAccountController::class, 'deleteListing'])->middleware('throttle:10,1');
         Route::get('/my-bookings', [MobileAccountController::class, 'bookings']);
-        Route::post('/rentals/{rentalScooter:slug}/bookings', [MobileBookingController::class, 'rentalBooking']);
-        Route::post('/service-centers/{serviceCenter:slug}/bookings', [MobileBookingController::class, 'serviceBooking']);
+        Route::post('/rentals/{rentalScooter:slug}/bookings', [MobileBookingController::class, 'rentalBooking'])->middleware('throttle:5,1');
+        Route::post('/service-centers/{serviceCenter:slug}/bookings', [MobileBookingController::class, 'serviceBooking'])->middleware('throttle:5,1');
     });
 });
 
