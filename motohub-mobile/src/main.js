@@ -1,7 +1,7 @@
 import './style.css'
 
 const app = document.querySelector('#app')
-const state = { page:'home', search:'', apiBase:localStorage.getItem('motohub_api_base') || (location.hostname === 'localhost' && location.port === '5173' ? 'http://10.0.2.2:8000' : location.origin), loading:false, error:'', items:[], pageData:null }
+const state = { page:'home', search:'', apiBase:localStorage.getItem('motohub_api_base') || (location.protocol === 'capacitor:' || (location.hostname === 'localhost' && location.port === '5173') ? 'http://10.0.2.2:8000' : location.origin), loading:false, error:'', items:[], pageData:null }
 const esc = v => String(v ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]))
 const money = v => v == null || v === '' ? 'ფასი შეთანხმებით' : '₾' + Number(v).toLocaleString('ka-GE',{maximumFractionDigits:0})
 const cfg = { bikes:{title:'მოტოციკლები',sub:'განცხადებები',url:'/api/mobile/motorcycles',empty:'ამ ძიებით მოტოციკლი ვერ მოიძებნა.'},parts:{title:'მოტო ნაწილები',sub:'კატალოგი',url:'/api/mobile/parts',empty:'ნაწილი ვერ მოიძებნა.'},listings:{title:'ნაწილების განცხადებები',sub:'ახალი და მეორადი',url:'/api/mobile/part-listings',empty:'განცხადება ჯერ არ არის.'},rentals:{title:'გაქირავება',sub:'ხელმისაწვდომი მოტოები',url:'/api/mobile/rentals',empty:'გაქირავების განცხადება ჯერ არ არის.'},services:{title:'სერვისცენტრები',sub:'სახელოსნოები და სერვისები',url:'/api/mobile/service-centers',empty:'სერვისცენტრი ვერ მოიძებნა.'}}
