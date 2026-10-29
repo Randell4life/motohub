@@ -131,10 +131,24 @@ function morePage() {
     <div class="settings-card"><h3>კავშირის პარამეტრები</h3><p>თუ Laravel სხვა მისამართზე მუშაობს, შეცვალე სერვერის მისამართი.</p><label for="api-base">საიტის მისამართი</label><input id="api-base" value="${escapeHtml(base)}" placeholder="http://10.0.2.2:8000"><button id="save-api" class="secondary-btn">მისამართის შენახვა</button><p id="settings-status" class="form-note"></p></div></section>`
 }
 
+function nativeInfoPage(page) {
+  const info = {
+    'service-centers': ['სერვისცენტრები', 'სერვისის ძებნა და ვიზიტის დაგეგმვა', 'სერვისცენტრების სია აპში შემდეგ ეტაპზე დაემატება.'],
+    transport: ['ტრანსპორტირება', 'მოტოციკლის გადაზიდვის მოთხოვნა', 'ტრანსპორტირების მოთხოვნის API ჯერ დასამატებელია.'],
+    account: ['პირადი კაბინეტი', 'განცხადებები, ჯავშნები და პროფილი', 'ავტორიზაციის API მობილურ აპში ჯერ დასაკავშირებელია.'],
+    messages: ['შეტყობინებები', 'მყიდველისა და გამყიდველის მიმოწერა', 'შეტყობინებების API მობილურ აპში ჯერ დასაკავშირებელია.'],
+    login: ['შესვლა / რეგისტრაცია', 'შედი ან შექმენი ანგარიში', 'ავტორიზაციის API მობილურ აპში ჯერ დასამატებელია.']
+  };
+  const item = info[page] || info.account;
+  return '<section class="page-heading"><p class="eyebrow">MOTOHUB MOBILE</p><h1>' + item[0] + '</h1><p>' + item[1] + '</p></section><section class="section"><div class="native-placeholder"><h2>აპის განყოფილება</h2><p>' + item[2] + '</p><button class="secondary-btn" data-page="more">მენიუში დაბრუნება</button></div></section>';
+}
+
 function render() {
   if (state.page === 'home') shell(homePage())
   else if (['motorcycles', 'rentals', 'parts'].includes(state.page)) shell(catalogPage(state.page))
   else if (state.page === 'request') shell(requestPage())
+  else if (['service-centers', 'transport', 'account', 'messages', 'login'].includes(state.page)) shell(nativeInfoPage(state.page))
+  else if (state.page === 'detail') shell('<section class="page-heading"><button class="text-btn" data-page="' + (state.selected?.kind || 'motorcycles') + '">← უკან</button><p class="eyebrow">MOTOHUB · DETAILS</p><h1>' + escapeHtml(state.selected?.title || 'განცხადების დეტალები') + '</h1><p>' + escapeHtml(state.selected?.location || '') + '</p></section><section class="section"><div class="native-placeholder"><h2>' + escapeHtml(state.selected?.price ? money(state.selected.price) : state.selected?.daily_rate ? money(state.selected.daily_rate) + ' / დღე' : 'დეტალები') + '</h2><p>' + escapeHtml(state.selected?.description || 'დამატებითი აღწერა მითითებული არ არის.') + '</p></div></section>')
   else shell(morePage())
 
   app.querySelectorAll('[data-page]').forEach(el => el.addEventListener('click', (event) => {
@@ -142,8 +156,18 @@ function render() {
     navigate(el.dataset.page)
   }))
   app.querySelectorAll('[data-open-url]').forEach(el => el.addEventListener('click', () => {
-    const base = getApiBase().replace(/\/api$/, '')
-    window.location.href = base + el.dataset.openUrl
+    const path = el.dataset.openUrl || ''
+    const slug = decodeURIComponent(path.split('/').filter(Boolean).pop() || '')
+    if (path.startsWith('/motorcycles/')) {
+      state.selected = { ...(state.motorcycles.find(item => item.slug === slug) || {}), kind: 'motorcycles' }
+      state.page = 'detail'; render(); return
+    }
+    if (path.startsWith('/rentals/')) {
+      state.selected = { ...(state.rentals.find(item => item.slug === slug) || {}), kind: 'rentals' }
+      state.page = 'detail'; render(); return
+    }
+    const pages = { '/service-centers': 'service-centers', '/transport': 'transport', '/account': 'account', '/messages': 'messages', '/login': 'login' }
+    navigate(pages[path] || (path === '/parts' ? 'parts' : 'more'))
   }))
   const retry = app.querySelector('[data-retry]')
   if (retry) retry.addEventListener('click', () => loadData(state.page))
