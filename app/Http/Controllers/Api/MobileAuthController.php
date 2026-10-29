@@ -19,7 +19,12 @@ class MobileAuthController extends Controller
             'phone' => ['nullable', 'string', 'max:30'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
-        $user = User::create($data);
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => strtolower($data['email']),
+            'phone' => $data['phone'] ?? null,
+            'password' => $data['password'],
+        ]);
         return response()->json($this->issue($user), 201);
     }
 
