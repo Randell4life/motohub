@@ -72,7 +72,7 @@ class RentalBookingForm
                     ->options([
                         'pending' => 'მოლოდინში',
                         'confirmed' => 'დადასტურებული',
-                        'rejected' => 'უარყოფილი',
+                        'declined' => 'უარყოფილი',
                         'cancelled' => 'გაუქმებული',
                         'completed' => 'დასრულებული',
                     ])
