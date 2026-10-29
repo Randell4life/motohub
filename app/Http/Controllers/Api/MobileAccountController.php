@@ -21,6 +21,7 @@ class MobileAccountController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'phone' => $user->phone,
+                'is_admin' => (bool) $user->is_admin,
             ],
         ]);
     }
@@ -39,7 +40,7 @@ class MobileAccountController extends Controller
             'message' => 'პროფილი განახლდა.',
             'user' => [
                 'id' => $user->id, 'name' => $user->name,
-                'email' => $user->email, 'phone' => $user->phone,
+                'email' => $user->email, 'phone' => $user->phone, 'is_admin' => (bool) $user->is_admin,
             ],
         ]);
     }
