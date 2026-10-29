@@ -47,6 +47,9 @@ class MobileAccountController extends Controller
                 'id' => $item->id, 'title' => $item->title, 'slug' => $item->slug,
                 'brand' => $item->brand, 'model' => $item->model, 'year' => $item->year,
                 'price' => $item->price, 'status' => $item->status,
+                'year' => $item->year, 'condition' => $item->condition,
+                'mileage' => $item->mileage, 'engine_cc' => $item->engine_cc,
+                'location' => $item->location, 'description' => $item->description,
                 'image_url' => $item->image_path ? url('/storage/' . ltrim($item->image_path, '/')) : null,
             ]);
         return response()->json($items);
@@ -126,7 +129,7 @@ class MobileAccountController extends Controller
             $base = Str::slug($data['title']) ?: 'motorcycle';
             $slug = $base;
             $suffix = 2;
-            while (Motorcycle::where('slug', $slug)->whereKeyNot($item->id)->exists()) {
+            while (Motorcycle::where('slug', $slug)->where('id', '!=', $item->id)->exists()) {
                 $slug = $base . '-' . $suffix++;
             }
             $data['slug'] = $slug;
