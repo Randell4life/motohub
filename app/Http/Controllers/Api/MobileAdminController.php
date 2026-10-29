@@ -31,6 +31,7 @@ class MobileAdminController extends Controller
         return response()->json([
             'counts' => [
                 'pending_motorcycles' => Motorcycle::whereIn('status', ['draft', 'pending'])->count(),
+                'published_motorcycles' => Motorcycle::where('status', 'published')->count(),
                 'open_part_requests' => PartRequest::whereIn('status', ['new', 'in_progress'])->count(),
                 'pending_rental_bookings' => RentalBooking::where('status', 'pending')->count(),
                 'pending_service_bookings' => ServiceBooking::where('status', 'pending')->count(),
@@ -38,6 +39,8 @@ class MobileAdminController extends Controller
             ],
             'motorcycles' => Motorcycle::with('user:id,name,email')->whereIn('status', ['draft', 'pending'])->latest()->limit(30)->get()
                 ->map(fn ($item) => ['id' => $item->id, 'title' => $item->title, 'brand' => $item->brand, 'model' => $item->model, 'year' => $item->year, 'price' => $item->price, 'status' => $item->status, 'owner' => $item->user?->name, 'email' => $item->user?->email]),
+            'published_motorcycles' => Motorcycle::with('user:id,name,email')->where('status', 'published')->latest('published_at')->limit(30)->get()
+                ->map(fn ($item) => ['id' => $item->id, 'title' => $item->title, 'brand' => $item->brand, 'model' => $item->model, 'year' => $item->year, 'price' => $item->price, 'status' => $item->status, 'is_featured' => (bool) $item->is_featured, 'owner' => $item->user?->name, 'email' => $item->user?->email]),
             'part_requests' => PartRequest::whereIn('status', ['new', 'in_progress'])->latest()->limit(30)->get()
                 ->map(fn ($item) => ['id' => $item->id, 'part_name' => $item->part_name, 'motorcycle' => trim(($item->motorcycle_brand ?? '') . ' ' . ($item->motorcycle_model ?? '') . ' ' . ($item->motorcycle_year ?? '')), 'customer_name' => $item->customer_name, 'phone' => $item->phone, 'email' => $item->email, 'details' => $item->details, 'status' => $item->status]),
             'rental_bookings' => RentalBooking::with('rentalScooter:id,title')->whereIn('status', ['pending', 'confirmed'])->latest()->limit(30)->get()
@@ -54,7 +57,7 @@ class MobileAdminController extends Controller
         $this->authorizeAdmin($request);
 
         $rules = [
-            'motorcycles' => ['published', 'rejected'],
+            'motorcycles' => ['published', 'rejected', 'featured', 'unfeatured'],
             'part-requests' => ['in_progress', 'completed', 'rejected'],
             'rental-bookings' => ['confirmed', 'declined', 'cancelled', 'completed'],
             'service-bookings' => ['confirmed', 'declined', 'cancelled', 'completed'],
@@ -78,7 +81,13 @@ class MobileAdminController extends Controller
         $changes = ['status' => $data['status']];
 
         if ($type === 'motorcycles') {
-            $changes['published_at'] = $data['status'] === 'published' ? now() : null;
+            if (in_array($data['status'], ['featured', 'unfeatured'], true)) {
+                abort_unless($model->status === 'published', 422, 'მხოლოდ გამოქვეყნებული განცხადების გამორჩეულად მონიშვნა შეიძლება.');
+                $changes = ['is_featured' => $data['status'] === 'featured'];
+            } else {
+                $changes['published_at'] = $data['status'] === 'published' ? now() : null;
+                if ($data['status'] === 'rejected') $changes['is_featured'] = false;
+            }
         }
 
         if ($type === 'service-centers') {
@@ -93,7 +102,7 @@ class MobileAdminController extends Controller
 
         return response()->json([
             'message' => 'სტატუსი წარმატებით განახლდა.',
-            'status' => $type === 'service-centers' ? $model->approval_status : $model->status,
+            'status' => $type === 'service-centers' ? $model->approval_status : ($type === 'motorcycles' && in_array($data['status'], ['featured', 'unfeatured'], true) ? ($model->is_featured ? 'featured' : 'unfeatured') : $model->status),
         ]);
     }
 }
