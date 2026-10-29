@@ -22,6 +22,9 @@ Route::prefix('mobile')->group(function () {
         Route::patch('/me', [MobileAccountController::class, 'update']);
         Route::post('/logout', [MobileAuthController::class, 'logout']);
         Route::get('/my-listings', [MobileAccountController::class, 'listings']);
+        Route::post('/my-listings', [MobileAccountController::class, 'storeListing']);
+        Route::put('/my-listings/{motorcycle}', [MobileAccountController::class, 'updateListing']);
+        Route::delete('/my-listings/{motorcycle}', [MobileAccountController::class, 'deleteListing']);
         Route::get('/my-bookings', [MobileAccountController::class, 'bookings']);
         Route::post('/rentals/{rentalScooter:slug}/bookings', [MobileBookingController::class, 'rentalBooking']);
         Route::post('/service-centers/{serviceCenter:slug}/bookings', [MobileBookingController::class, 'serviceBooking']);
