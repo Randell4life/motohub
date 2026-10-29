@@ -341,3 +341,44 @@ button {
     padding: 14px 11px;
   }
 }
+
+.connect-section { padding-top: 10px; }
+.connect-card {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: linear-gradient(145deg, #131c2b, #0d121c);
+}
+.connect-card label {
+  display: block;
+  margin-bottom: 9px;
+  color: #dce6f7;
+  font-size: 13px;
+  font-weight: 800;
+}
+.connect-card input {
+  width: 100%;
+  min-height: 50px;
+  padding: 13px 14px;
+  border: 1px solid #29364a;
+  border-radius: 10px;
+  outline: none;
+  background: #080c14;
+  color: #f4f7ff;
+  font-size: 14px;
+}
+.connect-card input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(56, 140, 255, .12);
+}
+.connect-help {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+.connect-help strong { color: #70adff; overflow-wrap: anywhere; }
+.connect-card .primary-btn { margin-top: 16px; }
+.connect-card .form-note { margin-top: 12px; }
+.features-heading { margin-top: 30px; }
+.service { cursor: default; }

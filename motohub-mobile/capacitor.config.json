@@ -1,6 +1,6 @@
 ﻿{
   "appId": "com.garage33.app",
-  "appName": "Garage33",
+  "appName": "MotoHub",
   "webDir": "dist",
   "server": {
     "androidScheme": "http"
