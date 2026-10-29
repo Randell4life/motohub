@@ -1,215 +1,23 @@
 import './style.css'
 
 const app = document.querySelector('#app')
-
-function homePage() {
-  app.innerHTML = `
-    <header class="topbar">
-      <div class="logo">MOTO<span>HUB</span></div>
-      <div class="location">GEORGIA · 🇬🇪</div>
-    </header>
-
-    <main>
-      <section class="hero">
-        <div class="eyebrow">YOUR MOTORCYCLE WORLD</div>
-        <h1>ყველაფერი<br>შენი <span>მოტოსთვის.</span></h1>
-        <p>მოტო ნაწილები, გაქირავება და მოტოციკლების სამყარო — ერთ სივრცეში.</p>
-        <button class="primary-btn" id="explore">აღმოაჩინე MotoHub ↗</button>
-      </section>
-
-      <section class="section" id="services">
-        <div class="section-heading">
-          <h2>რას ეძებ?</h2>
-          <span>ჩვენი სერვისები</span>
-        </div>
-
-        <div class="services">
-          <button class="service" id="parts">
-            <span class="service-icon">⚙</span>
-            <strong>მოტო ნაწილები</strong>
-            <small>მოითხოვე საჭირო ნაწილი ↗</small>
-          </button>
-
-          <button class="service" data-message="მოტოციკლების გაქირავება">
-            <span class="service-icon">🏍</span>
-            <strong>გაქირავება</strong>
-            <small>შეარჩიე მოტოციკლი ↗</small>
-          </button>
-
-          <button class="service" data-message="მოტო განცხადებები">
-            <span class="service-icon">◈</span>
-            <strong>მოტო განცხადებები</strong>
-            <small>იყიდე ან გაყიდე ↗</small>
-          </button>
-
-          <button class="service" data-message="ჩემი ანგარიში">
-            <span class="service-icon">♙</span>
-            <strong>ჩემი ანგარიში</strong>
-            <small>შენი პროფილი ↗</small>
-          </button>
-        </div>
-      </section>
-    </main>
-
-    <nav class="bottom-nav">
-      <a href="#" class="active" id="nav-home"><span>⌂</span>მთავარი</a>
-      <a href="#" id="nav-parts"><span>⚙</span>ნაწილები</a>
-      <a href="#" data-message="მოტოციკლების გაქირავება"><span>🏍</span>გაქირავება</a>
-      <a href="#" data-message="ჩემი ანგარიში"><span>♙</span>ანგარიში</a>
-    </nav>
-  `
-
-  document.querySelector('#explore').addEventListener('click', () => {
-    document.querySelector('#services').scrollIntoView({
-      behavior: 'smooth'
-    })
-  })
-
-  document.querySelector('#parts').addEventListener('click', (event) => {
-    event.preventDefault()
-    partsPage()
-  })
-
-  document.querySelector('#nav-parts').addEventListener('click', (event) => {
-    event.preventDefault()
-    partsPage()
-  })
-
-  document.querySelector('#nav-home').addEventListener('click', (event) => {
-    event.preventDefault()
-    homePage()
-  })
-
-  document.querySelectorAll('[data-message]').forEach((button) => {
-    button.addEventListener('click', (event) => {
-      event.preventDefault()
-      alert(button.dataset.message + ' — მალე დაემატება.')
-    })
-  })
-}
-
-function partsPage() {
-  app.innerHTML = `
-    <header class="topbar">
-      <button class="back-btn" id="back" type="button">← უკან</button>
-      <div class="logo">MOTO<span>HUB</span></div>
-    </header>
-
-    <main class="section request-page">
-      <div class="eyebrow">PARTS REQUEST</div>
-      <h1 class="request-title">მოითხოვე <span>ნაწილი.</span></h1>
-      <p class="request-intro">
-        ვერ იპოვე საჭირო ნაწილი? შეავსე ფორმა და დაგიკავშირდებით.
-      </p>
-
-      <form id="parts-form">
-        <label for="name">სახელი</label>
-        <input id="name" name="name" placeholder="შენი სახელი"
-          required maxlength="100" />
-
-        <label for="make">მოტოციკლის მარკა</label>
-        <input id="make" name="make" placeholder="მაგ. Yamaha"
-          required maxlength="100" />
-
-        <label for="model">მოდელი</label>
-        <input id="model" name="model" placeholder="მაგ. MT-07"
-          required maxlength="100" />
-
-        <label for="year">გამოშვების წელი</label>
-        <input id="year" name="year" type="number"
-          min="1950" max="2035" placeholder="მაგ. 2022" required />
-
-        <label for="part">რომელი ნაწილი გჭირდება?</label>
-        <input id="part" name="part" placeholder="მაგ. წინა ფარი"
-          required maxlength="150" />
-
-        <label for="description">დამატებითი აღწერა</label>
-        <textarea id="description" name="description" rows="4"
-          maxlength="2000"
-          placeholder="ფერი, მდგომარეობა ან სხვა დეტალები..."></textarea>
-
-        <label for="phone">ტელეფონის ნომერი</label>
-        <input id="phone" name="phone" type="tel"
-          placeholder="5XX XX XX XX" required maxlength="30" />
-
-        <button class="primary-btn" type="submit">
-          მოთხოვნის გაგზავნა ↗
-        </button>
-
-        <p class="form-note">
-          შეავსე ფორმა და გამოგზავნე მოთხოვნა.
-        </p>
-      </form>
-    </main>
-  `
-
-  document.querySelector('#back').addEventListener('click', (event) => {
-    event.preventDefault()
-    homePage()
-  })
-
-  document.querySelector('#parts-form').addEventListener('submit', async (event) => {
-    event.preventDefault()
-
-    const form = event.currentTarget
-    const submitButton = form.querySelector('button[type="submit"]')
-    const formNote = form.querySelector('.form-note')
-
-    const data = {
-      customer_name: form.querySelector('#name').value.trim(),
-      motorcycle_brand: form.querySelector('#make').value.trim(),
-      motorcycle_model: form.querySelector('#model').value.trim(),
-      motorcycle_year: Number(form.querySelector('#year').value),
-      part_name: form.querySelector('#part').value.trim(),
-      details: form.querySelector('#description').value.trim(),
-      phone: form.querySelector('#phone').value.trim()
-    }
-
-    submitButton.disabled = true
-    submitButton.textContent = 'იგზავნება...'
-    formNote.textContent = 'მოთხოვნა იგზავნება სერვერზე...'
-
-    try {
-      const response = await fetch(
-        'http://10.0.2.2:8000/api/part-requests',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify(data)
-        }
-      )
-
-      const result = await response.json()
-
-      if (!response.ok) {
-        const errors = result.errors
-          ? Object.values(result.errors).flat().join('\n')
-          : result.message || 'მოთხოვნის გაგზავნა ვერ მოხერხდა.'
-
-        throw new Error(errors)
-      }
-
-      form.reset()
-      formNote.textContent =
-        'მოთხოვნა წარმატებით გაიგზავნა! ჩვენი გუნდი დაგიკავშირდება.'
-      alert('მოთხოვნა წარმატებით გაიგზავნა!')
-
-    } catch (error) {
-      console.error('Parts request error:', error)
-
-      formNote.textContent =
-        'გაგზავნა ვერ მოხერხდა. შეამოწმე სერვერი და კავშირი.'
-
-      alert('შეცდომა: ' + error.message)
-
-    } finally {
-      submitButton.disabled = false
-      submitButton.textContent = 'მოთხოვნის გაგზავნა →'
-    }
-  })
-}
-
-homePage()
+const state = { page:'home', search:'', apiBase:localStorage.getItem('motohub_api_base') || (location.hostname === 'localhost' && location.port === '5173' ? 'http://10.0.2.2:8000' : location.origin), loading:false, error:'', items:[], pageData:null }
+const esc = v => String(v ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]))
+const money = v => v == null || v === '' ? 'ფასი შეთანხმებით' : '₾' + Number(v).toLocaleString('ka-GE',{maximumFractionDigits:0})
+const cfg = { bikes:{title:'მოტოციკლები',sub:'განცხადებები',url:'/api/mobile/motorcycles',empty:'ამ ძიებით მოტოციკლი ვერ მოიძებნა.'},parts:{title:'მოტო ნაწილები',sub:'კატალოგი',url:'/api/mobile/parts',empty:'ნაწილი ვერ მოიძებნა.'},listings:{title:'ნაწილების განცხადებები',sub:'ახალი და მეორადი',url:'/api/mobile/part-listings',empty:'განცხადება ჯერ არ არის.'},rentals:{title:'გაქირავება',sub:'ხელმისაწვდომი მოტოები',url:'/api/mobile/rentals',empty:'გაქირავების განცხადება ჯერ არ არის.'},services:{title:'სერვისცენტრები',sub:'სახელოსნოები და სერვისები',url:'/api/mobile/service-centers',empty:'სერვისცენტრი ვერ მოიძებნა.'}}
+function image(url,alt){return url?'<img class="item-image" src="'+esc(url)+'" alt="'+esc(alt)+'" loading="lazy" onerror="this.style.display=\'none\'">':'<div class="image-placeholder">M<span>H</span></div>'}
+function header(){return '<header class="topbar">'+(state.page!=='home'?'<button class="icon-button" data-action="home">←</button>':'')+'<button class="brand" data-action="home">MOTO<span>HUB</span></button><button class="icon-button" data-action="settings">⚙</button></header>'}
+function nav(){return '<nav class="bottom-nav">'+[['home','⌂','მთავარი'],['bikes','🏍','მოტოები'],['parts','⚙','ნაწილები'],['rentals','🛵','ქირაობა'],['account','♙','პროფილი']].map(t=>'<button class="nav-item '+(state.page===t[0]?'active':'')+'" data-action="'+t[0]+'"><span>'+t[1]+'</span><small>'+t[2]+'</small></button>').join('')+'</nav>'}
+function home(){return '<main><section class="hero"><div class="eyebrow">YOUR MOTORCYCLE WORLD · GEORGIA</div><h1>ყველაფერი<br>შენი <span>მოტოსთვის.</span></h1><p>იყიდე, გაყიდე, იქირავე და იპოვე სერვისი — ერთ სივრცეში.</p><button class="primary-btn" data-action="bikes">მოტოციკლების ნახვა ↗</button><div class="hero-mark">MH<span>.</span></div></section><section class="section"><div class="section-heading"><div><span class="eyebrow">EXPLORE</span><h2>რას ეძებ?</h2></div></div><div class="service-grid">'+[['parts','⚙','მოტო ნაწილები','კატალოგი და ძებნა'],['request','＋','ნაწილის მოთხოვნა','ვერ იპოვე? მოითხოვე'],['rentals','🛵','გაქირავება','შეარჩიე მოტო'],['services','🔧','სერვისცენტრები','იპოვე სახელოსნო'],['bikes','🏍','მოტო განცხადებები','ყიდვა და გაყიდვა'],['listings','◈','ნაწილების განცხადებები','ახალი და მეორადი']].map(x=>'<button class="service-card" data-action="'+x[0]+'"><span class="service-icon">'+x[1]+'</span><strong>'+x[2]+'</strong><small>'+x[3]+'</small><span class="card-arrow">↗</span></button>').join('')+'</div></section><section class="section"><div class="section-heading"><h2>მოტოები კატალოგში</h2><button class="text-button" data-action="bikes">ყველა ↗</button></div><div id="home-preview" class="horizontal-preview"><p class="muted">იტვირთება…</p></div></section><section class="section callout"><span class="eyebrow">NEED A PART?</span><h2>ვერ იპოვე საჭირო ნაწილი?</h2><p>გამოგვიგზავნე მოთხოვნა და დაგიკავშირდებით.</p><button class="secondary-btn" data-action="request">ნაწილის მოთხოვნა ↗</button></section></main>'}
+function itemCard(x){if(state.page==='services')return '<article class="item-card"><div class="item-card-content"><span class="pill">'+(x.is_verified?'✓ შემოწმებული':'სერვისცენტრი')+'</span><h3>'+esc(x.name)+'</h3><p class="item-meta">'+esc([x.city,x.address].filter(Boolean).join(' · '))+'</p><p>'+esc(x.description||'')+'</p><div class="service-tags">'+(x.services||[]).slice(0,4).map(s=>'<span>'+esc(s.name)+'</span>').join('')+'</div>'+(x.phone?'<a class="call-link" href="tel:'+esc(x.phone)+'">დარეკვა · '+esc(x.phone)+'</a>':'')+'</div></article>';const title=x.title||[x.brand,x.model].filter(Boolean).join(' ');const meta=[x.year,x.engine_cc?x.engine_cc+' cc':'',x.location,x.condition==='used'?'მეორადი':x.condition==='new'?'ახალი':''].filter(Boolean).join(' · ');const price=state.page==='rentals'?money(x.daily_rate)+' <small>/ დღე</small>':money(x.price);return '<article class="item-card">'+image(x.image_url,title)+'<div class="item-card-content">'+(x.is_featured?'<span class="pill blue-pill">რჩეული</span>':'')+'<h3>'+esc(title)+'</h3><p class="item-meta">'+esc(meta||x.brand||x.category||'')+'</p>'+(x.description?'<p class="item-description">'+esc(x.description.slice(0,120))+'</p>':'')+(x.compatible_motorcycle?'<p class="item-meta">თავსებადობა: '+esc(x.compatible_motorcycle)+'</p>':'')+'<div class="item-bottom"><strong class="price">'+price+'</strong>'+(x.stock!==undefined?'<small>მარაგი: '+x.stock+'</small>':'')+'</div>'+(state.page==='rentals'?'<button class="secondary-btn full-width" data-action="rental-info">დაჯავშნის მოთხოვნა</button>':'')+'</div></article>'}
+function catalog(){const c=cfg[state.page];return '<main class="section catalog-page"><div class="eyebrow">'+c.sub.toUpperCase()+'</div><h1 class="page-title">'+c.title+'<span>.</span></h1><p class="muted intro">მოძებნე და აირჩიე MotoHub-ზე.</p><form id="search-form" class="search-box"><span>⌕</span><input name="q" value="'+esc(state.search)+'" placeholder="ძებნა სახელით, მარკით ან მოდელით"><button>ძებნა</button></form>'+(state.loading?'<div class="loading-state"><div class="spinner"></div><p>იტვირთება…</p></div>':'')+(state.error?'<div class="error-state"><h3>კავშირი ვერ დამყარდა</h3><p>'+esc(state.error)+'</p><button class="secondary-btn" data-action="retry">ხელახლა ცდა</button><button class="text-button" data-action="settings">API პარამეტრები</button></div>':'')+'<div class="catalog-grid">'+state.items.map(itemCard).join('')+'</div>'+(!state.loading&&!state.error&&!state.items.length?'<div class="empty-state"><span>⌕</span><h3>ვერაფერი მოიძებნა</h3><p>'+c.empty+'</p></div>':'')+(state.pageData&&state.pageData.next_page_url?'<button class="secondary-btn full-width" data-action="more">მეტის ნახვა</button>':'')+'</main>'}
+function requestPage(){return '<main class="section request-page"><div class="eyebrow">PARTS REQUEST</div><h1 class="page-title">მოითხოვე <span>ნაწილი.</span></h1><p class="muted intro">შეავსე ფორმა და MotoHub-ის გუნდი დაგიკავშირდება.</p><form id="parts-form" class="form-stack"><label>სახელი<input name="customer_name" required maxlength="255" placeholder="შენი სახელი"></label><label>ტელეფონის ნომერი<input name="phone" required type="tel" maxlength="50" placeholder="5XX XX XX XX"></label><div class="form-row"><label>მარკა<input name="motorcycle_brand" maxlength="255" placeholder="მაგ. Yamaha"></label><label>მოდელი<input name="motorcycle_model" maxlength="255" placeholder="მაგ. R1"></label></div><label>გამოშვების წელი<input name="motorcycle_year" type="number" min="1900" max="2100" placeholder="მაგ. 2016"></label><label>რომელი ნაწილი გჭირდება?<input name="part_name" required maxlength="255" placeholder="მაგ. წინა ფარი"></label><label>დამატებითი აღწერა<textarea name="details" rows="4" maxlength="5000" placeholder="დეტალები, ფერი, მდგომარეობა…"></textarea></label><button class="primary-btn" type="submit">მოთხოვნის გაგზავნა ↗</button><p class="form-note" id="form-note">მოთხოვნა გაიგზავნება MotoHub-ის სერვერზე.</p></form></main>'}
+function account(){return '<main class="section account-page"><div class="eyebrow">YOUR GARAGE</div><h1 class="page-title">ჩემი <span>პროფილი.</span></h1><div class="account-panel"><div class="account-avatar">MH</div><h2>მოგესალმები MotoHub-ზე</h2><p class="muted">ანგარიშის, განცხადებებისა და ჯავშნების სამართავად საჭიროა უსაფრთხო ავტორიზაციის API.</p><div class="notice">პროფილის მონაცემებს ჯერ არ ვაჩვენებთ, სანამ უსაფრთხო ავტორიზაცია არ იქნება დაკავშირებული.</div><button class="secondary-btn full-width" data-action="bikes">განცხადებების ნახვა</button><button class="secondary-btn full-width" data-action="request">ნაწილის მოთხოვნა</button></div></main>'}
+function settings(){return '<main class="section"><div class="eyebrow">CONNECTION</div><h1 class="page-title">კავშირის <span>პარამეტრები.</span></h1><p class="muted intro">Android Emulator-ისთვის გამოიყენე http://10.0.2.2:8000. ფიზიკურ ტელეფონზე მიუთითე კომპიუტერის LAN IP ან HTTPS დომენი.</p><form id="settings-form" class="form-stack"><label>API მისამართი<input name="apiBase" type="url" required value="'+esc(state.apiBase)+'" placeholder="http://10.0.2.2:8000"></label><button class="primary-btn">შენახვა და შემოწმება</button><p id="settings-note" class="form-note"></p></form><div class="notice">სერვერი უნდა იყოს გაშვებული და ხელმისაწვდომი იმავე ქსელიდან.</div></main>'}
+function render(){const body=state.page==='home'?home():cfg[state.page]?catalog():state.page==='request'?requestPage():state.page==='settings'?settings():account();app.innerHTML=header()+body+nav();bind();if(state.page==='home')preview()}
+async function api(path,options={}){const base=state.apiBase.replace(/\/+$/,'');const response=await fetch(base+path,{...options,headers:{Accept:'application/json',...(options.body?{'Content-Type':'application/json'}:{}),...options.headers}});const data=await response.json().catch(()=>({}));if(!response.ok){const msg=data.errors?Object.values(data.errors).flat().join(' '):data.message;throw new Error(msg||'სერვერის შეცდომა ('+response.status+')')}return data}
+function go(page){state.page=page;state.search='';state.error='';state.items=[];state.pageData=null;render();if(cfg[page])loadCatalog()}
+async function loadCatalog(url){if(!cfg[state.page])return;state.loading=true;state.error='';const page=state.page;render();try{let path=url||cfg[page].url+(state.search?'?q='+encodeURIComponent(state.search):'');const base=state.apiBase.replace(/\/+$/,'');if(path.startsWith(base))path=path.slice(base.length);const data=await api(path);if(state.page!==page)return;state.pageData=data;state.items=data.data||data.items||[]}catch(e){if(state.page===page){state.error=e.message||'სერვერთან კავშირი ვერ მოხერხდა.';state.items=[]}}finally{state.loading=false;if(state.page===page)render()}}
+async function preview(){try{const data=await api('/api/mobile/motorcycles?per_page=4');const el=document.querySelector('#home-preview');if(el)el.innerHTML=(data.data||[]).map(x=>'<article class="preview-card">'+image(x.image_url,x.title)+'<strong>'+esc(x.title)+'</strong><span>'+money(x.price)+'</span></article>').join('')||'<p class="muted">გამოქვეყნებული განცხადებები ჯერ არ არის.</p>'}catch{const el=document.querySelector('#home-preview');if(el)el.innerHTML='<p class="muted">კატალოგის სანახავად შეამოწმე სერვერის კავშირი პარამეტრებში.</p>'}}
+function bind(){app.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>{const a=b.dataset.action;if(a==='retry')return loadCatalog();if(a==='more'&&state.pageData?.next_page_url)return loadCatalog(state.pageData.next_page_url);if(a==='settings')return go('settings');if(a==='rental-info')return alert('ჯავშნის გაგზავნა ჯერ დაკავშირებული არ არის; მოთხოვნა არ გაგზავნილა.');go(a)}));const sf=document.querySelector('#search-form');if(sf)sf.addEventListener('submit',e=>{e.preventDefault();state.search=new FormData(sf).get('q').toString().trim();loadCatalog()});const pf=document.querySelector('#parts-form');if(pf)pf.addEventListener('submit',async e=>{e.preventDefault();const btn=pf.querySelector('button[type=submit]'),note=document.querySelector('#form-note'),data=Object.fromEntries(new FormData(pf).entries());data.motorcycle_year=data.motorcycle_year?Number(data.motorcycle_year):null;Object.keys(data).forEach(k=>{if(data[k]==='')data[k]=null});btn.disabled=true;btn.textContent='იგზავნება…';note.textContent='მოთხოვნა იგზავნება…';try{const result=await api('/api/part-requests',{method:'POST',body:JSON.stringify(data)});pf.reset();note.textContent=result.message||'მოთხოვნა წარმატებით გაიგზავნა!';note.classList.add('success-text')}catch(err){note.textContent='გაგზავნა ვერ მოხერხდა: '+err.message;note.classList.remove('success-text')}finally{btn.disabled=false;btn.textContent='მოთხოვნის გაგზავნა ↗'}});const st=document.querySelector('#settings-form');if(st)st.addEventListener('submit',async e=>{e.preventDefault();const note=document.querySelector('#settings-note'),btn=st.querySelector('button'),value=new FormData(st).get('apiBase').toString().trim().replace(/\/+$/,'');btn.disabled=true;note.textContent='კავშირი მოწმდება…';state.apiBase=value;try{await api('/api/mobile/motorcycles?per_page=1');localStorage.setItem('motohub_api_base',value);note.textContent='კავშირი წარმატებულია. მისამართი შენახულია.';note.classList.add('success-text')}catch(err){note.textContent='კავშირი ვერ დადასტურდა: '+err.message;note.classList.remove('success-text')}finally{btn.disabled=false}})}
+render()
