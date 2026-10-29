@@ -7,6 +7,7 @@ use App\Models\Motorcycle;
 use App\Models\PartRequest;
 use App\Models\RentalBooking;
 use App\Models\ServiceBooking;
+use App\Models\ServiceCenter;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -33,6 +34,7 @@ class MobileAdminController extends Controller
                 'open_part_requests' => PartRequest::whereIn('status', ['new', 'in_progress'])->count(),
                 'pending_rental_bookings' => RentalBooking::where('status', 'pending')->count(),
                 'pending_service_bookings' => ServiceBooking::where('status', 'pending')->count(),
+                'pending_service_centers' => ServiceCenter::where('approval_status', 'pending')->count(),
             ],
             'motorcycles' => Motorcycle::with('user:id,name,email')->whereIn('status', ['draft', 'pending'])->latest()->limit(30)->get()
                 ->map(fn ($item) => ['id' => $item->id, 'title' => $item->title, 'brand' => $item->brand, 'model' => $item->model, 'year' => $item->year, 'price' => $item->price, 'status' => $item->status, 'owner' => $item->user?->name, 'email' => $item->user?->email]),
@@ -42,6 +44,8 @@ class MobileAdminController extends Controller
                 ->map(fn ($item) => ['id' => $item->id, 'title' => $item->rentalScooter?->title ?? 'მოპედი', 'customer_name' => $item->customer_name, 'phone' => $item->phone, 'start_date' => $item->start_date?->toDateString(), 'end_date' => $item->end_date?->toDateString(), 'total_price' => $item->total_price, 'status' => $item->status]),
             'service_bookings' => ServiceBooking::with('serviceCenter:id,name')->whereIn('status', ['pending', 'confirmed'])->latest('scheduled_at')->limit(30)->get()
                 ->map(fn ($item) => ['id' => $item->id, 'title' => $item->service_name, 'center' => $item->serviceCenter?->name, 'customer_name' => $item->customer_name, 'phone' => $item->customer_phone, 'scheduled_at' => $item->scheduled_at?->toIso8601String(), 'status' => $item->status]),
+            'service_centers' => ServiceCenter::with('owner:id,name,email')->where('approval_status', 'pending')->latest()->limit(30)->get()
+                ->map(fn ($item) => ['id' => $item->id, 'title' => $item->name, 'owner' => $item->owner?->name, 'email' => $item->owner?->email, 'phone' => $item->phone, 'city' => $item->city, 'address' => $item->address, 'details' => $item->description, 'status' => $item->approval_status]),
         ]);
     }
 
@@ -54,6 +58,7 @@ class MobileAdminController extends Controller
             'part-requests' => ['in_progress', 'completed', 'rejected'],
             'rental-bookings' => ['confirmed', 'declined', 'cancelled', 'completed'],
             'service-bookings' => ['confirmed', 'declined', 'cancelled', 'completed'],
+            'service-centers' => ['approved', 'rejected'],
         ];
 
         abort_unless(isset($rules[$type]), 404, 'განყოფილება ვერ მოიძებნა.');
@@ -67,6 +72,7 @@ class MobileAdminController extends Controller
             'part-requests' => PartRequest::query()->findOrFail($id),
             'rental-bookings' => RentalBooking::query()->findOrFail($id),
             'service-bookings' => ServiceBooking::query()->findOrFail($id),
+            'service-centers' => ServiceCenter::query()->findOrFail($id),
         };
 
         $changes = ['status' => $data['status']];
@@ -75,11 +81,19 @@ class MobileAdminController extends Controller
             $changes['published_at'] = $data['status'] === 'published' ? now() : null;
         }
 
+        if ($type === 'service-centers') {
+            $changes = [
+                'approval_status' => $data['status'],
+                'is_active' => $data['status'] === 'approved',
+                'is_verified' => $data['status'] === 'approved',
+            ];
+        }
+
         $model->forceFill($changes)->save();
 
         return response()->json([
             'message' => 'სტატუსი წარმატებით განახლდა.',
-            'status' => $model->status,
+            'status' => $type === 'service-centers' ? $model->approval_status : $model->status,
         ]);
     }
 }
