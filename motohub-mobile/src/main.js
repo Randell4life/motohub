@@ -58,6 +58,7 @@ async function preview(){try{const data=await api('/api/mobile/motorcycles?per_p
 function bind(){
 app.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',async()=>{
 const a=b.dataset.action;
+if(['edit-listing','delete-listing','cancel-booking'].includes(a))return;
 if(a==='bike-details'){const bike=state.items.find(x=>String(x.id)===b.dataset.id);if(!bike)return;state.selectedBike=bike;state.page='bike-detail';state.error='';render();return}
 if(a==='used-parts'){state.listingCondition='used';if(state.page==='listings')return loadCatalog();return go('listings')}
 if(a==='new-parts'){state.listingCondition='new';return loadCatalog()}
