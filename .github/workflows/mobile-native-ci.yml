@@ -1,0 +1,45 @@
+name: MotoHub mobile integration checks
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'routes/**'
+      - 'database/migrations/**'
+      - 'config/cors.php'
+      - 'motohub-mobile/**'
+      - '.github/workflows/mobile-native-ci.yml'
+  push:
+    branches: [feature/mobile-native-integration]
+
+jobs:
+  php-syntax:
+    name: Check Laravel PHP syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - name: Lint application PHP files
+        run: |
+          find app routes database/migrations config -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+
+  mobile-build:
+    name: Build MotoHub mobile frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: motohub-mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: motohub-mobile/package-lock.json
+      - name: Install dependencies
+        run: npm install
+      - name: Build mobile frontend
+        run: npm run build
