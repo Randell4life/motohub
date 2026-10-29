@@ -217,6 +217,6 @@ class MobileCatalogController extends Controller
             return $path;
         }
 
-        return asset('storage/' . ltrim(str_replace('public/', '', $path), '/'));
+        return request()->getSchemeAndHttpHost() . '/storage/' . ltrim(str_replace('public/', '', $path), '/');
     }
 }
