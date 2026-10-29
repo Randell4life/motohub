@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\MobileAuthController;
 use App\Http\Controllers\Api\MobileCatalogController;
 use App\Http\Controllers\Api\MobileAccountController;
 use App\Http\Controllers\Api\MobileBookingController;
+use App\Http\Controllers\Api\MobileAdminController;
 use App\Http\Controllers\PartRequestController;
 use App\Http\Middleware\AuthenticateMobileToken;
 use Illuminate\Support\Facades\Route;
