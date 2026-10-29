@@ -34,7 +34,11 @@
             <span>◷</span> სამუშაო საათები
         </a>
 
-        <a href="{{ route('my-service-center.passport-records.create') }}" class="mh-menu-link {{ request()->routeIs('my-service-center.passport-records.*') ? 'active' : '' }}">\n            <span>✓</span> პასპორტის ჩანაწერის დამატება\n        </a>\n\n        <a href="{{ route('my-service-center.profile') }}"
+        <a href="{{ route('my-service-center.passport-records.create') }}" class="mh-menu-link {{ request()->routeIs('my-service-center.passport-records.*') ? 'active' : '' }}">
+            <span>✓</span> პასპორტის ჩანაწერის დამატება
+        </a>
+
+        <a href="{{ route('my-service-center.profile') }}"
            class="mh-menu-link {{ request()->routeIs('my-service-center.profile') ? 'active' : '' }}">
             <span>▣</span> სერვისცენტრის პროფილი
         </a>
