@@ -79,7 +79,7 @@ class MobileAuthController extends Controller
             'token' => $plain,
             'token_type' => 'Bearer',
             'expires_at' => $expires->toIso8601String(),
-            'user' => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email, 'phone' => $user->phone],
+            'user' => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email, 'phone' => $user->phone, 'is_admin' => (bool) $user->is_admin],
         ];
     }
 }

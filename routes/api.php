@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\MobileAuthController;
 use App\Http\Controllers\Api\MobileCatalogController;
 use App\Http\Controllers\Api\MobileAccountController;
 use App\Http\Controllers\Api\MobileBookingController;
+use App\Http\Controllers\Api\MobileAdminController;
 use App\Http\Controllers\PartRequestController;
 use App\Http\Middleware\AuthenticateMobileToken;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +20,8 @@ Route::prefix('mobile')->group(function () {
 
     Route::middleware(AuthenticateMobileToken::class)->group(function () {
         Route::get('/me', [MobileAccountController::class, 'show']);
+        Route::get('/admin/dashboard', [MobileAdminController::class, 'dashboard']);
+        Route::patch('/admin/{type}/{id}/status', [MobileAdminController::class, 'updateStatus'])->whereIn('type', ['motorcycles', 'part-requests', 'rental-bookings', 'service-bookings'])->whereNumber('id')->middleware('throttle:30,1');
         Route::patch('/me', [MobileAccountController::class, 'update'])->middleware('throttle:10,1');
         Route::post('/logout', [MobileAuthController::class, 'logout']);
         Route::get('/my-listings', [MobileAccountController::class, 'listings']);
