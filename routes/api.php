@@ -26,6 +26,8 @@ Route::prefix('mobile')->group(function () {
         Route::put('/my-listings/{motorcycle}', [MobileAccountController::class, 'updateListing'])->middleware('throttle:10,1');
         Route::delete('/my-listings/{motorcycle}', [MobileAccountController::class, 'deleteListing'])->middleware('throttle:10,1');
         Route::get('/my-bookings', [MobileAccountController::class, 'bookings']);
+        Route::post('/my-bookings/rentals/{booking}/cancel', [MobileAccountController::class, 'cancelRentalBooking'])->whereNumber('booking')->middleware('throttle:5,1');
+        Route::post('/my-bookings/services/{booking}/cancel', [MobileAccountController::class, 'cancelServiceBooking'])->whereNumber('booking')->middleware('throttle:5,1');
         Route::post('/rentals/{rentalScooter:slug}/bookings', [MobileBookingController::class, 'rentalBooking'])->middleware('throttle:5,1');
         Route::post('/service-centers/{serviceCenter:slug}/bookings', [MobileBookingController::class, 'serviceBooking'])->middleware('throttle:5,1');
     });
