@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Motorcycle;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class MobileAccountController extends Controller
 {
@@ -47,7 +50,7 @@ class MobileAccountController extends Controller
                 'id' => $item->id, 'title' => $item->title, 'slug' => $item->slug,
                 'brand' => $item->brand, 'model' => $item->model, 'year' => $item->year,
                 'price' => $item->price, 'status' => $item->status,
-                'year' => $item->year, 'condition' => $item->condition,
+                'condition' => $item->condition,
                 'mileage' => $item->mileage, 'engine_cc' => $item->engine_cc,
                 'location' => $item->location, 'description' => $item->description,
                 'image_url' => $item->image_path ? url('/storage/' . ltrim($item->image_path, '/')) : null,
