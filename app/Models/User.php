@@ -36,6 +36,11 @@ public function rentalBookings(): HasMany
 {
     return $this->hasMany(RentalBooking::class);
 }
+
+public function serviceBookings(): HasMany
+{
+    return $this->hasMany(ServiceBooking::class);
+}
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
