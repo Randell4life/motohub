@@ -17,8 +17,8 @@
             --bg: #090b0f;
             --surface: #11151b;
             --surface-2: #171d25;
-            --accent: #ff812f;
-            --accent-light: #ffb17b;
+            --accent: #168cff;
+            --accent-light: #55baff;
             --text: #f5f7fa;
             --muted: #9ba5b3;
             --border: rgba(255,255,255,.09);
@@ -147,8 +147,8 @@
         }
 
         .account:hover {
-            border-color: rgba(255,129,47,.5);
-            background: rgba(255,129,47,.06);
+            border-color: rgba(22,140,255,.5);
+            background: rgba(22,140,255,.06);
         }
 
         /* HERO */
@@ -160,9 +160,9 @@
             align-items: center;
             min-height: 520px;
             overflow: hidden;
-            border-bottom: 1px solid rgba(255,129,47,.19);
+            border-bottom: 1px solid rgba(22,140,255,.19);
             background:
-                radial-gradient(ellipse at 80% 35%, rgba(255,129,47,.12), transparent 40%),
+                radial-gradient(ellipse at 80% 35%, rgba(22,140,255,.12), transparent 40%),
                 linear-gradient(125deg, #141820, #0b0e13 70%);
         }
 
@@ -198,11 +198,11 @@
             bottom: -290px;
             width: 520px;
             height: 520px;
-            border: 1px solid rgba(255,129,47,.17);
+            border: 1px solid rgba(22,140,255,.17);
             border-radius: 50%;
             box-shadow:
-                0 0 0 50px rgba(255,129,47,.025),
-                0 0 0 100px rgba(255,129,47,.018);
+                0 0 0 50px rgba(22,140,255,.025),
+                0 0 0 100px rgba(22,140,255,.018);
             content: "";
             pointer-events: none;
         }
@@ -229,7 +229,7 @@
             height: 3px;
             border-radius: 3px;
             background: var(--accent);
-            box-shadow: 0 0 15px rgba(255,129,47,.28);
+            box-shadow: 0 0 15px rgba(22,140,255,.28);
             content: "";
         }
 
@@ -286,7 +286,7 @@
 
         .button-primary:hover {
             transform: translateY(-2px);
-            background: #ff9958;
+            background: #42b4ff;
         }
 
         .button-secondary {
@@ -296,8 +296,8 @@
         }
 
         .button-secondary:hover {
-            border-color: rgba(255,129,47,.5);
-            background: rgba(255,129,47,.06);
+            border-color: rgba(22,140,255,.5);
+            background: rgba(22,140,255,.06);
         }
 
         .hero-bottom {
@@ -321,7 +321,7 @@
             flex-shrink: 0;
             border-radius: 50%;
             background: var(--accent);
-            box-shadow: 0 0 12px rgba(255,129,47,.4);
+            box-shadow: 0 0 12px rgba(22,140,255,.4);
         }
 
         /* BENEFITS */
@@ -346,7 +346,7 @@
 
         .benefit:hover {
             transform: translateY(-3px);
-            border-color: rgba(255,129,47,.3);
+            border-color: rgba(22,140,255,.3);
         }
 
         .benefit-icon {
@@ -355,9 +355,9 @@
             height: 38px;
             flex: 0 0 38px;
             place-items: center;
-            border: 1px solid rgba(255,129,47,.22);
+            border: 1px solid rgba(22,140,255,.22);
             border-radius: 8px;
-            background: rgba(255,129,47,.07);
+            background: rgba(22,140,255,.07);
             color: var(--accent);
             font-size: 17px;
         }
@@ -448,7 +448,7 @@
 
         .bike-card:hover {
             transform: translateY(-4px);
-            border-color: rgba(255,129,47,.36);
+            border-color: rgba(22,140,255,.36);
             box-shadow: 0 18px 40px rgba(0,0,0,.23);
         }
 
@@ -610,7 +610,7 @@
 
         .details-link:hover {
             transform: translateY(-1px);
-            background: #ff9958;
+            background: #42b4ff;
         }
 
         /* EMPTY STATE */
@@ -620,7 +620,7 @@
             border: 1px dashed #343b45;
             border-radius: 11px;
             background:
-                radial-gradient(ellipse at 50% 0%, rgba(255,129,47,.07), transparent 65%),
+                radial-gradient(ellipse at 50% 0%, rgba(22,140,255,.07), transparent 65%),
                 var(--surface);
             text-align: center;
         }
@@ -631,9 +631,9 @@
             height: 54px;
             margin: 0 auto 16px;
             place-items: center;
-            border: 1px solid rgba(255,129,47,.22);
+            border: 1px solid rgba(22,140,255,.22);
             border-radius: 12px;
-            background: rgba(255,129,47,.07);
+            background: rgba(22,140,255,.07);
             color: var(--accent);
             font-size: 23px;
         }
