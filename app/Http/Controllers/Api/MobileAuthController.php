@@ -13,12 +13,24 @@ class MobileAuthController extends Controller
 {
     public function register(Request $request)
     {
+        $request->merge([
+            'email' => mb_strtolower(trim((string) $request->input('email', ''))),
+        ]);
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'phone' => ['nullable', 'string', 'max:30'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
+
+        if (User::query()->whereRaw('LOWER(email) = ?', [$data['email']])->exists()) {
+            return response()->json([
+                'message' => 'ამ ელფოსტით ანგარიში უკვე არსებობს.',
+                'errors' => ['email' => ['ამ ელფოსტით ანგარიში უკვე არსებობს.']],
+            ], 422);
+        }
+
         $user = User::create([
             'name' => $data['name'],
             'email' => strtolower($data['email']),
@@ -30,6 +42,10 @@ class MobileAuthController extends Controller
 
     public function login(Request $request)
     {
+        $request->merge([
+            'email' => mb_strtolower(trim((string) $request->input('email', ''))),
+        ]);
+
         $data = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
