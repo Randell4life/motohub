@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Motorcycle;
+use App\Models\RentalBooking;
+use App\Models\ServiceBooking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -159,6 +161,36 @@ class MobileAccountController extends Controller
         $item->delete();
 
         return response()->json(['message' => 'განცხადება წაიშალა.']);
+    }
+
+    public function cancelRentalBooking(Request $request, int $booking)
+    {
+        $item = $request->user()->rentalBookings()->whereKey($booking)->firstOrFail();
+
+        if ($item->status !== 'pending') {
+            return response()->json([
+                'message' => 'მხოლოდ მოლოდინში მყოფი ჯავშნის გაუქმებაა შესაძლებელი. დადასტურებული ჯავშნისთვის დაუკავშირდი ადმინისტრაციას.',
+            ], 422);
+        }
+
+        $item->update(['status' => 'cancelled']);
+
+        return response()->json(['message' => 'გაქირავების ჯავშანი გაუქმდა.', 'status' => $item->status]);
+    }
+
+    public function cancelServiceBooking(Request $request, int $booking)
+    {
+        $item = $request->user()->serviceBookings()->whereKey($booking)->firstOrFail();
+
+        if ($item->status !== 'pending') {
+            return response()->json([
+                'message' => 'მხოლოდ მოლოდინში მყოფი ჯავშნის გაუქმებაა შესაძლებელი. დადასტურებული ჯავშნისთვის დაუკავშირდი სერვისცენტრს.',
+            ], 422);
+        }
+
+        $item->update(['status' => 'cancelled']);
+
+        return response()->json(['message' => 'სერვისის ჯავშანი გაუქმდა.', 'status' => $item->status]);
     }
 
     public function bookings(Request $request)
