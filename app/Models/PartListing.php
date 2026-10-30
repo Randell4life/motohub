@@ -8,25 +8,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PartListing extends Model
 {
     protected $fillable = [
-        'user_id',
-        'title',
-        'slug',
-        'brand',
-        'category',
-        'condition',
-        'part_number',
-        'compatible_motorcycle',
-        'description',
-        'price',
-        'image_path',
-        'status',
+        'user_id','title','slug','brand','category','condition','part_type','part_number',
+        'compatible_motorcycle','motorcycle_brand','motorcycle_model','motorcycle_year',
+        'engine_cc','description','price','image_path','status',
     ];
 
     protected function casts(): array
     {
-        return [
-            'price' => 'decimal:2',
-        ];
+        return ['price'=>'decimal:2','motorcycle_year'=>'integer','engine_cc'=>'integer'];
     }
 
     public function user(): BelongsTo
