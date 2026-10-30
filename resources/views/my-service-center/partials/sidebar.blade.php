@@ -7,6 +7,7 @@
     <nav class="mh-menu">
         <a href="{{ route('my-service-center.dashboard') }}" class="mh-menu-link {{ request()->routeIs('my-service-center.dashboard') ? 'active' : '' }}"><span>▦</span> მიმოხილვა</a>
         <a href="{{ route('my-service-center.bookings') }}" class="mh-menu-link {{ request()->routeIs('my-service-center.bookings') ? 'active' : '' }}"><span>▤</span> ჯავშნები</a>
+        <a href="{{ route('my-service-center.operations') }}" class="mh-menu-link {{ request()->routeIs('my-service-center.operations') ? 'active' : '' }}"><span>▣</span> მართვის ცენტრი</a>
         <a href="{{ route('my-service-center.work-orders.index') }}" class="mh-menu-link {{ request()->routeIs('my-service-center.work-orders.*') ? 'active' : '' }}"><span>⚙</span> სამუშაო შეკვეთები</a>
         <a href="{{ route('my-service-center.services') }}" class="mh-menu-link {{ request()->routeIs('my-service-center.services') ? 'active' : '' }}"><span>🔧</span> მომსახურებები</a>
         <a href="{{ route('my-service-center.hours') }}" class="mh-menu-link {{ request()->routeIs('my-service-center.hours') ? 'active' : '' }}"><span>◷</span> სამუშაო საათები</a>
