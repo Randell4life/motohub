@@ -115,7 +115,8 @@
             gap: 6px;
         }
 
-        .nav a {
+        .nav a,
+        .nav-item-coming-soon {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -137,6 +138,37 @@
 
         .nav a.active {
             box-shadow: inset 3px 0 var(--blue);
+        }
+
+
+        .nav-item-coming-soon {
+            gap: 12px;
+            min-height: 46px;
+            padding: 11px 13px;
+            border: 1px solid rgba(39,133,255,.12);
+            border-radius: 11px;
+            color: #8fa1bb;
+            background: rgba(39,133,255,.045);
+            font-weight: 600;
+            cursor: not-allowed;
+            opacity: .9;
+        }
+
+        .nav-item-label {
+            min-width: 0;
+        }
+
+        .coming-soon-badge {
+            margin-left: auto;
+            padding: 3px 7px;
+            border: 1px solid rgba(83,160,255,.25);
+            border-radius: 6px;
+            background: rgba(39,133,255,.10);
+            color: #79b5ff;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: .3px;
+            white-space: nowrap;
         }
 
         .nav-icon {
@@ -938,7 +970,8 @@
                 scrollbar-width: thin;
             }
 
-            .nav a {
+            .nav a,
+            .nav-item-coming-soon {
                 flex-shrink: 0;
                 min-height: 38px;
                 padding: 8px 11px;
@@ -1129,10 +1162,11 @@
                 მთავარი
             </a>
 
-            <a href="{{ route('account.moto-garage-3d') }}">
+            <span class="nav-item-coming-soon" aria-disabled="true" title="ფუნქცია მალე დაემატება">
                 <span class="nav-icon">🧩</span>
-                3D მოტოფარეხი
-            </a>
+                <span class="nav-item-label">3D მოტოფარეხი</span>
+                <span class="coming-soon-badge">მალე</span>
+            </span>
 
             <a href="#motorcycles">
                 <span class="nav-icon">🏍</span>
