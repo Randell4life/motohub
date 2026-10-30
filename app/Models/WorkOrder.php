@@ -17,6 +17,15 @@ class WorkOrder extends Model
         'cancelled',
     ];
 
+    protected static function booted(): void
+    {
+        static::creating(function (self $order) {
+            if (!$order->public_token) {
+                $order->public_token = (string) \Illuminate\Support\Str::uuid();
+            }
+        });
+    }
+
     protected $fillable = [
         'order_number',
         'service_booking_id',
