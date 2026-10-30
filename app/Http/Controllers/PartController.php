@@ -1,13 +1,13 @@
 <?php
 
-namespace App\\Http\\Controllers;
+namespace App\Http\Controllers;
 
-use App\\Models\\Part;
-use App\\Models\\PartListing;
-use Illuminate\\Contracts\\Pagination\\LengthAwarePaginator;
-use Illuminate\\Http\\Request;
-use Illuminate\\Support\\Facades\\Storage;
-use Illuminate\\View\\View;
+use App\Models\Part;
+use App\Models\PartListing;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 
 class PartController extends Controller
 {
