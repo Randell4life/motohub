@@ -7,15 +7,6 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::table('work_orders', function (Blueprint $table) {
-            if (!Schema::hasColumn('work_orders', 'public_token')) {
-                $table->uuid('public_token')->nullable()->unique();
-            }
-            if (!Schema::hasColumn('work_orders', 'service_center_bay_id')) {
-                $table->foreignId('service_center_bay_id')->nullable()->constrained('service_center_bays')->nullOnDelete();
-            }
-        });
-
         Schema::create('service_center_technicians', function (Blueprint $table) {
             $table->id();
             $table->foreignId('service_center_id')->constrained()->cascadeOnDelete();
