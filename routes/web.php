@@ -258,6 +258,11 @@ Route::middleware('guest')->group(function () {
 Route::get('/parts', [PartController::class, 'index'])
     ->name('parts.index');
 
+Route::get('/parts/{source}/{id}', [PartController::class, 'show'])
+    ->whereIn('source', ['store', 'marketplace'])
+    ->whereNumber('id')
+    ->name('parts.show');
+
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
