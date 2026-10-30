@@ -1,14 +1,14 @@
 <?php
 
-namespace App\\Http\\Controllers;
+namespace App\Http\Controllers;
 
-use App\\Models\\CommunityPost;
-use App\\Models\\Motorcycle;
-use App\\Notifications\\CommunityActivityNotification;
-use Illuminate\\Http\\RedirectResponse;
-use Illuminate\\Http\\Request;
-use Illuminate\\Support\\Facades\\Storage;
-use Illuminate\\View\\View;
+use App\Models\CommunityPost;
+use App\Models\Motorcycle;
+use App\Notifications\CommunityActivityNotification;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 
 class CommunityController extends Controller
 {
