@@ -268,12 +268,10 @@ Route::post('/logout', [AuthController::class, 'logout'])
     ->name('logout');
     
 // ახალი და მეორადი ნაწილების განცხადებები
-Route::get('/parts/new', [PartListingController::class, 'index'])
-    ->defaults('condition', 'new')
+Route::get('/parts/new', fn () => redirect()->route('parts.index', ['source' => 'marketplace', 'condition' => 'new']))
     ->name('part-listings.new');
 
-Route::get('/parts/used', [PartListingController::class, 'index'])
-    ->defaults('condition', 'used')
+Route::get('/parts/used', fn () => redirect()->route('parts.index', ['source' => 'marketplace', 'condition' => 'used']))
     ->name('part-listings.used');
 
 /*
