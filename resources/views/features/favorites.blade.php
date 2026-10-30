@@ -1,0 +1,9 @@
+@extends('layouts.motohub-features')
+@section('title','ფავორიტები | MotoHub')
+@section('content')
+<div class="eyebrow">SAVED FOR LATER</div><h1 class="page-title">ჩემი ფავორიტები</h1><p class="lead">შენახული მოტოციკლები და ნაწილები ერთ ადგილას.</p>
+<div class="section-head section"><h2>მოტოციკლები</h2><a class="btn ghost small" href="{{ route('motorcycles.index') }}">კატალოგი →</a></div>
+@if($motorcycles->isEmpty())<div class="empty">შენახული მოტოციკლები ჯერ არ გაქვს.</div>@else<div class="grid">@foreach($motorcycles as $m)<article class="card"><h3>{{ $m->title }}</h3><p>{{ $m->year }} · {{ $m->engine_cc }} cc · ₾{{ number_format((float)$m->price,0) }}</p><div class="actions"><a class="btn small" href="{{ route('motorcycles.show',$m->slug) }}">ნახვა</a><form method="POST" action="{{ route('favorites.motorcycles.toggle',$m->id) }}">@csrf<button class="btn ghost small">ამოშლა</button></form></div></article>@endforeach</div>@endif
+<div class="section-head section"><h2>ნაწილები</h2><a class="btn ghost small" href="{{ route('parts.index') }}">ნაწილების კატალოგი →</a></div>
+@if($partFavorites->isEmpty())<div class="empty">შენახული ნაწილები ჯერ არ გაქვს.</div>@else<div class="grid">@foreach($partFavorites as $part)<article class="card"><h3>{{ $part->title }}</h3><p>{{ $part->brand }} · ₾{{ number_format((float)$part->price,2) }}</p><div class="actions"><a class="btn small" href="{{ route('parts.show',[$part->source,$part->id]) }}">ნახვა</a><form method="POST" action="{{ route('favorites.parts.toggle',[$part->source,$part->id]) }}">@csrf<button class="btn ghost small">ამოშლა</button></form></div></article>@endforeach</div>@endif
+@endsection

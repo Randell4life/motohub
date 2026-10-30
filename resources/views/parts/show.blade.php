@@ -17,4 +17,9 @@
 <div class="spec"><small>წელი / მოცულობა</small><strong>{{ $item['motorcycle_year'] ?: '—' }} / {{ $item['engine_cc'] ? $item['engine_cc'].' cc' : '—' }}</strong></div>
 </div>
 <div class="seller"><strong>გამყიდველი: {{ $sellerName }}</strong>@if($sellerPhone)<p class="muted">ტელეფონი: {{ $sellerPhone }}</p><a class="btn" href="tel:{{ preg_replace('/[^0-9+]/','',$sellerPhone) }}">დარეკვა გამყიდველთან</a>@else<p class="muted">საკონტაქტო ნომერი მითითებული არ არის. დაუკავშირდი პლატფორმის მეშვეობით ან მოითხოვე დამატებითი ინფორმაცია.</p>@endif</div>
+@auth
+<form method="POST" action="{{ route('favorites.parts.toggle',[$item['source'],$item['id']]) }}" style="margin-top:16px">@csrf<button class="btn" type="submit">♡ ფავორიტებში შენახვა</button></form>
+@else
+<a class="btn" href="{{ route('login') }}">შესვლა ფავორიტებში შესანახად</a>
+@endauth
 <a class="back" href="{{ route('parts.index') }}">← ყველა ნაწილზე დაბრუნება</a></section></main></div></body></html>

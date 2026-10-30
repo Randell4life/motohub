@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#080b10">
-    <title>Garage33 — შენი მოტოსამყარო</title>
-    <meta name="description" content="აღმოაჩინე მოტოციკლები, შეარჩიე სასურველი მოდელი და იპოვე მოტოსერვისები Garage33-ზე.">
+    <title>MotoHub — შენი მოტოსამყარო</title>
+    <meta name="description" content="აღმოაჩინე მოტოციკლები, შეარჩიე სასურველი მოდელი და იპოვე მოტოსერვისები MotoHub-ზე.">
 
     <style>
         :root {
@@ -1345,6 +1345,9 @@
         </div>
     </div>
     <a href="{{ route('rentals.index') }}">გაქირავება</a>
+    <a href="{{ route('hub.index') }}">MotoHub HUB</a>
+    <a href="{{ route('clubs.index') }}">მოტოკლუბები</a>
+    @auth<a href="{{ route('garage.index') }}">ჩემი ავტოფარეხი</a>@endauth
     <a href="{{ route('community.index') }}">Moto Community</a>
     <a href="#about">ჩვენ შესახებ</a>
 </div>

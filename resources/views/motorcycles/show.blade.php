@@ -1037,6 +1037,7 @@
 
     <section style="display:flex;flex-wrap:wrap;gap:10px;margin:0 0 24px">
         <a href="{{ route('motorcycles.passport', $motorcycle->slug) }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 15px;border:1px solid #243653;border-radius:9px;background:#0d1422;color:#f4f8ff;font-weight:700">📘 ციფრული პასპორტი</a>
+        <a href="{{ route('motorcycles.compare') }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 15px;border:1px solid #243653;border-radius:9px;background:#0d1422;color:#f4f8ff;font-weight:700">⇄ მოტოციკლების შედარება</a>
         <a href="{{ route('moto-assistant.index') }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 15px;border:1px solid #1677ff;border-radius:9px;background:#0b1c36;color:#42a5ff;font-weight:700">✦ მოტო ასისტენტი</a>
     </section>
 
@@ -1126,7 +1127,13 @@
                 </div>
 
                 <div class="quick-actions">
-                    <button class="icon-button" type="button" id="favoriteButton" aria-label="რჩეულებში დამატება" title="რჩეულებში დამატება">♡</button>
+                    @auth
+                    <form method="POST" action="{{ route('favorites.motorcycles.toggle', $motorcycle->id) }}">@csrf
+                        <button class="icon-button" type="submit" aria-label="ფავორიტებში დამატება" title="ფავორიტებში დამატება">♡</button>
+                    </form>
+                    @else
+                    <a class="icon-button" href="{{ route('login') }}" aria-label="შესვლა ფავორიტებში დასამატებლად" title="შესვლა ფავორიტებში დასამატებლად">♡</a>
+                    @endauth
                     <button class="icon-button" type="button" id="shareButton" aria-label="გაზიარება" title="გაზიარება">♧</button>
                 </div>
             </div>
@@ -1536,17 +1543,7 @@
         item.addEventListener('click', shareListing);
     });
 
-    // A working local favorite toggle. Persistent account favorites need a backend endpoint.
-    const favoriteButton = document.getElementById('favoriteButton');
-
-    favoriteButton?.addEventListener('click', () => {
-        const active = favoriteButton.dataset.active === 'true';
-        favoriteButton.dataset.active = String(!active);
-        favoriteButton.textContent = active ? '♡' : '♥';
-        favoriteButton.style.color = active ? '' : '#1688ff';
-        favoriteButton.setAttribute('aria-pressed', String(!active));
-        favoriteButton.title = active ? 'რჩეულებში დამატება' : 'რჩეულებიდან ამოღება';
-    });
+    // Favorites are persisted through the authenticated MotoHub endpoint.
 
     // Open the authenticated private-message composer from the seller panel.
     const messageModal = document.getElementById('messageModal');

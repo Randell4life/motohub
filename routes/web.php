@@ -778,3 +778,81 @@ Route::middleware('auth')->prefix('community')->name('community.')->group(functi
         ->whereNumber('post')
         ->name('posts.destroy');
 });
+
+
+
+/*
+|--------------------------------------------------------------------------
+| MotoHub Growth — My Garage, Marketplace 2.0 and Moto Clubs
+|--------------------------------------------------------------------------
+*/
+Route::get('/hub', [\App\Http\Controllers\MotoHubFeaturesController::class, 'hub'])
+    ->name('hub.index');
+
+Route::get('/compare-motorcycles', [\App\Http\Controllers\MotoHubFeaturesController::class, 'compareMotorcycles'])
+    ->name('motorcycles.compare');
+
+Route::get('/clubs', [\App\Http\Controllers\MotoHubFeaturesController::class, 'clubs'])
+    ->name('clubs.index');
+
+Route::get('/clubs/create', [\App\Http\Controllers\MotoHubFeaturesController::class, 'createClub'])
+    ->middleware('auth')
+    ->name('clubs.create');
+
+Route::get('/clubs/{slug}', [\App\Http\Controllers\MotoHubFeaturesController::class, 'showClub'])
+    ->name('clubs.show');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/my-garage', [\App\Http\Controllers\MotoHubFeaturesController::class, 'garage'])
+        ->name('garage.index');
+
+    Route::post('/my-garage/reminders', [\App\Http\Controllers\MotoHubFeaturesController::class, 'storeReminder'])
+        ->middleware('throttle:10,1')
+        ->name('garage.reminders.store');
+
+    Route::patch('/my-garage/reminders/{reminder}/complete', [\App\Http\Controllers\MotoHubFeaturesController::class, 'completeReminder'])
+        ->whereNumber('reminder')
+        ->name('garage.reminders.complete');
+
+    Route::post('/my-garage/expenses', [\App\Http\Controllers\MotoHubFeaturesController::class, 'storeExpense'])
+        ->middleware('throttle:10,1')
+        ->name('garage.expenses.store');
+
+    Route::delete('/my-garage/expenses/{expense}', [\App\Http\Controllers\MotoHubFeaturesController::class, 'destroyExpense'])
+        ->whereNumber('expense')
+        ->name('garage.expenses.destroy');
+
+    Route::get('/account/favorites', [\App\Http\Controllers\MotoHubFeaturesController::class, 'favorites'])
+        ->name('favorites.index');
+
+    Route::post('/favorites/motorcycles/{motorcycle}', [\App\Http\Controllers\MotoHubFeaturesController::class, 'toggleMotorcycleFavorite'])
+        ->whereNumber('motorcycle')
+        ->name('favorites.motorcycles.toggle');
+
+    Route::post('/favorites/parts/{source}/{part}', [\App\Http\Controllers\MotoHubFeaturesController::class, 'togglePartFavorite'])
+        ->whereIn('source', ['store', 'marketplace'])
+        ->whereNumber('part')
+        ->name('favorites.parts.toggle');
+
+    Route::post('/clubs', [\App\Http\Controllers\MotoHubFeaturesController::class, 'storeClub'])
+        ->middleware('throttle:5,1')
+        ->name('clubs.store');
+
+    Route::post('/clubs/{club}/join', [\App\Http\Controllers\MotoHubFeaturesController::class, 'joinClub'])
+        ->whereNumber('club')
+        ->middleware('throttle:10,1')
+        ->name('clubs.join');
+
+    Route::patch('/clubs/{club}/members/{member}/approve', [\App\Http\Controllers\MotoHubFeaturesController::class, 'approveClubMember'])
+        ->whereNumber('club')->whereNumber('member')->name('clubs.members.approve');
+
+    Route::post('/clubs/{club}/events', [\App\Http\Controllers\MotoHubFeaturesController::class, 'storeEvent'])
+        ->whereNumber('club')
+        ->middleware('throttle:5,1')
+        ->name('clubs.events.store');
+
+    Route::post('/clubs/events/{event}/attend', [\App\Http\Controllers\MotoHubFeaturesController::class, 'attendEvent'])
+        ->whereNumber('event')
+        ->middleware('throttle:10,1')
+        ->name('clubs.events.attend');
+});
