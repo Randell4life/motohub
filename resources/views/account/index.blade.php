@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>პირადი კაბინეტი | Garage 33</title>
+    <title>პირადი კაბინეტი | MotoHub</title>
 
     <style>
         :root {
