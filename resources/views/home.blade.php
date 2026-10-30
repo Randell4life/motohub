@@ -1345,6 +1345,9 @@
         </div>
     </div>
     <a href="{{ route('rentals.index') }}">გაქირავება</a>
+    <a href="{{ route('hub.index') }}">MotoHub HUB</a>
+    <a href="{{ route('clubs.index') }}">მოტოკლუბები</a>
+    @auth<a href="{{ route('garage.index') }}">ჩემი ავტოფარეხი</a>@endauth
     <a href="{{ route('community.index') }}">Moto Community</a>
     <a href="#about">ჩვენ შესახებ</a>
 </div>
