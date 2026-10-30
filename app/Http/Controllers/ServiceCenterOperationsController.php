@@ -28,7 +28,7 @@ class ServiceCenterOperationsController extends Controller
         $to = $request->date('to')?->endOfDay() ?? now()->endOfWeek();
 
         $orders = WorkOrder::where('service_center_id', $center->id)
-            ->with(['serviceBooking', 'assignedTechnician', 'bay', 'parts.inventoryItem', 'payments'])
+            ->with(['serviceBooking', 'assignedTechnician', 'technician', 'bay', 'parts.inventoryItem', 'payments'])
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
             ->when($request->filled('q'), fn ($q) => $q->where(function ($sub) use ($request) {
                 $term = '%'.$request->string('q').'%';
@@ -39,7 +39,7 @@ class ServiceCenterOperationsController extends Controller
 
         $calendar = WorkOrder::where('service_center_id', $center->id)
             ->whereHas('serviceBooking', fn ($q) => $q->whereBetween('scheduled_at', [$from, $to]))
-            ->with(['serviceBooking', 'assignedTechnician', 'bay'])
+            ->with(['serviceBooking', 'assignedTechnician', 'technician', 'bay'])
             ->get();
 
         $technicians = $center->technicians()->where('is_active', true)->orderBy('name')->get();
@@ -117,8 +117,7 @@ class ServiceCenterOperationsController extends Controller
         if (!empty($data['assigned_technician_id'])) abort_unless($center->technicians()->whereKey($data['assigned_technician_id'])->exists(), 422);
         if (!empty($data['service_center_bay_id'])) abort_unless($center->bays()->whereKey($data['service_center_bay_id'])->exists(), 422);
         $workOrder->update([
-            'assigned_technician_id' => !empty($data['assigned_technician_id'])
-                ? $center->technicians()->findOrFail($data['assigned_technician_id'])->user_id : null,
+            'service_center_technician_id' => $data['assigned_technician_id'] ?? null,
             'service_center_bay_id' => $data['service_center_bay_id'] ?? null,
         ]);
         return back()->with('success', 'ხელოსანი და ბოქსი მიენიჭა შეკვეთას.');
