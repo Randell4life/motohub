@@ -28,10 +28,10 @@ class MotoHubFeaturesController extends Controller
                 $join->on('moto_club_members.club_id', '=', 'moto_clubs.id')
                     ->where('moto_club_members.status', '=', 'active');
             })
-            ->select('moto_clubs.id', 'moto_clubs.name', 'moto_clubs.slug', 'moto_clubs.city', 'moto_clubs.description')
+            ->select('moto_clubs.id', 'moto_clubs.name', 'moto_clubs.slug', 'moto_clubs.city', 'moto_clubs.description', 'moto_clubs.created_at')
             ->selectRaw('COUNT(moto_club_members.id) as members_count')
             ->where('moto_clubs.is_public', true)
-            ->groupBy('moto_clubs.id', 'moto_clubs.name', 'moto_clubs.slug', 'moto_clubs.city', 'moto_clubs.description')
+            ->groupBy('moto_clubs.id', 'moto_clubs.name', 'moto_clubs.slug', 'moto_clubs.city', 'moto_clubs.description', 'moto_clubs.created_at')
             ->latest('moto_clubs.created_at')
             ->limit(4)
             ->get();
@@ -230,7 +230,7 @@ class MotoHubFeaturesController extends Controller
                     $query->orWhere('moto_clubs.owner_id', auth()->id())
                         ->orWhereExists(function ($sub) {
                             $sub->selectRaw('1')->from('moto_club_members as mine')
-                                ->whereColumn('mine.club_id', 'moto_clubs.id')->where('mine.user_id', auth()->id());
+                                ->whereColumn('mine.club_id', 'moto_clubs.id')->where('mine.user_id', auth()->id())->where('mine.status', 'active');
                         });
                 }
             })
@@ -258,7 +258,7 @@ class MotoHubFeaturesController extends Controller
     {
         $club = DB::table('moto_clubs')->where('slug', $slug)->firstOrFail();
         $isMember = auth()->check() && DB::table('moto_club_members')->where('club_id', $club->id)->where('user_id', auth()->id())->where('status', 'active')->exists();
-        abort_unless($club->is_public || $isMember || (auth()->check() && $club->owner_id === auth()->id()), 404);
+        abort_unless($club->is_public || $isMember || (auth()->check() && (int) $club->owner_id === auth()->id()), 404);
         $members = DB::table('moto_club_members')->join('users', 'users.id', '=', 'moto_club_members.user_id')->where('moto_club_members.club_id', $club->id)->where('moto_club_members.status', 'active')->select('users.name', 'moto_club_members.role')->orderBy('moto_club_members.created_at')->limit(30)->get();
         $events = DB::table('moto_events')->leftJoin('moto_event_attendees', function ($join) {
             $join->on('moto_event_attendees.event_id', '=', 'moto_events.id')->where('moto_event_attendees.status', '=', 'going');
