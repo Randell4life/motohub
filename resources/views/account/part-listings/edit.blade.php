@@ -69,6 +69,11 @@
                     <label for="compatible_motorcycle">რომელ მოტოციკლს ერგება</label>
                     <input id="compatible_motorcycle" name="compatible_motorcycle" value="{{ old('compatible_motorcycle', $listing->compatible_motorcycle) }}" maxlength="255">
                 </div>
+                <div class="field"><label for="part_type">ნაწილის ტიპი</label><select id="part_type" name="part_type"><option value="">არ არის მითითებული</option><option value="oem" @selected(old('part_type', $listing->part_type)==='oem')>ორიგინალი (OEM)</option><option value="aftermarket" @selected(old('part_type', $listing->part_type)==='aftermarket')>Aftermarket</option><option value="used" @selected(old('part_type', $listing->part_type)==='used')>მეორადი / მოხსნილი</option></select></div>
+                <div class="field"><label for="motorcycle_brand">მოტოციკლის ბრენდი</label><input id="motorcycle_brand" name="motorcycle_brand" value="{{ old('motorcycle_brand', $listing->motorcycle_brand) }}" maxlength="100"></div>
+                <div class="field"><label for="motorcycle_model">მოტოციკლის მოდელი</label><input id="motorcycle_model" name="motorcycle_model" value="{{ old('motorcycle_model', $listing->motorcycle_model) }}" maxlength="120"></div>
+                <div class="field"><label for="motorcycle_year">გამოშვების წელი</label><input id="motorcycle_year" type="number" name="motorcycle_year" value="{{ old('motorcycle_year', $listing->motorcycle_year) }}" min="1900" max="2100"></div>
+                <div class="field"><label for="engine_cc">ძრავის მოცულობა (cc)</label><input id="engine_cc" type="number" name="engine_cc" value="{{ old('engine_cc', $listing->engine_cc) }}" min="1" max="10000"></div>
                 <div class="field wide">
                     <label for="description">აღწერა</label>
                     <textarea id="description" name="description" maxlength="10000">{{ old('description', $listing->description) }}</textarea>
