@@ -31,6 +31,7 @@ class WorkOrder extends Model
         'service_booking_id',
         'service_center_id',
         'assigned_technician_id',
+        'service_center_technician_id',
         'status',
         'intake_odometer',
         'intake_condition',
@@ -102,6 +103,16 @@ class WorkOrder extends Model
     public function bay(): BelongsTo
     {
         return $this->belongsTo(ServiceCenterBay::class, 'service_center_bay_id');
+    }
+
+    public function technician(): BelongsTo
+    {
+        return $this->belongsTo(ServiceCenterTechnician::class, 'service_center_technician_id');
+    }
+
+    public function activityLogs(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ServiceCenterActivityLog::class);
     }
 
 }
