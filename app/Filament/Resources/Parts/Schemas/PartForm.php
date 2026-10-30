@@ -53,6 +53,16 @@ class PartForm
                             ])
                             ->searchable(),
 
+                        Select::make('part_type')
+                            ->label('ნაწილის ტიპი')
+                            ->options(['oem' => 'ორიგინალი (OEM)', 'aftermarket' => 'Aftermarket', 'used' => 'მეორადი / მოხსნილი'])
+                            ->searchable(),
+
+                        TextInput::make('motorcycle_brand')->label('მოტოციკლის ბრენდი')->maxLength(100),
+                        TextInput::make('motorcycle_model')->label('მოტოციკლის მოდელი')->maxLength(120),
+                        TextInput::make('motorcycle_year')->label('გამოშვების წელი')->numeric()->minValue(1900)->maxValue(2100),
+                        TextInput::make('engine_cc')->label('ძრავის მოცულობა (cc)')->numeric()->minValue(1)->maxValue(10000),
+
                         TextInput::make('part_number')
                             ->label('ნაწილის ნომერი')
                             ->maxLength(255),
