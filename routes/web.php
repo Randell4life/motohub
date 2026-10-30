@@ -789,7 +789,7 @@ Route::middleware('auth')->prefix('community')->name('community.')->group(functi
 Route::get('/hub', [\App\Http\Controllers\MotoHubFeaturesController::class, 'hub'])
     ->name('hub.index');
 
-Route::get('/motorcycles/compare', [\App\Http\Controllers\MotoHubFeaturesController::class, 'compareMotorcycles'])
+Route::get('/compare-motorcycles', [\App\Http\Controllers\MotoHubFeaturesController::class, 'compareMotorcycles'])
     ->name('motorcycles.compare');
 
 Route::get('/clubs', [\App\Http\Controllers\MotoHubFeaturesController::class, 'clubs'])
