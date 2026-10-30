@@ -19,6 +19,11 @@
             <span>▤</span> ჯავშნები
         </a>
 
+        <a href="{{ route('my-service-center.operations') }}"
+           class="mh-menu-link {{ request()->routeIs('my-service-center.operations') ? 'active' : '' }}">
+            <span>▣</span> მართვის ცენტრი
+        </a>
+
         <a href="{{ route('my-service-center.work-orders.index') }}"
            class="mh-menu-link {{ request()->routeIs('my-service-center.work-orders.*') ? 'active' : '' }}">
             <span>⚙</span> სამუშაო შეკვეთები
@@ -34,7 +39,8 @@
             <span>◷</span> სამუშაო საათები
         </a>
 
-        <a href="{{ route('my-service-center.passport-records.create') }}" class="mh-menu-link {{ request()->routeIs('my-service-center.passport-records.*') ? 'active' : '' }}">
+        <a href="{{ route('my-service-center.passport-records.create') }}"
+           class="mh-menu-link {{ request()->routeIs('my-service-center.passport-records.*') ? 'active' : '' }}">
             <span>✓</span> პასპორტის ჩანაწერის დამატება
         </a>
 
