@@ -746,3 +746,32 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:30,1')
         ->name('messages.store');
 });
+
+
+/*
+|--------------------------------------------------------------------------
+| MotoHub Community — მოტო საზოგადოება
+|--------------------------------------------------------------------------
+*/
+Route::get('/community', [CommunityController::class, 'index'])
+    ->name('community.index');
+
+Route::middleware('auth')->prefix('community')->name('community.')->group(function () {
+    Route::post('/posts', [CommunityController::class, 'store'])
+        ->middleware('throttle:5,1')
+        ->name('posts.store');
+
+    Route::post('/posts/{post}/comments', [CommunityController::class, 'comment'])
+        ->whereNumber('post')
+        ->middleware('throttle:10,1')
+        ->name('posts.comments.store');
+
+    Route::post('/posts/{post}/like', [CommunityController::class, 'toggleLike'])
+        ->whereNumber('post')
+        ->middleware('throttle:30,1')
+        ->name('posts.like');
+
+    Route::delete('/posts/{post}', [CommunityController::class, 'destroy'])
+        ->whereNumber('post')
+        ->name('posts.destroy');
+});
