@@ -1129,6 +1129,11 @@
                 მთავარი
             </a>
 
+            <a href="{{ route('account.moto-garage-3d') }}">
+                <span class="nav-icon">🧩</span>
+                3D მოტოფარეხი
+            </a>
+
             <a href="#motorcycles">
                 <span class="nav-icon">🏍</span>
                 ჩემი მოტოციკლები
