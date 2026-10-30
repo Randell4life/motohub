@@ -8,18 +8,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('motorcycle_maintenance_reminders', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('motorcycle_id')->constrained()->cascadeOnDelete();
-            $table->string('title', 160);
-            $table->date('due_date')->nullable();
-            $table->unsignedInteger('due_mileage')->nullable();
-            $table->text('notes')->nullable();
-            $table->timestamp('completed_at')->nullable();
-            $table->timestamps();
-            $table->index(['user_id', 'completed_at', 'due_date']);
-        });
+        if (! Schema::hasTable('motorcycle_maintenance_reminders')) {
+            Schema::create('motorcycle_maintenance_reminders', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('motorcycle_id')->constrained()->cascadeOnDelete();
+                $table->string('title', 160);
+                $table->date('due_date')->nullable();
+                $table->unsignedInteger('due_mileage')->nullable();
+                $table->text('notes')->nullable();
+                $table->timestamp('completed_at')->nullable();
+                $table->timestamps();
+            });
+        }
 
         Schema::create('motorcycle_expenses', function (Blueprint $table) {
             $table->id();
