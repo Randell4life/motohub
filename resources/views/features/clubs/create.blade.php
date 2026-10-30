@@ -1,0 +1,6 @@
+@extends('layouts.motohub-features')
+@section('title','კლუბის შექმნა | MotoHub')
+@section('content')
+<div class="eyebrow">START A COMMUNITY</div><h1 class="page-title">შექმენი მოტოკლუბი</h1><p class="lead">შექმენი სივრცე შენი ქალაქის, ბრენდის ან საერთო ინტერესის მოტომოყვარულებისთვის.</p>
+<form class="panel section" method="POST" action="{{ route('clubs.store') }}">@csrf<div class="form-grid"><div class="field full"><label>კლუბის სახელი</label><input name="name" maxlength="140" value="{{ old('name') }}" required placeholder="მაგ. Tbilisi Riders"></div><div class="field"><label>ქალაქი</label><input name="city" maxlength="100" value="{{ old('city') }}" placeholder="თბილისი"></div><div class="field"><label>წვდომა</label><select name="is_public" required><option value="1">ღია — ყველას შეუძლია გაწევრიანება</option><option value="0">დახურული — მოთხოვნით გაწევრიანება</option></select></div><div class="field full"><label>აღწერა</label><textarea name="description" maxlength="4000" placeholder="რას წარმოადგენს თქვენი კლუბი?">{{ old('description') }}</textarea></div><div class="field full"><button class="btn">კლუბის შექმნა →</button></div></div></form>
+@endsection
