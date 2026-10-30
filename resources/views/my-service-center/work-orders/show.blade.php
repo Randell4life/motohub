@@ -696,4 +696,42 @@
         </div>
     </div>
 </section>
+
+<section class="od-card">
+    <div class="od-card-head"><div class="od-card-icon">↗</div><div><h3>მომხმარებლის სტატუსის ბმული</h3><p>გაუზიარე კლიენტს შეკვეთის ონლაინ თვალთვალი</p></div></div>
+    <div class="od-text">{{ route('service-centers.work-orders.status', $workOrder->public_token) }}</div>
+    <div class="od-actions"><a class="od-btn primary" target="_blank" rel="noopener" href="{{ route('service-centers.work-orders.status', $workOrder->public_token) }}">საჯარო გვერდის ნახვა →</a></div>
+</section>
+
+<div class="od-grid">
+<section class="od-card">
+ <div class="od-card-head"><div class="od-card-icon">＋</div><div><h3>ნაწილის დამატება</h3><p>საწყობიდან ჩამოწერა ავტომატურად მოხდება</p></div></div>
+ <form method="POST" action="{{ route('my-service-center.work-orders.parts',$workOrder) }}" class="od-status-form">@csrf
+  <select class="od-select" name="inventory_item_id" required><option value="">აირჩიე ნაწილი</option>@foreach($inventory as $item)<option value="{{ $item->id }}">{{ $item->name }} · მარაგი {{ $item->quantity }} · {{ number_format((float)$item->sale_price,2) }} ₾</option>@endforeach</select>
+  <input class="od-select" style="max-width:110px" type="number" min="1" name="quantity" value="1" required>
+  <button class="od-btn primary">დამატება</button>
+ </form>
+ @foreach($workOrder->parts as $part)<p class="od-muted">{{ $part->inventoryItem->name }} × {{ $part->quantity }} — {{ number_format((float)$part->total,2) }} ₾</p>@endforeach
+</section>
+<section class="od-card">
+ <div class="od-card-head"><div class="od-card-icon">₾</div><div><h3>გადახდის აღრიცხვა</h3><p>ნაწილობრივი ან სრული გადახდა</p></div></div>
+ <form method="POST" action="{{ route('my-service-center.work-orders.payments',$workOrder) }}" class="od-status-form">@csrf
+  <input class="od-select" type="number" min="0.01" step=".01" name="amount" placeholder="თანხა ₾" required>
+  <select class="od-select" name="method"><option value="cash">ნაღდი</option><option value="card">ბარათი</option><option value="transfer">გადარიცხვა</option><option value="other">სხვა</option></select>
+  <input class="od-select" name="reference" placeholder="ქვითრის ნომერი (არასავალდებულო)">
+  <button class="od-btn primary">გადახდის შენახვა</button>
+ </form>
+ @foreach($workOrder->payments as $payment)<p class="od-muted">{{ $payment->paid_at?->format('d.m.Y H:i') }} · {{ number_format((float)$payment->amount,2) }} ₾ · {{ $payment->method }}</p>@endforeach
+</section>
+</div>
+
+<section class="od-card">
+ <div class="od-card-head"><div class="od-card-icon">✉</div><div><h3>კლიენტის განახლება</h3><p>შეტყობინება დაემატება საჯარო შეკვეთის გვერდის ისტორიაში</p></div></div>
+ <form method="POST" action="{{ route('my-service-center.work-orders.updates',$workOrder) }}">@csrf
+  <textarea class="od-select" name="message" rows="3" required placeholder="მაგ. დიაგნოსტიკა დასრულდა, ველოდებით სათადარიგო ნაწილს..."></textarea>
+  <button class="od-btn primary" style="margin-top:10px">განახლების დამატება</button>
+ </form>
+ @foreach($workOrder->activityLogs as $log)<p class="od-muted">{{ $log->created_at->format('d.m.Y H:i') }} · {{ $log->message }}</p>@endforeach
+</section>
+
 @endsection
