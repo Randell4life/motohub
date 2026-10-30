@@ -843,6 +843,9 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:10,1')
         ->name('clubs.join');
 
+    Route::patch('/clubs/{club}/members/{member}/approve', [\App\Http\Controllers\MotoHubFeaturesController::class, 'approveClubMember'])
+        ->whereNumber('club')->whereNumber('member')->name('clubs.members.approve');
+
     Route::post('/clubs/{club}/events', [\App\Http\Controllers\MotoHubFeaturesController::class, 'storeEvent'])
         ->whereNumber('club')
         ->middleware('throttle:5,1')
