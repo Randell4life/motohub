@@ -80,4 +80,19 @@ class WorkOrder extends Model
             default => $this->status,
         };
     }
+    public function parts(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ServiceCenterWorkOrderPart::class);
+    }
+
+    public function payments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ServiceCenterPayment::class);
+    }
+
+    public function bay(): BelongsTo
+    {
+        return $this->belongsTo(ServiceCenterBay::class, 'service_center_bay_id');
+    }
+
 }
