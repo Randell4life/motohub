@@ -210,11 +210,14 @@ public function show(WorkOrder $workOrder)
     $workOrder->load([
         'serviceBooking.service',
         'assignedTechnician',
+        'technician', 'bay', 'parts.inventoryItem', 'payments', 'activityLogs',
     ]);
+
+    $inventory = $center->inventory()->where('is_active', true)->where('quantity', '>', 0)->orderBy('name')->get();
 
     return view(
         'my-service-center.work-orders.show',
-        compact('center', 'workOrder')
+        compact('center', 'workOrder', 'inventory')
     );
 }
 
