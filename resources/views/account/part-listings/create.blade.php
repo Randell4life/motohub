@@ -68,6 +68,31 @@
                     <label for="compatible_motorcycle">რომელ მოტოციკლს ერგება</label>
                     <input id="compatible_motorcycle" name="compatible_motorcycle" value="{{ old('compatible_motorcycle') }}" maxlength="255" placeholder="მაგ. Yamaha R1 2015–2020">
                 </div>
+                <div class="field">
+                    <label for="part_type">ნაწილის ტიპი</label>
+                    <select id="part_type" name="part_type">
+                        <option value="">არ არის მითითებული</option>
+                        <option value="oem" @selected(old('part_type') === 'oem')>ორიგინალი (OEM)</option>
+                        <option value="aftermarket" @selected(old('part_type') === 'aftermarket')>Aftermarket</option>
+                        <option value="used" @selected(old('part_type') === 'used')>მეორადი / მოხსნილი</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="motorcycle_brand">მოტოციკლის ბრენდი</label>
+                    <input id="motorcycle_brand" name="motorcycle_brand" value="{{ old('motorcycle_brand') }}" maxlength="100" placeholder="მაგ. Yamaha">
+                </div>
+                <div class="field">
+                    <label for="motorcycle_model">მოტოციკლის მოდელი</label>
+                    <input id="motorcycle_model" name="motorcycle_model" value="{{ old('motorcycle_model') }}" maxlength="120" placeholder="მაგ. R1">
+                </div>
+                <div class="field">
+                    <label for="motorcycle_year">გამოშვების წელი</label>
+                    <input id="motorcycle_year" type="number" name="motorcycle_year" value="{{ old('motorcycle_year') }}" min="1900" max="2100" placeholder="მაგ. 2016">
+                </div>
+                <div class="field">
+                    <label for="engine_cc">ძრავის მოცულობა (cc)</label>
+                    <input id="engine_cc" type="number" name="engine_cc" value="{{ old('engine_cc') }}" min="1" max="10000" placeholder="მაგ. 1000">
+                </div>
                 <div class="field wide">
                     <label for="description">აღწერა</label>
                     <textarea id="description" name="description" maxlength="10000" placeholder="მიუთითე ნაწილის მდგომარეობა და სხვა მნიშვნელოვანი ინფორმაცია">{{ old('description') }}</textarea>
