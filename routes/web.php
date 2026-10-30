@@ -758,6 +758,8 @@ Route::get('/community', [CommunityController::class, 'index'])
     ->name('community.index');
 
 Route::middleware('auth')->prefix('community')->name('community.')->group(function () {
+    Route::post('/avatar', [CommunityController::class, 'uploadAvatar'])->middleware('throttle:5,1')->name('avatar');
+    Route::post('/notifications/read', [CommunityController::class, 'markNotificationsRead'])->name('notifications.read');
     Route::post('/posts', [CommunityController::class, 'store'])
         ->middleware('throttle:5,1')
         ->name('posts.store');
