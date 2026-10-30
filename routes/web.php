@@ -688,6 +688,30 @@ Route::get('/my-service-center/profile', [
     'availability',
 ])->name('service-centers.availability');   
 
+Route::get('/my-service-center/operations', [\\App\\Http\\Controllers\\ServiceCenterOperationsController::class, 'index'])
+    ->name('my-service-center.operations');
+
+Route::post('/my-service-center/technicians', [\\App\\Http\\Controllers\\ServiceCenterOperationsController::class, 'storeTechnician'])
+    ->name('my-service-center.technicians.store');
+
+Route::post('/my-service-center/bays', [\\App\\Http\\Controllers\\ServiceCenterOperationsController::class, 'storeBay'])
+    ->name('my-service-center.bays.store');
+
+Route::post('/my-service-center/inventory', [\\App\\Http\\Controllers\\ServiceCenterOperationsController::class, 'storeInventory'])
+    ->name('my-service-center.inventory.store');
+
+Route::patch('/my-service-center/work-orders/{workOrder}/assignment', [\\App\\Http\\Controllers\\ServiceCenterOperationsController::class, 'assign'])
+    ->whereNumber('workOrder')->name('my-service-center.work-orders.assignment');
+
+Route::post('/my-service-center/work-orders/{workOrder}/parts', [\\App\\Http\\Controllers\\ServiceCenterOperationsController::class, 'addPart'])
+    ->whereNumber('workOrder')->name('my-service-center.work-orders.parts');
+
+Route::post('/my-service-center/work-orders/{workOrder}/payments', [\\App\\Http\\Controllers\\ServiceCenterOperationsController::class, 'payment'])
+    ->whereNumber('workOrder')->name('my-service-center.work-orders.payments');
+
+Route::post('/my-service-center/work-orders/{workOrder}/updates', [\\App\\Http\\Controllers\\ServiceCenterOperationsController::class, 'notify'])
+    ->whereNumber('workOrder')->name('my-service-center.work-orders.updates');
+
 Route::get(
     '/my-service-center/work-orders',
     [\App\Http\Controllers\WorkOrderController::class, 'index']
