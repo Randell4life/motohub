@@ -344,6 +344,9 @@ Route::middleware('auth')
         Route::get('/', [MotorcycleAccountController::class, 'index'])
             ->name('index');
 
+        Route::view('/moto-garage-3d', 'account.moto-garage-3d')
+            ->name('moto-garage-3d');
+
         Route::get('/motorcycles/create', [MotorcycleAccountController::class, 'create'])
             ->name('motorcycles.create');
 
