@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\\Database\\Migrations\\Migration;
-use Illuminate\\Database\\Schema\\Blueprint;
-use Illuminate\\Support\\Facades\\Schema;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -23,13 +23,7 @@ return new class extends Migration
     {
         foreach (['parts', 'part_listings'] as $tableName) {
             Schema::table($tableName, function (Blueprint $table) {
-                $table->dropColumn([
-                    'part_type',
-                    'motorcycle_brand',
-                    'motorcycle_model',
-                    'motorcycle_year',
-                    'engine_cc',
-                ]);
+                $table->dropColumn(['part_type', 'motorcycle_brand', 'motorcycle_model', 'motorcycle_year', 'engine_cc']);
             });
         }
     }
