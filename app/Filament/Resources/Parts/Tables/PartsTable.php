@@ -36,6 +36,13 @@ class PartsTable
                     ->label('კატალოგის ნომერი')
                     ->searchable(),
 
+                TextColumn::make('part_type')->label('ტიპი')->formatStateUsing(fn ($state): string => match ($state) { 'oem' => 'OEM', 'aftermarket' => 'Aftermarket', 'used' => 'მეორადი', default => '—' })->badge()->toggleable(),
+
+                TextColumn::make('motorcycle_brand')->label('მოტო ბრენდი')->toggleable(),
+                TextColumn::make('motorcycle_model')->label('მოტო მოდელი')->toggleable(),
+                TextColumn::make('motorcycle_year')->label('წელი')->toggleable(),
+                TextColumn::make('engine_cc')->label('cc')->toggleable(),
+
                 TextColumn::make('compatible_motorcycle')
                     ->label('თავსებადი მოტოციკლი')
                     ->searchable()
