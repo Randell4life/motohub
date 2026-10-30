@@ -10,7 +10,7 @@
         <a href="{{ route('my-service-center.work-orders.index') }}" class="mh-menu-link {{ request()->routeIs('my-service-center.work-orders.*') ? 'active' : '' }}"><span>⚙</span> სამუშაო შეკვეთები</a>
         <a href="{{ route('my-service-center.services') }}" class="mh-menu-link {{ request()->routeIs('my-service-center.services') ? 'active' : '' }}"><span>🔧</span> მომსახურებები</a>
         <a href="{{ route('my-service-center.hours') }}" class="mh-menu-link {{ request()->routeIs('my-service-center.hours') ? 'active' : '' }}"><span>◷</span> სამუშაო საათები</a>
-        <a href="{{ route('my-service-center.passport-records.*') }}" class="mh-menu-link {{ request()->routeIs('my-service-center.passport-records.*') ? 'active' : '' }}"><span>✓</span> სერვისის პასპორტი</a>
+        <a href="{{ route('my-service-center.passport-records.create') }}" class="mh-menu-link {{ request()->routeIs('my-service-center.passport-records.*') ? 'active' : '' }}"><span>✓</span> სერვისის პასპორტი</a>
         <a href="{{ route('my-service-center.profile') }}" class="mh-menu-link {{ request()->routeIs('my-service-center.profile') ? 'active' : '' }}"><span>▣</span> პროფილი</a>
     </nav>
     <div class="mh-sidebar-bottom">
