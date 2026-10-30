@@ -1,427 +1,91 @@
 @extends('my-service-center.layout')
 
-@section('title', 'მთავარი პანელი | MotoHub')
-@section('page-title', 'მთავარი პანელი')
-@section('page-subtitle', 'სერვისცენტრის ოპერაციების მართვა')
+@section('title', 'სერვისცენტრის მიმოხილვა | MotoHub')
+@section('page-title', 'სერვისცენტრის მიმოხილვა')
+@section('page-subtitle', 'მართე ჯავშნები, სამუშაო შეკვეთები და ყოველდღიური ოპერაციები')
 
 @section('public-link')
-    <a class="mh-public-link"
-       href="{{ route('service-centers.show', $center->slug) }}"
-       target="_blank" rel="noopener">
-        საჯარო გვერდი ↗
-    </a>
+    <a class="mh-public-link" href="{{ route('service-centers.show', $center->slug) }}" target="_blank" rel="noopener">საჯარო გვერდი ↗</a>
 @endsection
 
 @section('content')
-    <style>
-        .cp-hero {
-            position: relative;
-            overflow: hidden;
-            padding: 28px;
-            margin-bottom: 24px;
-            border: 1px solid #25486d;
-            border-radius: 18px;
-            background:
-                radial-gradient(ellipse at 90% 10%, rgba(0,124,255,.24), transparent 42%),
-                linear-gradient(120deg, #111d2c, #0a101a);
-        }
+<style>
+    .sc-welcome{position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding:30px;margin-bottom:20px;border:1px solid #284d78;border-radius:16px;background:radial-gradient(ellipse at 85% 15%,rgba(22,119,255,.28),transparent 40%),linear-gradient(120deg,#111e31,#0a111d)}
+    .sc-welcome:after{content:"MH";position:absolute;right:24px;bottom:-45px;color:rgba(93,166,255,.06);font-size:190px;font-weight:950;font-style:italic;line-height:1;pointer-events:none}
+    .sc-kicker{color:#67b7ff;font-size:10px;font-weight:900;letter-spacing:2.3px}
+    .sc-welcome h2{position:relative;z-index:1;margin:9px 0 5px;font-size:clamp(24px,3vw,35px);font-weight:900;letter-spacing:-1px}
+    .sc-welcome p{position:relative;z-index:1;margin:0;color:#a8b8cf}
+    .sc-live{position:relative;z-index:1;display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid #315276;border-radius:9px;background:rgba(6,14,25,.65);white-space:nowrap;font-size:12px;font-weight:800}
+    .sc-live i{width:8px;height:8px;border-radius:50%;background:{{ $center->is_active ? '#43d9a5' : '#ff7187' }};box-shadow:0 0 12px currentColor}
+    .sc-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:20px}
+    .sc-stat{position:relative;overflow:hidden;padding:19px;border:1px solid #263a55;border-radius:13px;background:linear-gradient(145deg,#111d2e,#0b121e)}
+    .sc-stat-top{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#9bacc3;font-size:12px;font-weight:700}
+    .sc-stat-icon{display:grid;place-items:center;width:37px;height:37px;border:1px solid #294c73;border-radius:10px;background:rgba(22,119,255,.12);color:#70bcff;font-size:17px}
+    .sc-stat strong{display:block;margin:14px 0 2px;font-size:34px;line-height:1;font-weight:900;letter-spacing:-1px}
+    .sc-stat small{color:#7f91aa;font-size:11px}
+    .sc-columns{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:16px;margin-bottom:18px}
+    .sc-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:17px}
+    .sc-card-head h3{margin:0;font-size:16px}
+    .sc-tag{color:#66b5ff;font-size:10px;font-weight:900;letter-spacing:1.3px}
+    .sc-details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin-top:20px}
+    .sc-detail{padding:12px;border:1px solid #243650;border-radius:10px;background:#0a111d}
+    .sc-detail span{display:block;margin-bottom:4px;color:#8093ad;font-size:11px}
+    .sc-detail strong{display:block;overflow-wrap:anywhere;font-size:13px}
+    .sc-actions{display:grid;gap:8px}
+    .sc-action{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 13px;border:1px solid #263a52;border-radius:10px;background:#0a111d;transition:.18s ease}
+    .sc-action:hover{border-color:#3989ed;background:#101e31;transform:translateX(2px)}
+    .sc-action strong{display:block;font-size:13px}
+    .sc-action small{display:block;margin-top:3px;color:#8fa2bc;font-size:11px}
+    .sc-arrow{color:#62b5ff;font-size:18px}
+    .sc-tip{display:flex;align-items:center;gap:13px;padding:17px 19px;border:1px solid #29466a;border-radius:12px;background:linear-gradient(100deg,rgba(22,119,255,.12),rgba(13,20,34,.9))}
+    .sc-tip-icon{display:grid;place-items:center;width:40px;height:40px;flex:0 0 40px;border:1px solid #315d8d;border-radius:11px;background:rgba(22,119,255,.13);color:#72bdff;font-size:19px}
+    .sc-tip strong{display:block;margin-bottom:2px}
+    .sc-tip p{margin:0;color:#98a8c2;font-size:12px}
+    @media(max-width:850px){.sc-columns{grid-template-columns:1fr}}
+    @media(max-width:600px){.sc-welcome{align-items:flex-start;flex-direction:column;padding:21px}.sc-live{font-size:11px}.sc-stats{grid-template-columns:1fr;gap:9px}.sc-stat{padding:15px}.sc-stat strong{font-size:29px}.sc-details{grid-template-columns:1fr 1fr}}
+</style>
 
-        .cp-hero::after {
-            content: "MH";
-            position: absolute;
-            right: 24px;
-            bottom: -35px;
-            font-size: 150px;
-            font-weight: 900;
-            font-style: italic;
-            line-height: 1;
-            color: rgba(75, 158, 255, .055);
-            pointer-events: none;
-        }
-
-        .cp-eyebrow {
-            color: #54b2ff;
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 2px;
-        }
-
-        .cp-hero h2 {
-            margin: 12px 0 8px;
-            font-size: clamp(24px, 3vw, 34px);
-            letter-spacing: -.8px;
-        }
-
-        .cp-hero p {
-            max-width: 560px;
-            line-height: 1.8;
-        }
-
-        .cp-stats {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .cp-stat {
-            position: relative;
-            overflow: hidden;
-            padding: 22px;
-            border: 1px solid #263a52;
-            border-radius: 15px;
-            background: linear-gradient(145deg, #121e2d, #0b111a);
-        }
-
-        .cp-stat-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-        }
-
-        .cp-stat-icon {
-            display: grid;
-            place-items: center;
-            width: 40px;
-            height: 40px;
-            border: 1px solid #294c73;
-            border-radius: 11px;
-            background: rgba(8,124,255,.12);
-            color: #69b8ff;
-            font-size: 20px;
-        }
-
-        .cp-stat-number {
-            display: block;
-            margin: 20px 0 5px;
-            font-size: 36px;
-            font-weight: 850;
-            line-height: 1;
-            letter-spacing: -1px;
-        }
-
-        .cp-stat-label {
-            color: #9aacc2;
-            font-size: 13px;
-        }
-
-        .cp-section-title {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .cp-section-title h3 {
-            margin: 0;
-            font-size: 17px;
-        }
-
-        .cp-panel-grid {
-            display: grid;
-            grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr);
-            gap: 20px;
-            margin-bottom: 22px;
-        }
-
-        .cp-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            padding: 7px 10px;
-            border: 1px solid #29415b;
-            border-radius: 8px;
-            background: #0b1420;
-            color: #d6e5f8;
-            font-size: 12px;
-        }
-
-        .cp-status-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #43d9a5;
-            box-shadow: 0 0 10px rgba(67,217,165,.55);
-        }
-
-        .cp-status-dot.off {
-            background: #ff7187;
-            box-shadow: 0 0 10px rgba(255,113,135,.4);
-        }
-
-        .cp-center-name {
-            margin: 12px 0 6px;
-            font-size: 23px;
-            font-weight: 800;
-        }
-
-        .cp-center-details {
-            display: grid;
-            gap: 15px;
-            margin-top: 22px;
-        }
-
-        .cp-detail-label {
-            display: block;
-            margin-bottom: 5px;
-            color: #8fa3bd;
-            font-size: 12px;
-        }
-
-        .cp-detail-value {
-            overflow-wrap: anywhere;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .cp-actions {
-            display: grid;
-            gap: 10px;
-        }
-
-        .cp-action {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 14px 15px;
-            border: 1px solid #263a52;
-            border-radius: 10px;
-            background: #0b121d;
-            color: #edf5ff;
-            text-decoration: none;
-            transition: .2s ease;
-        }
-
-        .cp-action:hover {
-            border-color: #338fff;
-            background: #101f32;
-            transform: translateX(2px);
-        }
-
-        .cp-action small {
-            display: block;
-            margin-top: 4px;
-            color: #91a5be;
-        }
-
-        .cp-action-arrow {
-            color: #54b2ff;
-            font-size: 18px;
-        }
-
-        .cp-next {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .cp-next-icon {
-            display: grid;
-            place-items: center;
-            flex: 0 0 44px;
-            height: 44px;
-            border: 1px solid #294c73;
-            border-radius: 12px;
-            background: rgba(8,124,255,.12);
-            color: #69b8ff;
-            font-size: 20px;
-        }
-
-        @media (max-width: 850px) {
-            .cp-panel-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 560px) {
-            .cp-stats {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-
-            .cp-stat {
-                padding: 18px;
-            }
-
-            .cp-stat-number {
-                margin-top: 14px;
-                font-size: 30px;
-            }
-
-            .cp-hero {
-                padding: 21px;
-            }
-        }
-    </style>
-
-    <section class="cp-hero">
-        <div class="cp-eyebrow">MOTOHUB / SERVICE OPERATIONS</div>
-
+<section class="sc-welcome">
+    <div>
+        <div class="sc-kicker">MOTOHUB / SERVICE OPERATIONS</div>
         <h2>მოგესალმები, {{ $center->name }}</h2>
+        <p>ყველაფერი, რაც სერვისცენტრის ყოველდღიური მართვისთვის გჭირდება — ერთ სივრცეში.</p>
+    </div>
+    <div class="sc-live"><i></i>{{ $center->is_active ? 'სერვისცენტრი აქტიურია' : 'სერვისცენტრი არააქტიურია' }}</div>
+</section>
 
-        <p class="mh-muted" style="margin:0">
-            მართე ჯავშნები, მომსახურებები და სამუშაო პროცესი
-            ერთი სივრციდან.
-        </p>
+<div class="sc-stats">
+    <section class="sc-stat"><div class="sc-stat-top"><span>მოლოდინში</span><span class="sc-stat-icon">◷</span></div><strong>{{ $bookingStats['pending'] ?? 0 }}</strong><small>დასადასტურებელი ჯავშნები</small></section>
+    <section class="sc-stat"><div class="sc-stat-top"><span>დადასტურებული</span><span class="sc-stat-icon">✓</span></div><strong>{{ $bookingStats['confirmed'] ?? 0 }}</strong><small>დაგეგმილი ვიზიტები</small></section>
+    <section class="sc-stat"><div class="sc-stat-top"><span>დასრულებული</span><span class="sc-stat-icon">↗</span></div><strong>{{ $bookingStats['completed'] ?? 0 }}</strong><small>დასრულებული ჯავშნები</small></section>
+</div>
+
+<div class="sc-columns">
+    <section class="mh-card">
+        <div class="sc-card-head"><h3>სერვისცენტრის ინფორმაცია</h3><span class="sc-tag">CENTER PROFILE</span></div>
+        <div class="sc-details">
+            <div class="sc-detail"><span>დამტკიცების სტატუსი</span><strong>{{ $center->approval_status === 'approved' ? 'დამტკიცებულია' : ($center->approval_status ?: 'უცნობი') }}</strong></div>
+            <div class="sc-detail"><span>ტელეფონი</span><strong>{{ $center->phone ?: 'არ არის მითითებული' }}</strong></div>
+            <div class="sc-detail"><span>ქალაქი</span><strong>{{ $center->city ?: 'არ არის მითითებული' }}</strong></div>
+            <div class="sc-detail"><span>მისამართი</span><strong>{{ $center->address ?: 'არ არის მითითებული' }}</strong></div>
+        </div>
+        <div style="margin-top:16px"><a class="mh-btn secondary" href="{{ route('my-service-center.profile') }}">პროფილის მართვა ↗</a></div>
     </section>
 
-    <div class="cp-stats">
-        <section class="cp-stat">
-            <div class="cp-stat-top">
-                <span class="cp-stat-label">მოლოდინში</span>
-                <span class="cp-stat-icon">◷</span>
-            </div>
-            <strong class="cp-stat-number">
-                {{ $bookingStats['pending'] ?? 0 }}
-            </strong>
-            <span class="cp-stat-label">დასადასტურებელი ჯავშნები</span>
-        </section>
-
-        <section class="cp-stat">
-            <div class="cp-stat-top">
-                <span class="cp-stat-label">დადასტურებული</span>
-                <span class="cp-stat-icon">✓</span>
-            </div>
-            <strong class="cp-stat-number">
-                {{ $bookingStats['confirmed'] ?? 0 }}
-            </strong>
-            <span class="cp-stat-label">დაგეგმილი ჯავშნები</span>
-        </section>
-
-        <section class="cp-stat">
-            <div class="cp-stat-top">
-                <span class="cp-stat-label">დასრულებული</span>
-                <span class="cp-stat-icon">↗</span>
-            </div>
-            <strong class="cp-stat-number">
-                {{ $bookingStats['completed'] ?? 0 }}
-            </strong>
-            <span class="cp-stat-label">დასრულებული ჯავშნები</span>
-        </section>
-    </div>
-
-    <div class="cp-panel-grid">
-        <section class="mh-card" style="padding:22px">
-            <div class="cp-section-title">
-                <h3>სერვისცენტრის მდგომარეობა</h3>
-                <span style="color:#54b2ff;font-size:11px;font-weight:800">
-                    PROFILE
-                </span>
-            </div>
-
-            <div class="cp-status">
-                <span class="cp-status-dot {{ $center->is_active ? '' : 'off' }}"></span>
-                {{ $center->is_active ? 'აქტიურია' : 'არააქტიურია' }}
-            </div>
-
-            <h3 class="cp-center-name">{{ $center->name }}</h3>
-
-            <p class="mh-muted" style="margin:0">
-                {{ $center->city ?: 'ქალაქი მითითებული არ არის' }}
-                @if($center->address)
-                    · {{ $center->address }}
-                @endif
-            </p>
-
-            <div class="cp-center-details">
-                <div>
-                    <span class="cp-detail-label">დამტკიცების სტატუსი</span>
-                    <span class="cp-detail-value">
-                        {{ $center->approval_status === 'approved'
-                            ? 'დამტკიცებულია'
-                            : ($center->approval_status ?: 'უცნობი') }}
-                    </span>
-                </div>
-
-                <div>
-                    <span class="cp-detail-label">ტელეფონი</span>
-                    <span class="cp-detail-value">
-                        {{ $center->phone ?: 'არ არის მითითებული' }}
-                    </span>
-                </div>
-
-                <div>
-                    <span class="cp-detail-label">საჯარო პროფილი</span>
-                    <a href="{{ route('service-centers.show', $center->slug) }}"
-                       target="_blank" rel="noopener"
-                       style="color:#54b2ff;text-decoration:none;font-weight:700">
-                        პროფილის გახსნა ↗
-                    </a>
-                </div>
-            </div>
-        </section>
-
-        <section class="mh-card" style="padding:22px">
-            <div class="cp-section-title">
-                <h3>სწრაფი მოქმედებები</h3>
-                <span style="color:#8297b1;font-size:12px">SHORTCUTS</span>
-            </div>
-
-            <div class="cp-actions">
-                <a class="cp-action" href="{{ route('my-service-center.passport-records.create') }}">
-                    <span>
-                        <strong>პასპორტის ჩანაწერის დამატება</strong>
-                        <small>დაადასტურე შესრულებული მომსახურება</small>
-                    </span>
-                    <span class="cp-action-arrow">↗</span>
-                </a>
-
-                <a class="cp-action" href="{{ route('my-service-center.bookings') }}">
-                    <span>
-                        <strong>ჯავშნების მართვა</strong>
-                        <small>ნახე და განაახლე ჯავშნები</small>
-                    </span>
-                    <span class="cp-action-arrow">↗</span>
-                </a>
-
-                <a class="cp-action" href="{{ route('my-service-center.work-orders.index') }}">
-                    <span>
-                        <strong>სამუშაო შეკვეთები</strong>
-                        <small>მართე სერვისის სამუშაოები</small>
-                    </span>
-                    <span class="cp-action-arrow">↗</span>
-                </a>
-
-                <a class="cp-action" href="{{ route('my-service-center.services') }}">
-                    <span>
-                        <strong>მომსახურებები</strong>
-                        <small>ფასები და მომსახურების სია</small>
-                    </span>
-                    <span class="cp-action-arrow">↗</span>
-                </a>
-
-                <a class="cp-action" href="{{ route('my-service-center.hours') }}">
-                    <span>
-                        <strong>სამუშაო საათები</strong>
-                        <small>კვირის სამუშაო განრიგი</small>
-                    </span>
-                    <span class="cp-action-arrow">↗</span>
-                </a>
-
-                <a class="cp-action" href="{{ route('my-service-center.profile') }}">
-                    <span>
-                        <strong>სერვისცენტრის პროფილი</strong>
-                        <small>საკონტაქტო ინფორმაცია და სტატუსი</small>
-                    </span>
-                    <span class="cp-action-arrow">↗</span>
-                </a>
-            </div>
-        </section>
-    </div>
-
-    <section class="mh-card" style="padding:22px">
-        <div class="cp-next">
-            <div class="cp-next-icon">⚡</div>
-            <div>
-                <h3 style="margin:0 0 6px">შენი შემდეგი ნაბიჯი</h3>
-                <p class="mh-muted" style="margin:0;line-height:1.7">
-                    რეგულარულად შეამოწმე ახალი ჯავშნები და განაახლე
-                    მათი სტატუსი, რათა მომხმარებლებს ზუსტი ინფორმაცია ჰქონდეთ.
-                </p>
-            </div>
+    <section class="mh-card">
+        <div class="sc-card-head"><h3>სწრაფი მოქმედებები</h3><span class="sc-tag">SHORTCUTS</span></div>
+        <div class="sc-actions">
+            <a class="sc-action" href="{{ route('my-service-center.bookings') }}"><span><strong>ჯავშნების მართვა</strong><small>ნახე და განაახლე ჯავშნები</small></span><span class="sc-arrow">↗</span></a>
+            <a class="sc-action" href="{{ route('my-service-center.work-orders.index') }}"><span><strong>სამუშაო შეკვეთები</strong><small>მართე მიმდინარე სამუშაოები</small></span><span class="sc-arrow">↗</span></a>
+            <a class="sc-action" href="{{ route('my-service-center.services') }}"><span><strong>მომსახურებები</strong><small>სერვისების სია, ფასები და ხანგრძლივობა</small></span><span class="sc-arrow">↗</span></a>
+            <a class="sc-action" href="{{ route('my-service-center.hours') }}"><span><strong>სამუშაო საათები</strong><small>განაახლე კვირის განრიგი</small></span><span class="sc-arrow">↗</span></a>
+            <a class="sc-action" href="{{ route('my-service-center.passport-records.create') }}"><span><strong>პასპორტის ჩანაწერი</strong><small>დაამატე შესრულებული მომსახურება</small></span><span class="sc-arrow">↗</span></a>
         </div>
     </section>
+</div>
+
+<section class="sc-tip">
+    <div class="sc-tip-icon">⚡</div>
+    <div><strong>რჩევა სამუშაო პროცესისთვის</strong><p>ახალი ჯავშნის მიღებისთანავე დაადასტურე ვიზიტი, ხოლო სამუშაოს დაწყებისას შექმენი შესაბამისი სამუშაო შეკვეთა.</p></div>
+</section>
 @endsection
