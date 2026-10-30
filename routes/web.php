@@ -602,6 +602,9 @@ Route::post('/workshops1/{slug}/booking', [
 Route::get('/service-centers', [ServiceCenterController::class, 'index'])
     ->name('service-centers.index');
 
+Route::get('/service-work-orders/{token}', [\\App\\Http\\Controllers\\ServiceCenterOperationsController::class, 'customerStatus'])
+    ->middleware('throttle:30,1')->name('service-centers.work-orders.status');
+
 Route::get('/service-centers/{serviceCenter:slug}', [
     ServiceCenterController::class,
     'show',
