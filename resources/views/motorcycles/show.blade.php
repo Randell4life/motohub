@@ -952,6 +952,21 @@
                 transition-duration: .01ms !important;
             }
         }
+
+        /* Messaging modal */
+        .message-modal[hidden] { display: none !important; }
+        .message-modal { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 18px; background: #020814d9; backdrop-filter: blur(8px); }
+        .message-dialog { width: min(520px, 100%); padding: 24px; border: 1px solid #24518a; border-radius: 12px; background: linear-gradient(145deg, #0b1b31, #050d1a); box-shadow: 0 24px 90px #0009; }
+        .message-dialog h3 { margin: 0 0 5px; font-size: 22px; }
+        .message-dialog p { margin: 0 0 18px; color: var(--muted); font-size: 12px; }
+        .message-dialog label { display: block; margin: 12px 0 6px; color: #c7d9f2; font-size: 12px; font-weight: 750; }
+        .message-dialog textarea, .message-dialog input { width: 100%; padding: 12px; border: 1px solid #29476b; border-radius: 7px; background: #030b17; color: var(--text); outline: none; font: inherit; }
+        .message-dialog textarea { min-height: 130px; resize: vertical; }
+        .message-dialog textarea:focus, .message-dialog input:focus { border-color: var(--blue-light); box-shadow: 0 0 0 3px #0866ff22; }
+        .message-dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+        .message-cancel { min-height: 40px; padding: 9px 14px; border: 1px solid var(--border); border-radius: 7px; background: transparent; color: var(--muted); cursor: pointer; }
+        .message-error { color: #ffb7c0; font-size: 12px; margin-top: 6px; }
+
     </style>
 </head>
 
@@ -965,23 +980,23 @@
 
         <nav class="main-nav" aria-label="მთავარი მენიუ">
             <a href="{{ route('home') }}">მთავარი</a>
-            <a href="{{ route('home') }}">განცხადებები</a>
-            <a href="{{ route('home') }}">კატეგორიები</a>
-            <a href="{{ route('home') }}">შესახებ</a>
-            <a href="{{ route('home') }}">კონტაქტი</a>
+            <a href="{{ route('motorcycles.index') }}">მოტოციკლები</a>
+            <a href="{{ route('parts.index') }}">ნაწილები</a>
+            <a href="{{ route('rentals.index') }}">გაქირავება</a>
+            <a href="{{ route('service-centers.index') }}">სახელოსნოები</a>
         </nav>
 
         <div class="header-actions">
-            <a class="header-icon" href="{{ route('home') }}" aria-label="ძიება">⌕</a>
-            <a class="header-icon" href="{{ route('home') }}" aria-label="რჩეულები">♡</a>
+            <a class="header-icon" href="{{ route('motorcycles.index') }}" aria-label="მოტოციკლების ძიება">⌕</a>
+            <a class="header-icon" href="{{ route('messages.index') }}" aria-label="შეტყობინებები">✉</a>
 
             @auth
-                <a class="login-link" href="{{ route('home') }}">ჩემი ანგარიში</a>
+                <a class="login-link" href="{{ route('account.index') }}">ჩემი ანგარიში</a>
             @else
-                <a class="login-link" href="{{ route('home') }}">შესვლა</a>
+                <a class="login-link" href="{{ route('login') }}">შესვლა</a>
             @endauth
 
-            <a class="primary-button" href="{{ route('home') }}">განცხადების დამატება</a>
+            <a class="primary-button" href="{{ route('account.motorcycles.create') }}">განცხადების დამატება</a>
         </div>
     </div>
 </header>
@@ -992,7 +1007,7 @@
         <span class="breadcrumb-separator">›</span>
         <a href="{{ route('home') }}">მთავარი</a>
         <span class="breadcrumb-separator">›</span>
-        <a href="{{ route('home') }}">მოტოციკლები</a>
+        <a href="{{ route('motorcycles.index') }}">მოტოციკლები</a>
         <span class="breadcrumb-separator">›</span>
         <span>{{ $motorcycle->title }}</span>
     </nav>
@@ -1018,6 +1033,11 @@
                 <span class="meta-chip">⌖ {{ $motorcycle->location }}</span>
             @endif
         </div>
+    </section>
+
+    <section style="display:flex;flex-wrap:wrap;gap:10px;margin:0 0 24px">
+        <a href="{{ route('motorcycles.passport', $motorcycle->slug) }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 15px;border:1px solid #243653;border-radius:9px;background:#0d1422;color:#f4f8ff;font-weight:700">📘 ციფრული პასპორტი</a>
+        <a href="{{ route('moto-assistant.index') }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 15px;border:1px solid #1677ff;border-radius:9px;background:#0b1c36;color:#42a5ff;font-weight:700">✦ მოტო ასისტენტი</a>
     </section>
 
     @php
@@ -1271,7 +1291,13 @@
                     <a class="call-button" href="tel:{{ $phoneForCall }}">☎ &nbsp; დაგვიკავშირდით</a>
                 @endif
 
-                <button type="button" class="outline-button" id="sellerMessageButton">▤ &nbsp; შეტყობინება</button>
+                @auth
+                    @if ((int) auth()->id() !== (int) $motorcycle->user_id)
+                        <button type="button" class="outline-button" id="sellerMessageButton">▤ &nbsp; შეტყობინება</button>
+                    @endif
+                @else
+                    <a class="outline-button" href="{{ route('login') }}">▤ &nbsp; შეტყობინება</a>
+                @endauth
             </div>
 
             <div class="seller-details">
@@ -1281,6 +1307,30 @@
             </div>
         </section>
     </div>
+
+        @auth
+            @if ((int) auth()->id() !== (int) $motorcycle->user_id)
+                <div class="message-modal" id="messageModal" hidden>
+                    <section class="message-dialog" role="dialog" aria-modal="true" aria-labelledby="messageModalTitle">
+                        <h3 id="messageModalTitle">მისწერე გამყიდველს</h3>
+                        <p>შეტყობინება გაიგზავნება MotoHub-ის პირად მიმოწერაში.</p>
+                        <form method="POST" action="{{ route('messages.start') }}">
+                            @csrf
+                            <input type="hidden" name="recipient_id" value="{{ $motorcycle->user_id }}">
+                            <input type="hidden" name="motorcycle_id" value="{{ $motorcycle->id }}">
+                            <input type="hidden" name="subject" value="მოტოციკლი: {{ $motorcycle->title }}">
+                            <label for="sellerMessageBody">შეტყობინება</label>
+                            <textarea id="sellerMessageBody" name="body" maxlength="5000" required placeholder="გამარჯობა, მაინტერესებს თქვენი მოტოციკლი...">{{ old('body') }}</textarea>
+                            @error('body')<div class="message-error">{{ $message }}</div>@enderror
+                            <div class="message-dialog-actions">
+                                <button type="button" class="message-cancel" id="closeMessageModal">გაუქმება</button>
+                                <button type="submit" class="primary-button">გაგზავნა ↗</button>
+                            </div>
+                        </form>
+                    </section>
+                </div>
+            @endif
+        @endauth
 
     <section class="additional-panel" id="additional">
         <h2 class="section-title">დამატებითი მახასიათებლები</h2>
@@ -1498,13 +1548,28 @@
         favoriteButton.title = active ? 'რჩეულებში დამატება' : 'რჩეულებიდან ამოღება';
     });
 
-    // Do not pretend messaging is connected when no messaging backend exists.
-    function showMessageNotice() {
-        alert('შეტყობინებების ფუნქციის გასააქტიურებლად საჭიროა მომხმარებლებს შორის შეტყობინებების სისტემა.');
-    }
-
-    document.getElementById('messageButton')?.addEventListener('click', showMessageNotice);
-    document.getElementById('sellerMessageButton')?.addEventListener('click', showMessageNotice);
+    // Open the authenticated private-message composer from the seller panel.
+    const messageModal = document.getElementById('messageModal');
+    const messageBody = document.getElementById('sellerMessageBody');
+    const openMessageModal = () => {
+        if (!messageModal) return;
+        messageModal.hidden = false;
+        document.body.style.overflow = 'hidden';
+        window.setTimeout(() => messageBody?.focus(), 50);
+    };
+    const closeMessageModal = () => {
+        if (!messageModal) return;
+        messageModal.hidden = true;
+        document.body.style.overflow = '';
+    };
+    document.getElementById('sellerMessageButton')?.addEventListener('click', openMessageModal);
+    document.getElementById('closeMessageModal')?.addEventListener('click', closeMessageModal);
+    messageModal?.addEventListener('click', event => {
+        if (event.target === messageModal) closeMessageModal();
+    });
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && messageModal && !messageModal.hidden) closeMessageModal();
+    });
 
     showPhoto(0);
 })();

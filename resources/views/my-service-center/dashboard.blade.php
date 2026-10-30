@@ -361,6 +361,14 @@
             </div>
 
             <div class="cp-actions">
+                <a class="cp-action" href="{{ route('my-service-center.passport-records.create') }}">
+                    <span>
+                        <strong>პასპორტის ჩანაწერის დამატება</strong>
+                        <small>დაადასტურე შესრულებული მომსახურება</small>
+                    </span>
+                    <span class="cp-action-arrow">↗</span>
+                </a>
+
                 <a class="cp-action" href="{{ route('my-service-center.bookings') }}">
                     <span>
                         <strong>ჯავშნების მართვა</strong>

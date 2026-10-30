@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\MotoAssistantController;
+use App\Http\Controllers\MotorcyclePassportController;
 use App\Http\Controllers\MotorcycleAccountController;
 use App\Http\Controllers\MotorcycleCatalogController;
 use App\Http\Controllers\PartController;
@@ -213,6 +216,10 @@ Route::get('/transport/{transportRequest}', [
 | მოტოციკლების კატალოგი
 |--------------------------------------------------------------------------
 */
+
+Route::get('/moto-assistant', [MotoAssistantController::class, 'index'])->name('moto-assistant.index');
+Route::post('/moto-assistant/diagnose', [MotoAssistantController::class, 'diagnose'])->middleware('throttle:10,1')->name('moto-assistant.diagnose');
+Route::get('/motorcycles/{motorcycle:slug}/passport', [MotorcyclePassportController::class, 'show'])->name('motorcycles.passport');
 
 Route::get('/motorcycles', [MotorcycleCatalogController::class, 'index'])
     ->name('motorcycles.index');
@@ -551,6 +558,13 @@ Route::get('/service-centers/{serviceCenter:slug}', [
 ])->name('service-centers.show');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/my-service-center/passport-records/create', [\App\Http\Controllers\ServiceCenterPassportController::class, 'create'])
+        ->name('my-service-center.passport-records.create');
+
+    Route::post('/my-service-center/passport-records', [\App\Http\Controllers\ServiceCenterPassportController::class, 'store'])
+        ->middleware('throttle:10,1')
+        ->name('my-service-center.passport-records.store');
+
     Route::get('/my-service-center', [
         MyServiceCenterController::class,
         'dashboard',
@@ -658,4 +672,28 @@ Route::put(
 )->whereNumber('workOrder')
   ->name('my-service-center.work-orders.update');
 
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| MotoHub — პირადი შეტყობინებები
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
+    Route::get('/messages', [MessageController::class, 'index'])
+        ->name('messages.index');
+
+    Route::post('/messages', [MessageController::class, 'start'])
+        ->middleware('throttle:10,1')
+        ->name('messages.start');
+
+    Route::get('/messages/{conversation}', [MessageController::class, 'show'])
+        ->whereNumber('conversation')
+        ->name('messages.show');
+
+    Route::post('/messages/{conversation}', [MessageController::class, 'store'])
+        ->whereNumber('conversation')
+        ->middleware('throttle:30,1')
+        ->name('messages.store');
 });

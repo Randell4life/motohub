@@ -550,7 +550,7 @@
         <div class="nav-links">
             <a class="btn btn-outline" href="{{ route('rentals.index') }}">ყველა მოპედი</a>
             @auth
-                <a class="btn btn-outline" href="{{ route('account.index') }}">ჩემი კაბინეტი</a>
+                @auth<a class="btn btn-outline" href="{{ route('account.index') }}">ჩემი კაბინეტი</a><a class="btn btn-outline" href="{{ route('messages.index') }}">შეტყობინებები</a>@endauth
             @else
                 <a class="btn btn-outline" href="{{ route('login') }}">შესვლა</a>
             @endauth
