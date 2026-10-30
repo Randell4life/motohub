@@ -1345,6 +1345,7 @@
         </div>
     </div>
     <a href="{{ route('rentals.index') }}">გაქირავება</a>
+    <a href="{{ route('community.index') }}">Moto Community</a>
     <a href="#about">ჩვენ შესახებ</a>
 </div>
 
