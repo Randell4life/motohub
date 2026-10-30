@@ -264,7 +264,12 @@ class MotoHubFeaturesController extends Controller
             $join->on('moto_event_attendees.event_id', '=', 'moto_events.id')->where('moto_event_attendees.status', '=', 'going');
         })->where('moto_events.club_id', $club->id)->select('moto_events.id', 'moto_events.club_id', 'moto_events.created_by', 'moto_events.title', 'moto_events.description', 'moto_events.location', 'moto_events.starts_at', 'moto_events.ends_at', 'moto_events.capacity', 'moto_events.created_at', 'moto_events.updated_at')->selectRaw('COUNT(moto_event_attendees.id) as attendees_count')->groupBy('moto_events.id', 'moto_events.club_id', 'moto_events.created_by', 'moto_events.title', 'moto_events.description', 'moto_events.location', 'moto_events.starts_at', 'moto_events.ends_at', 'moto_events.capacity', 'moto_events.created_at', 'moto_events.updated_at')->orderBy('moto_events.starts_at')->get();
         $myEventIds = auth()->check() ? DB::table('moto_event_attendees')->where('user_id', auth()->id())->where('status', 'going')->pluck('event_id')->all() : [];
-        return view('features.clubs.show', compact('club', 'isMember', 'members', 'events', 'myEventIds'));
+        $pendingMembers = auth()->check() && (int) $club->owner_id === auth()->id()
+            ? DB::table('moto_club_members')->join('users', 'users.id', '=', 'moto_club_members.user_id')
+                ->where('moto_club_members.club_id', $club->id)->where('moto_club_members.status', 'pending')
+                ->select('moto_club_members.id', 'moto_club_members.user_id', 'users.name')->get()
+            : collect();
+        return view('features.clubs.show', compact('club', 'isMember', 'members', 'events', 'myEventIds', 'pendingMembers'));
     }
 
     public function joinClub(Request $request, int $club): RedirectResponse
@@ -276,12 +281,23 @@ class MotoHubFeaturesController extends Controller
         return back()->with('success', $status === 'active' ? 'კლუბს შეუერთდი.' : 'გაწევრიანების მოთხოვნა გაიგზავნა.');
     }
 
+
+    public function approveClubMember(Request $request, int $club, int $member): RedirectResponse
+    {
+        $clubRow = DB::table('moto_clubs')->where('id', $club)->where('owner_id', $request->user()->id)->first();
+        abort_unless($clubRow, 403);
+        $updated = DB::table('moto_club_members')->where('id', $member)->where('club_id', $club)
+            ->where('status', 'pending')->update(['status' => 'active', 'updated_at' => now()]);
+        abort_unless($updated, 404);
+        return back()->with('success', 'გაწევრიანების მოთხოვნა დადასტურდა.');
+    }
+
     public function storeEvent(Request $request, int $club): RedirectResponse
     {
         $clubRow = DB::table('moto_clubs')->where('id', $club)->where('owner_id', $request->user()->id)->first();
         abort_unless($clubRow, 403);
         $data = $request->validate(['title' => ['required', 'string', 'max:160'], 'description' => ['nullable', 'string', 'max:3000'], 'location' => ['required', 'string', 'max:180'], 'starts_at' => ['required', 'date', 'after:now'], 'ends_at' => ['nullable', 'date', 'after:starts_at'], 'capacity' => ['nullable', 'integer', 'min:2', 'max:100000']]);
-        DB::table('moto_events')->insert(['club_id' => $club, 'created_by' => $request->user()->id, 'title' => $data['title'], 'description' => $data['description'] ?? null, 'location' => $data['location'], 'starts_at' => $data['starts_at'], 'ends_at' => $data['ends_at'] ?? null, 'capacity' => $data['capacity'] ?? null, 'created_at' => now(), 'updated_at' => now()]);
+        DB::table('moto_events')->insert(['club_id' => $club, 'created_by' => $request->user()->id, 'title' => $data['title'], 'description' => $data['description'] ?? null, 'location' => $data['location'], 'starts_at' => \Illuminate\Support\Carbon::parse($data['starts_at'])->format('Y-m-d H:i:s'), 'ends_at' => !empty($data['ends_at']) ? \Illuminate\Support\Carbon::parse($data['ends_at'])->format('Y-m-d H:i:s') : null, 'capacity' => $data['capacity'] ?? null, 'created_at' => now(), 'updated_at' => now()]);
         return back()->with('success', 'ღონისძიება გამოქვეყნდა.');
     }
 
