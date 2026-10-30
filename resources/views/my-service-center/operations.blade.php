@@ -48,11 +48,11 @@
   <td><a style="color:#73baff" href="{{ route('my-service-center.work-orders.show',$order) }}">{{ $order->order_number }}</a><div class="ops-muted">{{ $order->created_at->format('d.m.Y H:i') }}</div></td>
   <td>{{ $order->serviceBooking?->customer_name ?? 'კლიენტი არ არის მითითებული' }}<div class="ops-muted">{{ $order->serviceBooking?->motorcycle ?? '—' }}</div></td>
   <td><span class="ops-pill">{{ $order->status_label }}</span></td>
-  <td>{{ $order->assignedTechnician?->name ?? 'მიუნიჭებელია' }}<div class="ops-muted">{{ $order->bay?->name ?? 'ბოქსი —' }}</div></td>
+  <td>{{ $order->technician?->name ?? 'მიუნიჭებელია' }}<div class="ops-muted">{{ $order->bay?->name ?? 'ბოქსი —' }}</div></td>
   <td>{{ number_format((float)$order->total_cost,2) }} ₾<div class="ops-muted">გადახდილი: {{ number_format((float)$order->payments->sum('amount'),2) }} ₾</div></td>
   <td>
    <form class="ops-inline" method="POST" action="{{ route('my-service-center.work-orders.assignment',$order) }}">@csrf @method('PATCH')
-    <select name="assigned_technician_id"><option value="">ხელოსანი</option>@foreach($technicians as $tech)<option value="{{ $tech->id }}" @selected($order->assignedTechnician && $order->assignedTechnician->id===$tech->user_id)>{{ $tech->name }}</option>@endforeach</select>
+    <select name="assigned_technician_id"><option value="">ხელოსანი</option>@foreach($technicians as $tech)<option value="{{ $tech->id }}" @selected($order->service_center_technician_id===$tech->id)>{{ $tech->name }}</option>@endforeach</select>
     <select name="service_center_bay_id"><option value="">ბოქსი</option>@foreach($bays as $bay)<option value="{{ $bay->id }}" @selected($order->service_center_bay_id===$bay->id)>{{ $bay->name }}</option>@endforeach</select>
     <button>შენახვა</button>
    </form>
