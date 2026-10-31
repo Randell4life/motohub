@@ -55,6 +55,7 @@ class ServiceCentersTable
                     ->badge()
                     ->formatStateUsing(fn ($state): string => match ($state) {
                         'active' => 'აქტიური',
+                        'pending_payment' => 'გადახდის მოლოდინში',
                         'past_due' => 'გადახდა ვადაგადაცილებულია',
                         'expired' => 'ვადაგასული',
                         'cancelled' => 'გაუქმებული',
@@ -106,6 +107,7 @@ class ServiceCentersTable
                             ->label('სტატუსი')
                             ->options([
                                 'active' => 'აქტიური',
+                                'pending_payment' => 'გადახდის მოლოდინში',
                                 'past_due' => 'გადახდა ვადაგადაცილებულია',
                                 'expired' => 'ვადაგასული',
                                 'cancelled' => 'გაუქმებული',
