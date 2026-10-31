@@ -526,3 +526,27 @@ body{background:radial-gradient(ellipse at 50% -8%,#1b3152 0,transparent 42%),li
 .rental-booking-success small{color:#91d9b5;font-size:10px}
 @media(max-width:680px){.rental-checkout-layout{grid-template-columns:1fr}.rental-checkout-summary{position:static;order:-1}.rental-checkout-summary h2{margin-bottom:13px}.rental-summary-security{margin-top:12px}}
 @media(max-width:420px){.rental-checkout-form,.rental-checkout-summary{padding:14px}.rental-checkout-bike{gap:10px;padding:10px}.rental-checkout-bike>img,.rental-checkout-placeholder{width:94px;height:78px;flex-basis:94px}.rental-checkout-bike-info h2{font-size:14px}.rental-date-grid,.rental-contact-grid{gap:8px}.rental-checkout-form input{padding:9px;font-size:11px}}
+
+/* MotoHub native parts marketplace — premium catalogue */
+.parts-filter-panel{margin:15px 0 19px;padding:16px;border:1px solid #2b4a70;border-radius:13px;background:radial-gradient(ellipse at 100% 0%,#1677ff24,transparent 46%),linear-gradient(145deg,#14243a,#0a1421);box-shadow:0 14px 34px #0003}
+.parts-filter-panel .filter-panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
+.parts-filter-panel .filter-panel-head strong{display:block;margin-top:4px;color:#f4f8ff;font-size:14px;font-weight:950}
+.parts-filter-panel .filter-panel-head small{display:block;margin-top:4px;color:#91a7c3;font-size:9px}
+.parts-filter-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.parts-filter-grid label{display:flex;flex-direction:column;gap:6px;color:#aebed3;font-size:10px;font-weight:850}
+.parts-filter-grid .parts-filter-wide{grid-column:span 2}
+.parts-filter-grid input:not([type=checkbox]),.parts-filter-grid select{width:100%;min-height:42px;padding:9px 11px;border:1px solid #2a4361;border-radius:8px;outline:none;background:#081321;color:#f4f8ff;font-size:11px}
+.parts-filter-grid input:focus,.parts-filter-grid select:focus{border-color:#2789ff;box-shadow:0 0 0 3px #2789ff20}
+.parts-filter-grid .parts-stock-toggle{display:flex;flex-direction:row;align-items:center;gap:8px;grid-column:span 2;padding:9px 10px;border:1px solid #294766;border-radius:8px;background:#10243a;color:#c4d9ef}
+.parts-stock-toggle input{width:16px;height:16px;accent-color:#2789ff}
+.parts-filter-panel>.primary-btn{min-height:44px;margin-top:13px}
+.catalog-page:has(.parts-filter-panel) .catalog-grid .item-card{overflow:hidden;border-color:#294665;background:linear-gradient(150deg,#142238,#0a1420);box-shadow:0 12px 30px #0003}
+.catalog-page:has(.parts-filter-panel) .catalog-grid .item-image{aspect-ratio:4/3;object-fit:cover}
+.catalog-page:has(.parts-filter-panel) .catalog-grid .item-card-content{padding:14px}
+.catalog-page:has(.parts-filter-panel) .catalog-grid .item-card h3{font-size:14px;line-height:1.35}
+.parts-fitment{margin:9px 0 5px;padding:8px 9px;border:1px solid #29496a;border-radius:7px;background:#10243a;color:#a9d1fa!important;font-size:10px!important}
+.parts-number{font-size:9px!important;color:#8198b5!important}
+.parts-stock{font-size:9px;font-weight:850}
+.parts-stock.is-available{color:#79d4a8}
+.parts-stock.is-empty{color:#d4a3a3}
+@media(max-width:380px){.parts-filter-panel{padding:12px}.parts-filter-panel .filter-panel-head strong{font-size:12px}}
