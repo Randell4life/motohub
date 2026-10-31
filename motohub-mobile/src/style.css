@@ -80,3 +80,94 @@ html, body { background: radial-gradient(ellipse at 50% -15%,#0b1d35 0%,#050a13 
   #app { max-width: 980px; }
   .hero { padding-left: 34px; padding-right: 34px; }
 }
+
+/* MotoHub native app — final interaction and layout refinement */
+:root {
+  font-family: "Fira GO","Noto Sans Georgian",Inter,"Segoe UI",Arial,sans-serif;
+  --app-bg:#050a13;
+  --app-surface:#08172b;
+  --app-raised:#0d1b2e;
+  --app-line:rgba(91,151,224,.24);
+  --app-blue:#0878ff;
+  --app-cyan:#25baff;
+  --app-text:#f4f8ff;
+  --app-muted:#9aabc2;
+}
+body {
+  color:var(--app-text);
+  background:
+    radial-gradient(ellipse at 50% -15%,rgba(11,39,72,.7),transparent 42%),
+    var(--app-bg);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+button,a,input,select,textarea { -webkit-tap-highlight-color:transparent; }
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible {
+  outline:2px solid var(--app-cyan);
+  outline-offset:3px;
+}
+.topbar {
+  padding-top:max(10px,env(safe-area-inset-top));
+  border-bottom-color:var(--app-line);
+  background:rgba(3,9,19,.94);
+}
+.hero {
+  background:
+    radial-gradient(ellipse at 90% 35%,rgba(8,120,255,.22),transparent 55%),
+    linear-gradient(180deg,rgba(5,10,19,.12),rgba(5,10,19,.22));
+}
+.hero h1,.page-title { text-wrap:balance; }
+.service-card,.item-card,.account-panel,.admin-item,.admin-count,.callout,.preview-card,.bike-spec,.bike-description {
+  border-color:var(--app-line);
+  border-radius:14px;
+  box-shadow:0 12px 30px rgba(0,0,0,.14);
+}
+.service-card,.item-card,.preview-card {
+  transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+@media (hover:hover) {
+  .service-card:hover,.item-card:hover,.preview-card:hover {
+    transform:translateY(-2px);
+    border-color:rgba(37,186,255,.4);
+    box-shadow:0 16px 34px rgba(0,0,0,.22);
+  }
+}
+.primary-btn,.search-box button {
+  border:1px solid #168bff;
+  background:linear-gradient(135deg,#0865e8,#159cff);
+  box-shadow:0 8px 22px rgba(0,109,255,.16);
+}
+.secondary-btn,.icon-button {
+  border:1px solid #31577e;
+  background:linear-gradient(145deg,#10213a,#0a1729);
+}
+.form-stack input,.form-stack textarea,.form-stack select {
+  min-height:48px;
+  border-color:#294363;
+  border-radius:10px;
+  background:#061225;
+}
+.form-stack textarea { min-height:112px; }
+.form-stack label { line-height:1.55; }
+.item-card-content { display:flex; flex-direction:column; min-height:0; }
+.item-card .item-bottom { margin-top:auto; padding-top:12px; }
+.bottom-nav {
+  padding-bottom:max(8px,env(safe-area-inset-bottom));
+  border-top-color:var(--app-line);
+  background:rgba(3,9,19,.96);
+}
+.nav-item { min-width:0; }
+.nav-item.active { color:var(--app-cyan); }
+.loading-state,.empty-state,.error-state {
+  border:1px dashed rgba(91,151,224,.28);
+  border-radius:14px;
+  background:rgba(8,23,43,.45);
+}
+@media(max-width:390px) {
+  .topbar { padding-right:14px; padding-left:14px; }
+  .section { padding-right:14px; padding-left:14px; }
+  .hero h1 { letter-spacing:-1.3px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  *,*::before,*::after { transition-duration:.01ms!important; animation-duration:.01ms!important; }
+}

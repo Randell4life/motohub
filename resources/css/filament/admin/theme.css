@@ -3,28 +3,22 @@
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
 
-
-@import '../../../../vendor/filament/filament/resources/css/theme.css';
-
-@source '../../../../app/Filament/**/*';
-@source '../../../../resources/views/filament/**/*';
-
 /* =========================================
    MotoHub Admin — Premium Design System
    ========================================= */
 
 :root {
-    --mh-accent: #2589ff;
-    --mh-accent-hover: #0874f9;
-    --mh-accent-soft: rgba(37, 137, 255, 0.12);
-    --mh-border: rgba(148, 163, 184, 0.14);
+    --mh-accent: #0878ff;
+    --mh-accent-hover: #25baff;
+    --mh-accent-soft: rgba(8, 120, 255, 0.14);
+    --mh-border: rgba(91, 151, 224, 0.24);
     --mh-radius: 14px;
 }
 
 /* Global typography and transitions */
 
 .fi-body {
-    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    font-family: "Fira GO", Inter, "Noto Sans Georgian", "Segoe UI", Arial, sans-serif;
     letter-spacing: -0.01em;
 }
 
@@ -279,5 +273,133 @@
         scroll-behavior: auto !important;
         transition-duration: 0.01ms !important;
         animation-duration: 0.01ms !important;
+    }
+}
+
+/* MotoHub Admin — unified homepage identity and operational polish */
+:root {
+    --mh-admin-bg: #050a13;
+    --mh-admin-panel: #08172b;
+    --mh-admin-panel-raised: #0d1b2e;
+    --mh-admin-cyan: #25baff;
+}
+.fi-body {
+    background:
+        radial-gradient(ellipse at 50% -12%, rgba(11,39,72,.55), transparent 44%),
+        #050a13;
+    color: #f4f8ff;
+    font-family: "Fira GO", Inter, "Noto Sans Georgian", "Segoe UI", Arial, sans-serif;
+}
+.fi-sidebar {
+    background: linear-gradient(180deg,#091629,#060e1b);
+    border-right-color: rgba(91,151,224,.24);
+}
+.fi-sidebar-header {
+    border-bottom-color: rgba(91,151,224,.18);
+}
+.fi-sidebar-item a {
+    min-height: 42px;
+    border: 1px solid transparent;
+}
+.fi-sidebar-item a:hover,
+.fi-sidebar-item.fi-active > a,
+.fi-sidebar-item a[aria-current="page"] {
+    background: linear-gradient(100deg,rgba(8,120,255,.2),rgba(8,120,255,.06));
+    border-color: rgba(37,186,255,.2);
+    color: #eaf5ff;
+}
+.fi-sidebar-item.fi-active > a,
+.fi-sidebar-item a[aria-current="page"] {
+    box-shadow: inset 3px 0 #25baff;
+}
+.fi-topbar {
+    background: rgba(3,9,19,.94);
+    border-bottom-color: rgba(91,151,224,.2);
+    backdrop-filter: blur(18px);
+}
+.fi-header-heading {
+    color: #f4f8ff;
+    font-weight: 900;
+    letter-spacing: -.04em;
+}
+.fi-section,
+.fi-wi-stats-overview-stat,
+.fi-ta-ctn,
+.fi-fo-component-ctn {
+    border-color: rgba(91,151,224,.22);
+    border-radius: 14px;
+    box-shadow: 0 12px 32px rgba(0,0,0,.14);
+}
+.fi-wi-stats-overview-stat {
+    background: radial-gradient(ellipse at 100% 0%,rgba(8,120,255,.13),transparent 58%),linear-gradient(145deg,#0d1b2e,#081321);
+}
+.fi-wi-stats-overview-stat:hover {
+    border-color: rgba(37,186,255,.42);
+    box-shadow: 0 16px 38px rgba(0,0,0,.22);
+}
+.fi-ta-header {
+    background: rgba(8,120,255,.08);
+}
+.fi-ta-header-cell {
+    color: #b9d7f7;
+}
+.fi-ta-row:hover {
+    background: rgba(8,120,255,.08);
+}
+.fi-btn {
+    border-radius: 10px;
+    font-weight: 750;
+}
+.fi-btn-color-primary {
+    box-shadow: 0 8px 22px rgba(0,109,255,.16);
+}
+.fi-input-wrp,
+.fi-select-input,
+.fi-fo-textarea {
+    border-radius: 10px;
+}
+.fi-input-wrp:focus-within {
+    border-color: #25baff;
+    box-shadow: 0 0 0 3px rgba(37,186,255,.14);
+}
+.fi-badge {
+    border-radius: 999px;
+    font-weight: 750;
+}
+.dark .fi-body,
+.dark .fi-main {
+    background-color: #050a13;
+}
+.dark .fi-sidebar {
+    background-color: #081426;
+}
+.dark .fi-topbar {
+    background-color: rgba(3,9,19,.94);
+}
+.dark .fi-section,
+.dark .fi-wi-stats-overview-stat,
+.dark .fi-ta-ctn,
+.dark .fi-fo-component-ctn {
+    background-color: #08172b;
+    border-color: rgba(91,151,224,.22);
+}
+.dark .fi-section-header,
+.dark .fi-ta-header {
+    border-color: rgba(91,151,224,.18);
+    background-color: #0b1a2e;
+}
+.fi-simple-main {
+    background: rgba(8,23,43,.96);
+    border-color: rgba(91,151,224,.24);
+    box-shadow: 0 24px 70px rgba(0,0,0,.3);
+}
+@media (max-width: 768px) {
+    .fi-main {
+        min-width: 0;
+    }
+    .fi-section,
+    .fi-wi-stats-overview-stat,
+    .fi-ta-ctn {
+        border-radius: 12px;
     }
 }
