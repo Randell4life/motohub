@@ -197,7 +197,8 @@ class MobileExtendedController extends Controller
         $events = DB::table('moto_events')->join('moto_clubs', 'moto_clubs.id', '=', 'moto_events.club_id')
             ->where('moto_events.starts_at', '>=', now())->orderBy('moto_events.starts_at')
             ->select('moto_events.*', 'moto_clubs.name as club_name', 'moto_clubs.slug as club_slug')->limit(30)->get();
-        return response()->json(['clubs' => $clubs, 'events' => $events]);
+         $pendingMembers = DB::table('moto_club_members')->join('moto_clubs','moto_clubs.id','=','moto_club_members.club_id')->join('users','users.id','=','moto_club_members.user_id')->where('moto_clubs.owner_id',$userId)->where('moto_club_members.status','pending')->select('moto_club_members.id','moto_club_members.club_id','moto_clubs.name as club_name','users.name as user_name')->get();
+        return response()->json(['clubs' => $clubs, 'events' => $events, 'pending_members' => $pendingMembers]);
     }
 
     public function storeClub(Request $request)
