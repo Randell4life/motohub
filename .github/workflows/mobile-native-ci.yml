@@ -1,4 +1,4 @@
-name: MotoHub mobile integration checks
+name: MotoHub quality checks
 
 on:
   pull_request:
@@ -7,27 +7,65 @@ on:
       - 'app/**'
       - 'routes/**'
       - 'database/migrations/**'
-      - 'config/cors.php'
+      - 'config/**'
+      - 'tests/**'
       - 'motohub-mobile/**'
+      - 'composer.json'
+      - 'composer.lock'
       - '.github/workflows/mobile-native-ci.yml'
   push:
-    branches: [feature/mobile-native-integration]
+    branches: [main, feature/mobile-native-integration, feature/motohub-hardening-visual-refresh]
+
+permissions:
+  contents: read
 
 jobs:
   php-syntax:
-    name: Check Laravel PHP syntax
+    name: PHP syntax
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-      - name: Lint application PHP files
+      - name: Lint PHP files
         run: |
-          find app routes database/migrations config -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+          find app routes database/migrations config tests -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+
+  laravel-tests:
+    name: Laravel feature tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: mbstring, bcmath, pdo_sqlite, sqlite3, zip, gd, curl, xml
+          coverage: none
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Prepare testing environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+          CACHE_STORE: array
+          SESSION_DRIVER: array
+          QUEUE_CONNECTION: sync
+      - name: Run Laravel tests
+        run: php artisan test
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+          CACHE_STORE: array
+          SESSION_DRIVER: array
+          QUEUE_CONNECTION: sync
 
   mobile-build:
-    name: Build MotoHub mobile frontend
+    name: MotoHub mobile production build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -40,6 +78,6 @@ jobs:
           cache: npm
           cache-dependency-path: motohub-mobile/package-lock.json
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       - name: Build mobile frontend
         run: npm run build
