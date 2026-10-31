@@ -466,10 +466,38 @@ class MobileExtendedController extends Controller
         $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
         $order = \App\Models\WorkOrder::where('service_center_id', $center->id)->findOrFail($workOrder);
         $data = $request->validate(['amount'=>['required','numeric','gt:0'],'method'=>['required','in:cash,card,transfer,other'],'reference'=>['nullable','string','max:120'],'note'=>['nullable','string','max:2000']]);
-        $due = round((float)$order->total_cost-(float)$order->payments()->sum('amount'),2);
-        if ((float)$data['amount'] > $due) throw ValidationException::withMessages(['amount'=>'გადასახდელ ნაშთზე მეტი თანხა არ შეიძლება.']);
-        \App\Models\ServiceCenterPayment::create($data+['service_center_id'=>$center->id,'work_order_id'=>$order->id,'received_by'=>$request->user()->id,'paid_at'=>now()]);
-        return response()->json(['message' => 'გადახდა აღირიცხა.']);
+        $payment = DB::transaction(function () use ($data, $center, $order, $request) {
+            // Serialize payments for this work order so concurrent requests cannot
+            // both read the same outstanding balance and over-collect.
+            $lockedOrder = \App\Models\WorkOrder::where('service_center_id', $center->id)
+                ->whereKey($order->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $paid = (float) $lockedOrder->payments()->sum('amount');
+            $due = round((float) $lockedOrder->total_cost - $paid, 2);
+            $amount = round((float) $data['amount'], 2);
+
+            if ($amount <= 0 || $amount > $due) {
+                throw ValidationException::withMessages([
+                    'amount' => 'გადასახდელი ნაშთი არის ' . number_format(max(0, $due), 2) . ' ₾. ამ თანხაზე მეტის მიღება არ შეიძლება.',
+                ]);
+            }
+
+            return \App\Models\ServiceCenterPayment::create($data + [
+                'amount' => $amount,
+                'service_center_id' => $center->id,
+                'work_order_id' => $lockedOrder->id,
+                'received_by' => $request->user()->id,
+                'paid_at' => now(),
+            ]);
+        });
+
+        return response()->json([
+            'message' => 'გადახდა აღირიცხა.',
+            'payment' => $payment,
+            'remaining' => round(max(0, (float) $order->fresh()->total_cost - (float) $order->payments()->sum('amount')), 2),
+        ]);
     }
 
     public function updateWorkOrderStatus(Request $request, int $workOrder)
