@@ -5,6 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $motorcycle->title }} | MotoHub</title>
     <meta name="description" content="{{ \Illuminate\Support\Str::limit(strip_tags($motorcycle->description ?? $motorcycle->title), 155) }}">
+    <link rel="canonical" href="{{ url()->current() }}">
+    <meta property="og:type" content="product">
+    <meta property="og:site_name" content="MotoHub">
+    <meta property="og:title" content="{{ $motorcycle->title }} | MotoHub">
+    <meta property="og:description" content="{{ IlluminateSupportStr::limit(strip_tags($motorcycle->description ?? $motorcycle->title), 155) }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ $motorcycle->image_path ? IlluminateSupportFacades\Storage::url($motorcycle->image_path) : 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=1200&q=85' }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $motorcycle->title }} | MotoHub">
+    <meta name="twitter:description" content="{{ IlluminateSupportStr::limit(strip_tags($motorcycle->description ?? $motorcycle->title), 155) }}">
+    <meta name="twitter:image" content="{{ $motorcycle->image_path ? IlluminateSupportFacades\Storage::url($motorcycle->image_path) : 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=1200&q=85' }}">
+    <script type="application/ld+json">
+    @json([
+        '@context' => 'https://schema.org',
+        '@type' => 'Product',
+        'name' => $motorcycle->title,
+        'description' => IlluminateSupportStr::limit(strip_tags($motorcycle->description ?? $motorcycle->title), 500),
+        'image' => $motorcycle->image_path ? IlluminateSupportFacades\Storage::url($motorcycle->image_path) : null,
+        'brand' => $motorcycle->brand ? ['@type' => 'Brand', 'name' => $motorcycle->brand] : null,
+        'offers' => [
+            '@type' => 'Offer',
+            'price' => (float) $motorcycle->price,
+            'priceCurrency' => 'GEL',
+            'availability' => 'https://schema.org/InStock',
+            'url' => url()->current(),
+        ],
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+    </script>
     <meta name="theme-color" content="#030b18">
 
     <style>
@@ -967,7 +995,76 @@
         .message-cancel { min-height: 40px; padding: 9px 14px; border: 1px solid var(--border); border-radius: 7px; background: transparent; color: var(--muted); cursor: pointer; }
         .message-error { color: #ffb7c0; font-size: 12px; margin-top: 6px; }
 
-    </style>
+    
+        /* Premium listing detail experience */
+        .listing-heading{position:relative;padding:22px 25px;margin:4px 0 20px;border:1px solid #203b5d;border-radius:16px;background:radial-gradient(ellipse at 88% 0%,#16447755,transparent 45%),linear-gradient(115deg,#0d1b2e,#07111f 70%);box-shadow:0 18px 45px #0003}
+        .listing-heading h1{font-size:clamp(28px,3.6vw,42px);letter-spacing:-1.2px}
+        .listing-meta{gap:8px}
+        .meta-chip{padding:7px 11px;border-radius:7px;background:#0b1b30;border-color:#274568}
+        .detail-grid{grid-template-columns:minmax(0,1.42fr) minmax(360px,.9fr);gap:22px}
+        .photo-panel,.info-panel,.description-panel,.seller-panel,.additional-panel{border-color:#233d5d;border-radius:15px;background:linear-gradient(145deg,#101f33,#081321);box-shadow:0 18px 45px #0003}
+        .photo-panel{position:relative}
+        .gallery-stage{background:radial-gradient(ellipse at center,#1b3553 0%,#071321 72%);min-height:300px}
+        .main-photo{aspect-ratio:1.48/1;max-height:690px;object-fit:contain}
+        .photo-badge{top:17px;left:17px;padding:8px 12px;border-radius:99px;background:#1677ffdd;box-shadow:0 7px 22px #0005}
+        .gallery-arrow{width:46px;height:46px;border-radius:50%;background:#071321d9;border-color:#8dbfff55}
+        .gallery-thumb{flex-basis:122px;height:82px;border-radius:9px}
+        .info-panel{position:sticky;top:18px;padding:25px}
+        .info-title{font-size:clamp(24px,2.5vw,32px);letter-spacing:-.8px}
+        .info-meta{color:#9bb2d1;font-size:12px}
+        .price{margin:21px 0;padding:17px 18px;border:1px solid #2865a5;border-radius:12px;background:linear-gradient(110deg,#102e50,#0b1b30);color:#fff;font-size:clamp(28px,3vw,37px);font-weight:950;letter-spacing:-1px;text-shadow:0 0 25px #1677ff55}
+        .specs{gap:9px}
+        .spec{min-height:74px;padding:12px;border:1px solid #203a58;border-radius:10px;background:#0a1727}
+        .spec-icon{color:#58aaff}
+        .spec-value{font-weight:800;color:#eff6ff}
+        .contact-row{gap:10px;margin-top:20px}
+        .call-button{min-height:49px;border-radius:9px;background:linear-gradient(110deg,#1677ff,#0757c9);box-shadow:0 10px 24px #0866ff30}
+        .outline-button{min-height:49px;border-radius:9px;border-color:#3b78b5}
+        .phone-number{display:block;margin-top:10px;color:#78bdff;font-size:17px;font-weight:900;text-align:center}
+        .seller-mini{margin-top:20px;padding:13px;border:1px solid #213b59;border-radius:11px;background:#0a1727}
+        .lower-grid{gap:20px;margin-bottom:20px}
+        .description-panel,.seller-panel,.additional-panel{padding:23px}
+        .section-tabs{gap:8px;border-bottom-color:#29415e}
+        .section-tabs a{padding:10px 13px;border-radius:8px 8px 0 0}
+        .section-tabs a.active{background:#1677ff1b;color:#78bdff}
+        .section-title{font-size:20px;letter-spacing:-.4px}
+        .description{color:#c3d2e7;font-size:14px;line-height:1.9;white-space:pre-line}
+        .feature-item{color:#b9cce4}
+        .seller-panel{background:radial-gradient(ellipse at 100% 0%,#1a4a7755,transparent 55%),linear-gradient(145deg,#101f33,#081321)}
+        .seller-avatar{border:2px solid #438cce;box-shadow:0 0 20px #1677ff25}
+        .seller-name{font-size:19px}
+        .seller-badge{border-color:#3478b8;background:#12335a;color:#9dceff}
+        .seller-buttons{gap:10px}
+        .additional-panel{margin:20px 0}
+        .additional-grid{gap:10px}
+        .additional-item{padding:14px;border:1px solid #203a58;border-radius:10px;background:#0a1727}
+        #galleryFullscreen{backdrop-filter:blur(14px)}
+        #fullscreenClose,#fullscreenPrev,#fullscreenNext{border:1px solid #ffffff35;border-radius:50%;background:#071321;color:#fff}
+        .message-dialog{border:1px solid #315477;border-radius:18px;background:linear-gradient(145deg,#13243a,#081321);box-shadow:0 25px 90px #0009}
+        .message-dialog textarea{border-color:#2b496c;border-radius:10px;background:#071321}
+        @media(max-width:900px){.detail-grid{grid-template-columns:1fr}.info-panel{position:relative;top:auto}.main-photo{aspect-ratio:1.35/1}}
+        @media(max-width:650px){
+            .listing-heading{padding:18px;margin-bottom:14px;border-radius:13px}
+            .listing-heading h1{font-size:27px}
+            .detail-grid{gap:13px}
+            .photo-panel,.info-panel,.description-panel,.seller-panel,.additional-panel{border-radius:13px}
+            .gallery-stage{min-height:220px}
+            .main-photo{aspect-ratio:1.08/1;max-height:440px}
+            .gallery-thumbnails{gap:7px;padding:9px}
+            .gallery-thumb{flex-basis:91px;height:65px}
+            .info-panel{padding:17px}
+            .price{margin:15px 0;padding:15px;font-size:29px}
+            .spec{min-height:70px;padding:10px}
+            .contact-row{display:grid;grid-template-columns:1fr 1fr}
+            .call-button,.outline-button{font-size:11px;padding:10px 8px}
+            .lower-grid{grid-template-columns:1fr;gap:13px}
+            .description-panel,.seller-panel,.additional-panel{padding:17px}
+            .section-tabs{overflow-x:auto;white-space:nowrap}
+            .additional-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+        }
+        @media(max-width:390px){.contact-row{grid-template-columns:1fr}.specs{grid-template-columns:1fr 1fr}.listing-meta{gap:6px}.meta-chip{font-size:10px}}
+
+</style>
 </head>
 
 <body>
