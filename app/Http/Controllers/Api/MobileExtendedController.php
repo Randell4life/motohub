@@ -191,14 +191,18 @@ class MobileExtendedController extends Controller
             $join->on('moto_club_members.club_id', '=', 'moto_clubs.id')->where('moto_club_members.status', '=', 'active');
         })->select('moto_clubs.id', 'moto_clubs.name', 'moto_clubs.slug', 'moto_clubs.city', 'moto_clubs.description', 'moto_clubs.is_public', 'moto_clubs.owner_id')
             ->selectRaw('COUNT(moto_club_members.id) as members_count')
+            ->selectSub(fn ($q) => $q->from('moto_club_members as mine')->select('mine.status')->whereColumn('mine.club_id', 'moto_clubs.id')->where('mine.user_id', $userId)->limit(1), 'my_status')
             ->where(function ($q) use ($userId) {
                 $q->where('moto_clubs.is_public', true)->orWhere('moto_clubs.owner_id', $userId)
                     ->orWhereExists(fn ($sub) => $sub->selectRaw('1')->from('moto_club_members as mine')->whereColumn('mine.club_id', 'moto_clubs.id')->where('mine.user_id', $userId)->where('mine.status', 'active'));
-            })->groupBy('moto_clubs.id', 'moto_clubs.name', 'moto_clubs.slug', 'moto_clubs.city', 'moto_clubs.description', 'moto_clubs.is_public')
+            })->groupBy('moto_clubs.id', 'moto_clubs.name', 'moto_clubs.slug', 'moto_clubs.city', 'moto_clubs.description', 'moto_clubs.is_public', 'moto_clubs.owner_id')
             ->orderByDesc('moto_clubs.created_at')->get();
         $events = DB::table('moto_events')->join('moto_clubs', 'moto_clubs.id', '=', 'moto_events.club_id')
             ->where('moto_events.starts_at', '>=', now())->orderBy('moto_events.starts_at')
-            ->select('moto_events.*', 'moto_clubs.name as club_name', 'moto_clubs.slug as club_slug')->limit(30)->get();
+            ->select('moto_events.*', 'moto_clubs.name as club_name', 'moto_clubs.slug as club_slug')
+            ->addSelect(['attendees_count' => DB::table('moto_event_attendees')->selectRaw('COUNT(*)')->whereColumn('event_id', 'moto_events.id')->where('status', 'going')])
+            ->addSelect(['my_attendance' => DB::table('moto_event_attendees')->select('status')->whereColumn('event_id', 'moto_events.id')->where('user_id', $userId)->limit(1)])
+            ->limit(30)->get();
          $pendingMembers = DB::table('moto_club_members')->join('moto_clubs','moto_clubs.id','=','moto_club_members.club_id')->join('users','users.id','=','moto_club_members.user_id')->where('moto_clubs.owner_id',$userId)->where('moto_club_members.status','pending')->select('moto_club_members.id','moto_club_members.club_id','moto_clubs.name as club_name','users.name as user_name')->get();
         return response()->json(['clubs' => $clubs, 'events' => $events, 'pending_members' => $pendingMembers]);
     }
