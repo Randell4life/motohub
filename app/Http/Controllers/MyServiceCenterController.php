@@ -108,7 +108,14 @@ public function profile(): RedirectResponse|View
             'email' => ['nullable', 'email', 'max:255'],
             'city' => ['required', 'string', 'max:120'],
             'address' => ['required', 'string', 'max:255'],
+            'subscription_plan' => ['required', Rule::in(array_keys(ServiceCenter::subscriptionPlans()))],
         ]);
+
+        $plan = ServiceCenter::subscriptionPlans()[$data['subscription_plan']];
+        $data['subscription_price'] = $plan['price'];
+        $data['subscription_status'] = 'active';
+        $data['subscription_started_at'] = now();
+        $data['subscription_ends_at'] = $plan['price'] > 0 ? now()->addMonth() : null;
 
         DB::transaction(function () use ($data) {
             $baseSlug = Str::slug($data['name']) ?: 'service-center';
