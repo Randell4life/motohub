@@ -14,7 +14,7 @@ class InjectMotoHubTheme
         $response = $next($request);
 
         if (
-            $request->is('api', 'api/*', 'livewire/*')
+            $request->is('api', 'api/*', 'livewire/*', 'admin', 'admin/*')
             || ! str_contains((string) $response->headers->get('Content-Type'), 'text/html')
         ) {
             return $response;
