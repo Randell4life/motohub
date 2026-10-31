@@ -143,4 +143,29 @@ class MobileBookingController extends Controller
             ],
         ], 201);
     }
+
+    public function workshopBooking(Request $request, string $slug)
+    {
+        $workshop = \App\Models\Partner::query()->where('type','workshop')
+            ->where('application_status','approved')->where('is_active',true)->where('slug',$slug)->firstOrFail();
+        $data = $request->validate([
+            'service_id'=>['required','integer'],'motorcycle_brand'=>['nullable','string','max:100'],
+            'motorcycle_model'=>['nullable','string','max:100'],'motorcycle_year'=>['nullable','integer','between:1950,2100'],
+            'problem_description'=>['required','string','max:3000'],'customer_name'=>['required','string','max:255'],
+            'phone'=>['required','string','max:40'],'email'=>['nullable','email','max:255'],
+            'preferred_date'=>['nullable','date','after_or_equal:today'],
+        ]);
+        $service = DB::table('services')->where('partner_id',$workshop->id)->where('is_active',true)->where('id',$data['service_id'])->first();
+        abort_unless($service,404);
+        $id = DB::table('service_bookings')->insertGetId([
+            'partner_id'=>$workshop->id,'service_id'=>$service->id,'service_price'=>$service->price,
+            'service_type'=>$service->title,'motorcycle_brand'=>$data['motorcycle_brand']??null,
+            'motorcycle_model'=>$data['motorcycle_model']??null,'motorcycle_year'=>$data['motorcycle_year']??null,
+            'problem_description'=>$data['problem_description'],'customer_name'=>$data['customer_name'],
+            'phone'=>$data['phone'],'email'=>$data['email']??null,'preferred_date'=>$data['preferred_date']??null,
+            'status'=>'new','created_at'=>now(),'updated_at'=>now(),
+        ]);
+        return response()->json(['message'=>'სახელოსნოში ჯავშნის მოთხოვნა გაიგზავნა.','booking_id'=>$id],201);
+    }
+
 }
