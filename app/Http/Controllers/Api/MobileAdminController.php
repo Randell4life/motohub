@@ -18,7 +18,7 @@ class MobileAdminController extends Controller
         $user = $request->user();
 
         abort_unless(
-            $user && (bool) $user->is_admin && strtolower((string) $user->email) === 'braincell2003@gmail.com',
+            $user && (bool) $user->is_admin ,
             403,
             'ადმინისტრატორის უფლებები არ გაქვს.'
         );
