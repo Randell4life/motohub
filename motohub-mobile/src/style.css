@@ -265,3 +265,15 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .feature-group-body .form-stack input,.feature-group-body .form-stack select{min-height:42px}
 .feature-group>summary:focus-visible{outline:2px solid #328dff;outline-offset:-3px}
 @media(min-width:600px){.feature-group-body{padding:0 15px 15px}.feature-group>summary{padding:14px 17px}}
+
+
+/* Compact in-section search and status filters */
+.group-tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,.42fr);gap:9px;align-items:end;margin:12px 0}
+.group-search,.group-status-filter{display:grid;gap:5px;min-width:0}
+.group-search>span,.group-status-filter>span{font-size:10px;font-weight:800;letter-spacing:.04em;color:#91a5bf}
+.group-search input,.group-status-filter select{width:100%;min-width:0;min-height:42px;padding:0 11px;border:1px solid #2a4260;border-radius:9px;background:#091321;color:#eef5ff;font:inherit;font-size:12px;outline:none}
+.group-search input:focus,.group-status-filter select:focus{border-color:#328dff;box-shadow:0 0 0 2px #1677ff24}
+.group-search input::placeholder{color:#71849d}
+.feature-group-body .notice[hidden]{display:none!important}
+.group-empty{margin:10px 0;padding:13px;border:1px dashed #304761;border-radius:9px;color:#9badc3;text-align:center;font-size:12px}
+@media(max-width:380px){.group-tools{grid-template-columns:1fr}.group-status-filter select{min-height:39px}}

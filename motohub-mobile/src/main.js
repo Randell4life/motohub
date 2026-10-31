@@ -68,7 +68,12 @@ function featuresPage(){
  return '<main class="section"><div class="eyebrow">MOTOHUB / ECOSYSTEM</div><h1 class="page-title">ყველა <span>ფუნქცია.</span></h1><p class="muted intro">საიტის დამატებითი შესაძლებლობები ერთიანდება აპლიკაციაში. აირჩიე სასურველი განყოფილება.</p><div class="service-grid">'+cards.map(x=>'<button class="service-card" data-action="feature-open" data-page="'+x[0]+'"><span class="service-icon">'+x[1]+'</span><strong>'+x[2]+'</strong><small class="service-copy">'+x[3]+'</small><span class="service-topline"><small>გახსნა</small><span>↗</span></span></button>').join('')+'</div></main>'
 }
 function featureShell(page,body){
- return '<main class="section feature-page"><div class="eyebrow">MOTOHUB / '+esc((featureTitles[page]||'').toUpperCase())+'</div><div class="section-heading"><h1 class="page-title">'+esc(featureTitles[page]||'ფუნქცია')+'<span>.</span></h1><button class="text-button" data-action="feature-reload">↻ განახლება</button></div><button class="text-button" data-action="features">← ყველა ფუნქცია</button>'+(state.extendedLoading?'<div class="loading-state"><div class="spinner"></div><p>მონაცემები იტვირთება…</p></div>':'')+(state.extendedError?'<div class="error-state">'+esc(state.extendedError)+'</div>':'')+body+'</main>'
+ const organized=body.replace(/(<div class="feature-group-body">)([\s\S]*?)(<\/div><\/details>)/g,(match,start,content,end)=>{
+  if(!content.includes('class="notice"'))return match;
+  const hasStatus=/pending|confirmed|completed|cancelled|declined|მიმდინარეობს|დასრულებული|გაუქმებული|მოლოდინი|აქტიური|მიღებულია|უარყოფილი/.test(content);
+  return start+'<div class="group-tools"><label class="group-search"><span>ძებნა ამ განყოფილებაში</span><input type="search" data-group-search placeholder="სახელი, ნომერი ან სიტყვა..." autocomplete="off"></label>'+(hasStatus?'<label class="group-status-filter"><span>სტატუსი</span><select data-group-status><option value="all">ყველა</option><option value="active">აქტიური / მიმდინარე</option><option value="completed">დასრულებული</option><option value="cancelled">გაუქმებული</option></select></label>':'')+'</div>'+content+'<p class="group-empty" data-group-empty hidden>შედეგი ვერ მოიძებნა.</p>'+end;
+ });
+ return '<main class="section feature-page"><div class="eyebrow">MOTOHUB / '+esc((featureTitles[page]||'').toUpperCase())+'</div><div class="section-heading"><h1 class="page-title">'+esc(featureTitles[page]||'ფუნქცია')+'<span>.</span></h1><button class="text-button" data-action="feature-reload">↻ განახლება</button></div><button class="text-button" data-action="features">← ყველა ფუნქცია</button>'+(state.extendedLoading?'<div class="loading-state"><div class="spinner"></div><p>მონაცემები იტვირთება…</p></div>':'')+(state.extendedError?'<div class="error-state">'+esc(state.extendedError)+'</div>':'')+organized+'</main>'
 }
 function featureForm(id,title,fields,endpoint,button='შენახვა'){
  return '<section class="account-panel"><h3>'+title+'</h3><form id="'+id+'" class="form-stack" data-feature-form data-endpoint="'+endpoint+'">'+fields+'<button class="primary-btn" type="submit">'+button+'</button><p class="form-note" id="'+id+'-note"></p></form></section>'
@@ -145,6 +150,25 @@ async function submitFeatureForm(form){
  }catch(e){if(note){note.textContent='შეცდომა: '+e.message;note.classList.remove('success-text')}else alert(e.message)}
  finally{if(btn){btn.disabled=false;btn.textContent=btn.dataset.original||'შენახვა'}}
 }
+function filterFeatureGroup(body){
+ if(!body)return;
+ const query=(body.querySelector('[data-group-search]')?.value||'').trim().toLocaleLowerCase('ka');
+ const status=body.querySelector('[data-group-status]')?.value||'all';
+ const cards=[...body.querySelectorAll('.notice')];
+ let visible=0;
+ const activeWords=['pending','confirmed','in_progress','received','diagnostics','waiting_for_parts','in_repair','აქტიური','მიმდინარე','მიღებულია','დიაგნოსტიკა','მიმდინარეობს','ნაწილების მოლოდინი'];
+ const doneWords=['completed','handed_over','დასრულებული','გადაცემულია'];
+ const cancelledWords=['cancelled','declined','გაუქმებული','უარყოფილი'];
+ cards.forEach(card=>{
+  const value=card.textContent.toLocaleLowerCase('ka');
+  const matchesText=!query||value.includes(query);
+  const matchesStatus=status==='all'||(status==='active'&&activeWords.some(word=>value.includes(word)))||(status==='completed'&&doneWords.some(word=>value.includes(word)))||(status==='cancelled'&&cancelledWords.some(word=>value.includes(word)));
+  card.hidden=!(matchesText&&matchesStatus);
+  if(!card.hidden)visible++;
+ });
+ const empty=body.querySelector('[data-group-empty]');
+ if(empty)empty.hidden=visible!==0;
+}
 function bindExtendedForms(){
  app.querySelectorAll('[data-feature-form]').forEach(form=>form.addEventListener('submit',e=>{e.preventDefault();submitFeatureForm(form)}))
 }
@@ -155,6 +179,8 @@ function go(page){state.page=page;state.search='';state.error='';state.items=[];
 async function loadCatalog(url){if(!cfg[state.page])return;state.loading=true;state.error='';const page=state.page;render();try{let path=url;if(!path){const params=new URLSearchParams();if(state.search)params.set('q',state.search);if(page==='listings'&&state.listingCondition)params.set('condition',state.listingCondition);path=cfg[page].url+(params.toString()?'?'+params.toString():'')}const base=state.apiBase.replace(/\/+$/,'');if(path.startsWith(base))path=path.slice(base.length);const data=await api(path);if(state.page!==page)return;state.pageData=data;state.items=data.data||data.items||[]}catch(e){if(state.page===page){state.error=e.message||'სერვერთან კავშირი ვერ მოხერხდა.';state.items=[]}}finally{state.loading=false;if(state.page===page)render()}}
 async function preview(){try{const data=await api('/api/mobile/motorcycles?per_page=4');const el=document.querySelector('#home-preview');if(el)el.innerHTML=(data.data||[]).map(x=>'<article class="preview-card">'+image(x.image_url,x.title)+'<strong>'+esc(x.title)+'</strong><span>'+money(x.price)+'</span></article>').join('')||'<p class="muted">გამოქვეყნებული განცხადებები ჯერ არ არის.</p>'}catch{const el=document.querySelector('#home-preview');if(el)el.innerHTML='<p class="muted">კატალოგის სანახავად შეამოწმე სერვერის კავშირი პარამეტრებში.</p>'}}
 function bind(){
+ app.querySelectorAll('[data-group-search]').forEach(input=>input.addEventListener('input',()=>filterFeatureGroup(input.closest('.feature-group-body'))));
+ app.querySelectorAll('[data-group-status]').forEach(select=>select.addEventListener('change',()=>filterFeatureGroup(select.closest('.feature-group-body'))));
 app.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',async()=>{
 const a=b.dataset.action;
 if(['edit-listing','delete-listing','cancel-booking'].includes(a))return;
