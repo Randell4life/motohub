@@ -510,4 +510,35 @@ class MobileExtendedController extends Controller
         return response()->json(['message'=>'ტრანსპორტირების სტატუსი განახლდა.']);
     }
 
+
+    public function updateServiceBookingStatus(Request $request, int $booking)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id',$request->user()->id)->firstOrFail();
+        $item = $center->bookings()->findOrFail($booking);
+        $data = $request->validate(['status'=>['required','in:confirmed,declined,cancelled,completed']]);
+        $item->update($data);
+        return response()->json(['message'=>'ჯავშნის სტატუსი განახლდა.']);
+    }
+
+    public function storeWorkshopCustomer(Request $request)
+    {
+        $partner = \App\Models\Partner::where('user_id',$request->user()->id)->where('type','workshop')->where('application_status','approved')->where('is_active',true)->firstOrFail();
+        $data = $request->validate(['name'=>['required','string','max:150'],'phone'=>['required','string','max:30'],'email'=>['nullable','email','max:255'],'address'=>['nullable','string','max:255'],'notes'=>['nullable','string','max:5000']]);
+        return response()->json(['message'=>'კლიენტი დაემატა.','customer'=>$partner->customers()->create($data)],201);
+    }
+
+    public function storeWorkshopServiceRecord(Request $request, int $customer, int $motorcycle)
+    {
+        $partner = \App\Models\Partner::where('user_id',$request->user()->id)->where('type','workshop')->where('application_status','approved')->where('is_active',true)->firstOrFail();
+        $customerRow = $partner->customers()->findOrFail($customer);
+        $bike = \App\Models\Motorcycle::where('partner_id',$partner->id)->where('customer_id',$customerRow->id)->findOrFail($motorcycle);
+        $data = $request->validate([
+            'service_date'=>['required','date','before_or_equal:today'],'mileage'=>['nullable','integer','min:0'],
+            'category'=>['required','string','max:100'],'title'=>['required','string','max:255'],
+            'description'=>['nullable','string','max:5000'],'cost'=>['required','numeric','min:0','max:99999999.99'],
+            'notes'=>['nullable','string','max:5000'],
+        ]);
+        return response()->json(['message'=>'მომსახურების ჩანაწერი დაემატა.','record'=>$bike->serviceRecords()->create($data)],201);
+    }
+
 }
