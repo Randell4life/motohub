@@ -222,18 +222,25 @@ class MobileExtendedController extends Controller
 
     public function attendEvent(Request $request, int $event)
     {
-        $item = DB::table('moto_events')->join('moto_clubs', 'moto_clubs.id', '=', 'moto_events.club_id')
-            ->where('moto_events.id', $event)->where(function ($q) use ($request) {
-                $q->where('moto_clubs.is_public', true)->orWhere('moto_clubs.owner_id', $request->user()->id)
-                    ->orWhereExists(fn ($sub) => $sub->selectRaw('1')->from('moto_club_members')->whereColumn('moto_club_members.club_id', 'moto_clubs.id')->where('moto_club_members.user_id', $request->user()->id)->where('moto_club_members.status', 'active'));
-            })->select('moto_events.*')->first();
-        abort_unless($item, 404);
-        $count = DB::table('moto_event_attendees')->where('event_id', $event)->where('status', 'going')->count();
-        if ($item->capacity && $count >= $item->capacity && !DB::table('moto_event_attendees')->where('event_id', $event)->where('user_id', $request->user()->id)->exists()) {
-            throw ValidationException::withMessages(['event' => 'ღონისძიებაზე თავისუფალი ადგილი აღარ არის.']);
-        }
-        DB::table('moto_event_attendees')->updateOrInsert(['event_id' => $event, 'user_id' => $request->user()->id], ['status' => 'going', 'created_at' => now(), 'updated_at' => now()]);
-        return response()->json(['message' => 'ღონისძიებაზე მონაწილეობა დადასტურდა.']);
+        $item = DB::table('moto_events')->where('id',$event)->first();
+        abort_unless($item,404);
+        $member = DB::table('moto_club_members')->where('club_id',$item->club_id)
+            ->where('user_id',$request->user()->id)->where('status','active')->exists();
+        abort_unless($member,403);
+        DB::transaction(function () use ($item,$request) {
+            $locked = DB::table('moto_events')->where('id',$item->id)->lockForUpdate()->first();
+            $alreadyGoing = DB::table('moto_event_attendees')->where('event_id',$locked->id)
+                ->where('user_id',$request->user()->id)->where('status','going')->exists();
+            if (!$alreadyGoing && $locked->capacity) {
+                $count = DB::table('moto_event_attendees')->where('event_id',$locked->id)->where('status','going')->count();
+                if ($count >= $locked->capacity) throw ValidationException::withMessages(['event'=>'ღონისძიებაზე თავისუფალი ადგილები აღარ არის.']);
+            }
+            DB::table('moto_event_attendees')->updateOrInsert(
+                ['event_id'=>$locked->id,'user_id'=>$request->user()->id],
+                ['status'=>'going','created_at'=>now(),'updated_at'=>now()]
+            );
+        });
+        return response()->json(['message'=>'ღონისძიებაზე მონაწილეობა დადასტურდა.']);
     }
 
     public function conversations(Request $request)
