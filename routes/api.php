@@ -16,7 +16,7 @@ Route::prefix('mobile')->group(function () {
     Route::get('/parts', [MobileCatalogController::class, 'parts']);
     Route::get('/part-listings', [MobileCatalogController::class, 'partListings']);
     Route::get('/rentals', [MobileCatalogController::class, 'rentals']);
-    Route::get('/service-centers', [MobileCatalogController::class, 'serviceCenters']);
+    Route::get('/service-centers', [MobileCatalogController::class, 'serviceCenters']);\n    Route::get('/motorcycles/{motorcycle}/passport', [MobilePassportController::class, 'show'])->whereNumber('motorcycle');
 
     Route::middleware(AuthenticateMobileToken::class)->group(function () {
         Route::get('/me', [MobileAccountController::class, 'show']);
