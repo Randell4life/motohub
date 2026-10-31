@@ -185,7 +185,7 @@ class MobileCatalogController extends Controller
             $builder->where(fn ($where) => $where->where('name', 'like', "%{$term}%")
                 ->orWhere('city', 'like', "%{$term}%")->orWhere('address', 'like', "%{$term}%")
                 ->orWhereHas('services', fn ($services) => $services->where('is_active', true)->where('name', 'like', "%{$term}%")));
-        })->when($request->filled('service'), fn ($builder) => $builder->whereHas('services', fn ($services) => $services->where('is_active', true)->where('name', 'like', '%' . trim((string) $request->query('service')) . '%')))->when($request->filled('city'), fn ($builder) => $builder->where('city', 'like', '%' . trim((string) $request->query('city')) . '%'))
+        })->when($request->filled('service'), fn ($builder) => $builder->whereHas('services', fn ($services) => $services->where('is_active', true)->where('name', 'like', '%' . trim((string) $request->query('service')) . '%')))->when($request->boolean('verified'), fn ($builder) => $builder->where('is_verified', true))->when($request->filled('city'), fn ($builder) => $builder->where('city', 'like', '%' . trim((string) $request->query('city')) . '%'))
             ->orderByDesc('is_verified')->orderBy('name')
             ->paginate(min(max((int) $request->query('per_page', 12), 1), 50));
         $centers->getCollection()->transform(fn ($center) => [
