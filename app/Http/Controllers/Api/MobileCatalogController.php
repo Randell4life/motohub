@@ -26,7 +26,22 @@ class MobileCatalogController extends Controller
             ->when($request->filled('brand'), fn ($builder) => $builder->where('brand', $request->query('brand')))
             ->when($request->filled('min_price') && is_numeric($request->query('min_price')), fn ($builder) => $builder->where('price', '>=', (float) $request->query('min_price')))
             ->when($request->filled('max_price') && is_numeric($request->query('max_price')), fn ($builder) => $builder->where('price', '<=', (float) $request->query('max_price')))
-            ->orderByDesc('is_featured')->orderByDesc('published_at')->orderByDesc('created_at');
+            ->when($request->filled('min_year') && is_numeric($request->query('min_year')), fn ($builder) => $builder->where('year', '>=', (int) $request->query('min_year')))
+            ->when($request->filled('max_year') && is_numeric($request->query('max_year')), fn ($builder) => $builder->where('year', '<=', (int) $request->query('max_year')))
+            ->when($request->filled('min_cc') && is_numeric($request->query('min_cc')), fn ($builder) => $builder->where('engine_cc', '>=', (int) $request->query('min_cc')))
+            ->when($request->filled('max_cc') && is_numeric($request->query('max_cc')), fn ($builder) => $builder->where('engine_cc', '<=', (int) $request->query('max_cc')))
+            ->when($request->filled('min_mileage') && is_numeric($request->query('min_mileage')), fn ($builder) => $builder->where('mileage', '>=', (int) $request->query('min_mileage')))
+            ->when($request->filled('max_mileage') && is_numeric($request->query('max_mileage')), fn ($builder) => $builder->where('mileage', '<=', (int) $request->query('max_mileage')))
+            ->when(in_array($request->query('condition'), ['new', 'used'], true), fn ($builder) => $builder->where('condition', $request->query('condition')))
+            ->when($request->filled('location'), fn ($builder) => $builder->where('location', 'like', '%' . trim((string) $request->query('location')) . '%'))
+            ->when($request->boolean('featured'), fn ($builder) => $builder->where('is_featured', true))
+            ->when($request->query('sort') === 'price_asc', fn ($builder) => $builder->orderBy('price'))
+            ->when($request->query('sort') === 'price_desc', fn ($builder) => $builder->orderByDesc('price'))
+            ->when($request->query('sort') === 'year_desc', fn ($builder) => $builder->orderByDesc('year'))
+            ->when($request->query('sort') === 'mileage_asc', fn ($builder) => $builder->orderBy('mileage'))
+            ->when($request->query('sort') === 'mileage_desc', fn ($builder) => $builder->orderByDesc('mileage'))
+            ->when($request->query('sort') === 'oldest', fn ($builder) => $builder->orderBy('published_at'))
+            ->when(!in_array($request->query('sort'), ['price_asc','price_desc','year_desc','mileage_asc','mileage_desc','oldest'], true), fn ($builder) => $builder->orderByDesc('is_featured')->orderByDesc('published_at')->orderByDesc('created_at'));
 
         $page = $query->paginate(min(max((int) $request->query('per_page', 12), 1), 50));
         $page->getCollection()->transform(fn ($item) => [
