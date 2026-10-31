@@ -68,7 +68,7 @@ function featuresPage(){
  return '<main class="section"><div class="eyebrow">MOTOHUB / ECOSYSTEM</div><h1 class="page-title">ყველა <span>ფუნქცია.</span></h1><p class="muted intro">საიტის დამატებითი შესაძლებლობები ერთიანდება აპლიკაციაში. აირჩიე სასურველი განყოფილება.</p><div class="service-grid">'+cards.map(x=>'<button class="service-card" data-action="feature-open" data-page="'+x[0]+'"><span class="service-icon">'+x[1]+'</span><strong>'+x[2]+'</strong><small class="service-copy">'+x[3]+'</small><span class="service-topline"><small>გახსნა</small><span>↗</span></span></button>').join('')+'</div></main>'
 }
 function featureShell(page,body){
- const organized=body.replace(/(<div class="feature-group-body">)([\\s\\S]*?)(<\\/div><\\/details>)/g,(match,start,content,end)=>{
+ const organized=body.replace(/(<div class="feature-group-body">)([\s\S]*?)(<\/div><\/details>)/g,(match,start,content,end)=>{
   if(!content.includes('class="notice"'))return match;
   const hasStatus=/pending|confirmed|completed|cancelled|declined|მიმდინარეობს|დასრულებული|გაუქმებული|მოლოდინი|აქტიური|მიღებულია|უარყოფილი/.test(content);
   return start+'<div class="group-tools"><label class="group-search"><span>ძებნა ამ განყოფილებაში</span><input type="search" data-group-search placeholder="სახელი, ნომერი ან სიტყვა..." autocomplete="off"></label>'+(hasStatus?'<label class="group-status-filter"><span>სტატუსი</span><select data-group-status><option value="all">ყველა</option><option value="active">აქტიური / მიმდინარე</option><option value="completed">დასრულებული</option><option value="cancelled">გაუქმებული</option></select></label>':'')+'</div>'+content+'<p class="group-empty" data-group-empty hidden>შედეგი ვერ მოიძებნა.</p>'+end;
