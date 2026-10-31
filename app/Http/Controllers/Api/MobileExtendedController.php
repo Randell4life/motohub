@@ -153,11 +153,12 @@ class MobileExtendedController extends Controller
 
     public function storePost(Request $request)
     {
-        $data = $request->validate(['body' => ['required', 'string', 'min:2', 'max:3000'], 'motorcycle_id' => ['nullable', 'integer', 'exists:motorcycles,id']]);
+        $data = $request->validate(['body' => ['required', 'string', 'min:2', 'max:3000'], 'motorcycle_id' => ['nullable', 'integer', 'exists:motorcycles,id'], 'image' => ['nullable','image','mimes:jpg,jpeg,png,webp','max:5120']]);
         if (!empty($data['motorcycle_id'])) {
             $request->user()->motorcycles()->where('status', 'published')->findOrFail($data['motorcycle_id']);
         }
-        $post = CommunityPost::create(['user_id' => $request->user()->id, 'motorcycle_id' => $data['motorcycle_id'] ?? null, 'body' => trim($data['body'])]);
+        $imagePath = $request->file('image')?->store('community/posts','public');
+        $post = CommunityPost::create(['user_id' => $request->user()->id, 'motorcycle_id' => $data['motorcycle_id'] ?? null, 'body' => trim($data['body']), 'image_path' => $imagePath]);
         return response()->json(['message' => 'პოსტი გამოქვეყნდა.', 'post' => $post->load('user:id,name,avatar_path')], 201);
     }
 
