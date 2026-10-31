@@ -132,11 +132,12 @@ function workshopCustomerCards(d){
 }
 
 function communityPage(d){
+ if(!state.token)return '<main class="section feature-page community-page"><div class="community-hero"><span class="eyebrow">MOTOHUB / RIDER NETWORK</span><h1>მოტო ხალხი.<br><span>ერთი საზოგადოება.</span></h1><p>საზოგადოების პოსტების სანახავად და გამოსაქვეყნებლად შედი შენს ანგარიშში.</p></div><section class="community-side-card"><h3>შეუერთდი MotoHub-ის რაიდერებს</h3><button class="primary-btn full-width" data-action="account">შესვლა / რეგისტრაცია ↗</button></section></main>';
  const posts=Array.isArray(d.data)?d.data:[];
  const notifications=d.notifications||{};
  const items=notifications.items||[];
  const unread=Number(notifications.unread_count||0);
- const initials=name=>String(name||'M').trim().split(/\\s+/).slice(0,2).map(v=>v.charAt(0).toUpperCase()).join('')||'M';
+ const initials=name=>String(name||'M').trim().split(/\s+/).slice(0,2).map(v=>v.charAt(0).toUpperCase()).join('')||'M';
  const postCards=posts.map(x=>{
   const author=x.user||{}, bike=x.motorcycle||{}, comments=x.comments||[];
   const liked=Boolean(x.liked_by_me);
