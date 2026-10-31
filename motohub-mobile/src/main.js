@@ -29,7 +29,7 @@ function bikeDetail(){
  const photos=[...(x.image_url?[x.image_url]:[]),...(x.images||[]).map(i=>i.url).filter(Boolean)].filter((url,i,all)=>all.indexOf(url)===i);
  const index=Math.min(state.detailPhotoIndex||0,Math.max(photos.length-1,0));
  const seller=x.seller||{};
- const phone=String(seller.phone||'').replace(/[^+\\d]/g,'');
+ const phone=String(seller.phone||'').replace(/[^+\d]/g,'');
  const specs=[['მარკა',x.brand],['მოდელი',x.model],['გამოშვების წელი',x.year],['გარბენი',x.mileage!=null?Number(x.mileage).toLocaleString('ka-GE')+' კმ':null],['ძრავის მოცულობა',x.engine_cc?x.engine_cc+' cc':null],['მდგომარეობა',x.condition==='used'?'მეორადი':x.condition==='new'?'ახალი':null],['მდებარეობა',x.location],['განცხადების ID','#'+x.id]].filter(p=>p[1]!==null&&p[1]!==undefined&&p[1]!=='');
  const chips=[x.brand,x.year,x.condition==='used'?'მეორადი':x.condition==='new'?'ახალი':null,x.location].filter(Boolean);
  return '<main class="section bike-detail premium-bike-detail">'+
