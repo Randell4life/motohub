@@ -328,3 +328,22 @@ body{background:radial-gradient(ellipse at 50% -8%,#1b3152 0,transparent 42%),li
 .admin-page .admin-item{padding:14px;border:1px solid #2a405e;border-radius:12px;background:#0d1726;margin:10px 0}
 @media(min-width:600px){#app{box-shadow:0 0 80px #0005}.hero{border-left:1px solid #ffffff08;border-right:1px solid #ffffff08}.catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.service-grid{gap:15px}}
 @media(max-width:380px){.hero{min-height:455px;padding-top:43px}.hero h1{font-size:38px}.service-card{min-height:145px;padding:12px}.section{padding-left:15px;padding-right:15px}}
+
+/* Motorcycle catalogue — advanced filter panel */
+.bike-filter-panel{margin:18px 0 22px;padding:17px;border:1px solid #2c4566;border-radius:16px;background:linear-gradient(145deg,#132239,#0c1523);box-shadow:0 16px 35px #0003}
+.filter-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}
+.filter-panel-head>div{display:flex;flex-direction:column;gap:5px}
+.filter-panel-head strong{font-size:14px;font-weight:900}
+.filter-clear{border:1px solid #365274;border-radius:8px;padding:8px 10px;background:#101d2f;color:#8fc3ff;font-size:10px;font-weight:800}
+.bike-filter-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.bike-filter-grid label{display:flex;min-width:0;flex-direction:column;gap:6px;color:#a9bbd4;font-size:10px;font-weight:750}
+.bike-filter-grid input,.bike-filter-grid select{width:100%;min-width:0;min-height:43px;padding:9px 10px;border:1px solid #2b4260;border-radius:9px;outline:none;background:#091321;color:#edf5ff;font-size:12px}
+.bike-filter-grid input:focus,.bike-filter-grid select:focus{border-color:#4a9cff;box-shadow:0 0 0 3px #1677ff20}
+.featured-only{display:flex;align-items:center;gap:9px;margin:14px 0 2px;color:#c5d9f4;font-size:11px;font-weight:750}
+.featured-only input{width:17px;height:17px;accent-color:#2587ff}
+.bike-filter-panel .primary-btn{margin-top:13px}
+.catalog-page .search-box{border-color:#2d4565;background:linear-gradient(120deg,#111f32,#0b1421);box-shadow:0 8px 22px #0002}
+.catalog-page .search-box input{min-width:0}
+.catalog-page .catalog-grid .item-card{border-color:#2b405e;box-shadow:0 12px 28px #0003}
+.catalog-page .catalog-grid .item-card:active{border-color:#4b9cff}
+@media(max-width:380px){.bike-filter-grid{grid-template-columns:1fr}.filter-panel-head{align-items:flex-start;flex-direction:column}.filter-clear{align-self:flex-end}}
