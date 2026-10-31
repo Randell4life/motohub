@@ -429,3 +429,36 @@ body{background:radial-gradient(ellipse at 50% -8%,#1b3152 0,transparent 42%),li
  .detail-utility-card small{grid-column:2}
  .detail-utility-card b{position:static;grid-column:3;grid-row:1/3}
 }
+
+/* MotoHub mobile profile — premium personal dashboard */
+.profile-premium-page{padding-top:27px}
+.profile-premium-page>.intro{margin:7px 0 18px;font-size:12px}
+.profile-mobile-hero{position:relative;display:flex;align-items:center;gap:14px;overflow:hidden;margin:18px 0 10px;padding:18px 15px;border:1px solid #2b4b70;border-radius:13px;background:radial-gradient(ellipse at 85% 0%,#1677ff42,transparent 52%),linear-gradient(125deg,#142943,#0b1421 78%)}
+.profile-mobile-avatar{position:relative;z-index:1;display:grid;place-items:center;width:70px;height:70px;flex:0 0 70px;overflow:hidden;border:2px solid #478ed0;border-radius:17px;background:#173b63;color:#a9d8ff;font-size:28px;font-weight:950;box-shadow:0 0 22px #1677ff26}
+.profile-mobile-avatar img{width:100%;height:100%;object-fit:cover}
+.profile-mobile-identity{position:relative;z-index:1;min-width:0}
+.profile-mobile-identity small{color:#78baff;font-size:9px;font-weight:850;letter-spacing:.6px}
+.profile-mobile-identity h2{margin:4px 0;color:#f4f8ff;font-size:19px;font-weight:950;overflow-wrap:anywhere}
+.profile-mobile-identity p{margin:0 0 8px;color:#9bacc3;font-size:10px;overflow-wrap:anywhere}
+.profile-member-pill{display:inline-flex;padding:4px 7px;border:1px solid #28664f;border-radius:99px;background:#103426;color:#8de5bd;font-size:8px;font-weight:850}
+.profile-mobile-watermark{position:absolute;right:-5px;bottom:-25px;color:#ffffff08;font-size:83px;font-weight:1000;letter-spacing:-8px}
+.profile-mobile-stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:0 0 16px}
+.profile-mobile-stats>div{display:flex;flex-direction:column;gap:5px;padding:12px;border:1px solid #283d58;border-radius:10px;background:#101a29}
+.profile-mobile-stats small{color:#8297b3;font-size:9px}
+.profile-mobile-stats strong{color:#eaf3ff;font-size:11px;overflow-wrap:anywhere}
+.profile-edit-card{padding:18px 15px!important;border-color:#2c4564!important;background:linear-gradient(145deg,#121f30,#0c1420)!important}
+.profile-card-heading{display:flex;justify-content:space-between;gap:10px;margin-bottom:17px}
+.profile-card-heading h2{margin:3px 0 4px!important;font-size:18px!important;font-weight:950}
+.profile-card-heading .muted{margin:0;font-size:10px;line-height:1.6}
+.profile-heading-icon{display:grid;place-items:center;width:36px;height:36px;flex:0 0 36px;border:1px solid #315b84;border-radius:9px;background:#142d49;color:#7bbcff;font-size:17px}
+.profile-field-help{color:#8195af;font-size:9px;font-weight:500}
+.profile-edit-card .form-stack input[type=file]{padding:10px;border-style:dashed;color:#9aacc4;font-size:10px}
+.profile-edit-card .form-stack input:disabled{opacity:.72;color:#899bb3;background:#0a111b}
+.profile-edit-card .primary-btn{margin-top:5px}
+.profile-quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:13px 0 20px}
+.profile-quick-actions .secondary-btn,.profile-quick-actions .primary-btn{width:100%;min-height:44px;margin:0;padding:10px 8px;font-size:10px}
+.profile-quick-actions [data-action=logout]{grid-column:1/-1;border-color:#4a3941;background:#20151b;color:#e8b5bd}
+.profile-premium-page .notice{margin-top:14px}
+.profile-premium-page #account-data{margin-top:20px}
+@media(min-width:600px){.profile-premium-page{padding-top:32px}.profile-mobile-hero{padding:23px}.profile-edit-card{padding:22px!important}.profile-quick-actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:370px){.profile-mobile-hero{gap:10px;padding:14px 11px}.profile-mobile-avatar{width:58px;height:58px;flex-basis:58px}.profile-mobile-identity h2{font-size:16px}.profile-quick-actions{gap:7px}.profile-quick-actions .secondary-btn,.profile-quick-actions .primary-btn{font-size:9px}}
