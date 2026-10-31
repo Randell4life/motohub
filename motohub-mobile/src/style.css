@@ -462,3 +462,19 @@ body{background:radial-gradient(ellipse at 50% -8%,#1b3152 0,transparent 42%),li
 .profile-premium-page #account-data{margin-top:20px}
 @media(min-width:600px){.profile-premium-page{padding-top:32px}.profile-mobile-hero{padding:23px}.profile-edit-card{padding:22px!important}.profile-quick-actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:370px){.profile-mobile-hero{gap:10px;padding:14px 11px}.profile-mobile-avatar{width:58px;height:58px;flex-basis:58px}.profile-mobile-identity h2{font-size:16px}.profile-quick-actions{gap:7px}.profile-quick-actions .secondary-btn,.profile-quick-actions .primary-btn{font-size:9px}}
+
+/* Premium rental catalogue */
+.rental-mobile-filter{margin:15px 0 18px;padding:16px;border:1px solid #2b4a70;border-radius:13px;background:radial-gradient(ellipse at 100% 0%,#1677ff20,transparent 48%),linear-gradient(145deg,#121f30,#0a1421)}
+.rental-mobile-filter .filter-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}
+.rental-mobile-filter .filter-panel-head strong{display:block;margin-top:4px;font-size:13px;font-weight:900}
+.rental-mobile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:13px}
+.rental-mobile-grid label{display:flex;flex-direction:column;gap:6px;color:#aebed3;font-size:10px;font-weight:800}
+.rental-mobile-grid input,.rental-mobile-grid select{width:100%;min-height:42px;padding:9px;border:1px solid #2a4361;border-radius:8px;outline:none;background:#081321;color:#f4f8ff;font-size:11px}
+.rental-mobile-grid input:focus,.rental-mobile-grid select:focus{border-color:#2789ff;box-shadow:0 0 0 3px #2789ff20}
+.rental-mobile-filter>.primary-btn{min-height:44px}
+.rental-card-meta{display:flex;justify-content:space-between;gap:8px;margin:8px 0 12px;color:#91a7c3;font-size:9px}
+.rental-card-meta span{min-width:0;overflow-wrap:anywhere}
+.catalog-page:has(.rental-mobile-filter) .catalog-grid .item-card{border-color:#2a4565;background:linear-gradient(145deg,#121f30,#0a1421);box-shadow:0 12px 32px #0003}
+.catalog-page:has(.rental-mobile-filter) .catalog-grid .item-image{aspect-ratio:16/10}
+.catalog-page:has(.rental-mobile-filter) .catalog-grid .item-card-content{padding:14px}
+.catalog-page:has(.rental-mobile-filter) .catalog-grid .price{color:#68b7ff}
