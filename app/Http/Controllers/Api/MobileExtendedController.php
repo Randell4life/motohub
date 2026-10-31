@@ -612,7 +612,7 @@ class MobileExtendedController extends Controller
         $data = $request->validate(['name'=>['required','string','max:160'],'description'=>['nullable','string','max:3000'],'phone'=>['required','string','max:40'],'email'=>['nullable','email','max:255'],'city'=>['required','string','max:120'],'address'=>['required','string','max:255'],'subscription_plan'=>['required',Rule::in(array_keys(\\App\\Models\\ServiceCenter::subscriptionPlans()))]]);
         $plan = \\App\\Models\\ServiceCenter::subscriptionPlans()[$data['subscription_plan']];
         $data['subscription_price'] = $plan['price'];
-        $data['subscription_status'] = 'active';
+        $data['subscription_status'] = $plan['price'] > 0 ? 'pending_payment' : 'active';
         $data['subscription_started_at'] = now();
         $data['subscription_ends_at'] = $plan['price'] > 0 ? now()->addMonth() : null;
         $center = DB::transaction(function () use ($request,$data) {
