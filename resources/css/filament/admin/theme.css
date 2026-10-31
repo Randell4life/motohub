@@ -403,3 +403,36 @@
         border-radius: 12px;
     }
 }
+
+
+/* Final MotoHub admin refinement */
+.fi-main-ctn{max-width:1600px}
+.fi-page{gap:1.5rem}
+.fi-header{padding-bottom:.35rem}
+.fi-header-heading{font-size:clamp(1.45rem,2vw,2rem)}
+.fi-section-header-heading{font-weight:800;letter-spacing:-.02em}
+.fi-wi-stats-overview-stat{min-height:116px}
+.fi-ta-ctn{overflow:hidden}
+.fi-ta-table{border-collapse:separate;border-spacing:0}
+.fi-ta-row{transition:background-color .16s ease}
+.fi-fo-field-wrp-label{font-weight:700}
+.fi-input-wrp,.fi-select-input,.fi-fo-textarea{transition:border-color .16s ease,box-shadow .16s ease}
+.fi-sidebar-item a{padding-block:.7rem}
+.fi-sidebar-group{margin-top:.55rem}
+.fi-sidebar-group-label{color:#8fa7c5}
+.fi-breadcrumbs{opacity:.78}
+.fi-pagination{padding:1rem}
+.fi-modal-window{border:1px solid var(--mh-border);border-radius:18px;box-shadow:0 28px 90px #0008}
+.fi-dropdown-panel{border:1px solid var(--mh-border);border-radius:12px;box-shadow:0 18px 50px #0006}
+.fi-notifications-notification{border:1px solid var(--mh-border);border-radius:12px}
+.dark .fi-section,
+.dark .fi-ta-ctn,
+.dark .fi-fo-component-ctn{background:linear-gradient(145deg,#101d30,#0a1422)}
+.dark .fi-input-wrp{background:#081321}
+@media(max-width:768px){
+ .fi-main{padding-inline:0}
+ .fi-page{gap:1rem}
+ .fi-section{border-radius:12px}
+ .fi-wi-stats-overview-stat{min-height:96px;padding:14px}
+ .fi-ta-cell{padding-block:11px}
+}
