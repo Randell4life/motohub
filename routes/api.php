@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\MobileCatalogController;
 use App\Http\Controllers\Api\MobileAccountController;
 use App\Http\Controllers\Api\MobileBookingController;
 use App\Http\Controllers\Api\MobileAdminController;
+use App\Http\Controllers\Api\MobilePassportController;
 use App\Http\Controllers\PartRequestController;
 use App\Http\Middleware\AuthenticateMobileToken;
 use Illuminate\Support\Facades\Route;
@@ -16,7 +17,8 @@ Route::prefix('mobile')->group(function () {
     Route::get('/parts', [MobileCatalogController::class, 'parts']);
     Route::get('/part-listings', [MobileCatalogController::class, 'partListings']);
     Route::get('/rentals', [MobileCatalogController::class, 'rentals']);
-    Route::get('/service-centers', [MobileCatalogController::class, 'serviceCenters']);\n    Route::get('/motorcycles/{motorcycle}/passport', [MobilePassportController::class, 'show'])->whereNumber('motorcycle');
+    Route::get('/service-centers', [MobileCatalogController::class, 'serviceCenters']);
+    Route::get('/motorcycles/{motorcycle}/passport', [MobilePassportController::class, 'show'])->whereNumber('motorcycle');
 
     Route::middleware(AuthenticateMobileToken::class)->group(function () {
         Route::get('/me', [MobileAccountController::class, 'show']);
