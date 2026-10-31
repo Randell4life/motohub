@@ -54,6 +54,7 @@ Route::prefix('mobile')->group(function () {
         Route::patch('/transport/partner/requests/{transportRequest}/status', [MobileExtendedController::class, 'updateTransportOrderStatus'])->whereNumber('transportRequest');
         Route::post('/moto-assistant/diagnose', [MobileExtendedController::class, 'diagnose'])->middleware('throttle:10,1');
         Route::get('/service-center/dashboard', [MobileExtendedController::class, 'serviceCenterDashboard']);
+        Route::patch('/service-center/bookings/{booking}/status', [MobileExtendedController::class, 'updateServiceBookingStatus'])->whereNumber('booking');
         Route::post('/service-center/technicians', [MobileExtendedController::class, 'storeTechnician'])->middleware('throttle:10,1');
         Route::post('/service-center/bays', [MobileExtendedController::class, 'storeBay'])->middleware('throttle:10,1');
         Route::post('/service-center/inventory', [MobileExtendedController::class, 'storeInventory'])->middleware('throttle:10,1');
@@ -62,6 +63,8 @@ Route::prefix('mobile')->group(function () {
         Route::post('/service-center/work-orders/{workOrder}/payments', [MobileExtendedController::class, 'recordWorkOrderPayment'])->whereNumber('workOrder');
         Route::patch('/service-center/work-orders/{workOrder}/status', [MobileExtendedController::class, 'updateWorkOrderStatus'])->whereNumber('workOrder');
         Route::get('/workshop/dashboard', [MobileExtendedController::class, 'workshopDashboard']);
+        Route::post('/workshop/customers', [MobileExtendedController::class, 'storeWorkshopCustomer'])->middleware('throttle:10,1');
+        Route::post('/workshop/customers/{customer}/motorcycles/{motorcycle}/service-records', [MobileExtendedController::class, 'storeWorkshopServiceRecord'])->whereNumber('customer')->whereNumber('motorcycle')->middleware('throttle:10,1');
         Route::get('/me', [MobileAccountController::class, 'show']);
         Route::get('/admin/dashboard', [MobileAdminController::class, 'dashboard']);
         Route::patch('/admin/{type}/{id}/status', [MobileAdminController::class, 'updateStatus'])->whereIn('type', ['motorcycles', 'part-requests', 'rental-bookings', 'service-bookings', 'service-centers'])->whereNumber('id')->middleware('throttle:30,1');
