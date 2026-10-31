@@ -171,3 +171,55 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 @media(prefers-reduced-motion:reduce) {
   *,*::before,*::after { transition-duration:.01ms!important; animation-duration:.01ms!important; }
 }
+
+
+/* MotoHub premium mobile product polish — shared across every feature screen */
+:root{--surface:#101722;--surface-raised:#151f2d;--line:#29394d;--blue-glow:#1677ff38;--soft-blue:#a8ceff}
+body{overscroll-behavior-y:contain}
+button,a,input,textarea,select{-webkit-tap-highlight-color:transparent}
+button{transition:transform .16s ease,border-color .16s ease,background .16s ease,box-shadow .16s ease}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--blue2);outline-offset:3px}
+.feature-page{padding-top:24px}
+.feature-page>.eyebrow{margin:0 0 12px}
+.feature-page>.section-heading{align-items:center;padding:17px 15px;margin:0 0 12px;border:1px solid #2a3b51;border-radius:12px;background:linear-gradient(125deg,#14243a 0%,#101722 72%);box-shadow:inset 0 1px #ffffff08}
+.feature-page .page-title{margin:0;font-size:clamp(27px,7vw,36px);line-height:1.15}
+.feature-page>.text-button{display:inline-flex;align-items:center;min-height:36px;margin:0 0 13px;padding:0 5px}
+.feature-page .account-panel{position:relative;margin:13px 0;padding:17px 15px;border:1px solid #29394d;border-radius:12px;background:linear-gradient(145deg,#121c2a 0%,#0e151f 100%);box-shadow:0 12px 28px #0002}
+.feature-page .account-panel>h2,.feature-page .account-panel>h3{display:flex;align-items:center;gap:9px;margin:0 0 13px;color:#f2f6fd;font-size:16px;font-weight:900;letter-spacing:-.25px}
+.feature-page .account-panel>h3:before{content:"";width:3px;height:17px;border-radius:3px;background:linear-gradient(#42a5ff,#1677ff);box-shadow:0 0 12px #1677ff66}
+.feature-page .notice{margin:10px 0;padding:14px;border:1px solid #2a3a50;border-radius:10px;background:linear-gradient(135deg,#172437,#111a27);color:#dbe6f6;box-shadow:inset 0 1px #ffffff08}
+.feature-page .notice>b,.feature-page .notice>strong{display:block;color:#f5f8ff;font-size:13px;line-height:1.55}
+.feature-page .notice p{line-height:1.75}
+.feature-page .form-stack{gap:12px}
+.feature-page .form-stack label{gap:7px;color:#cbd7e8;font-size:11px;font-weight:800;letter-spacing:.1px}
+.feature-page .form-stack input,.feature-page .form-stack textarea,.feature-page .form-stack select,.form-stack select{width:100%;min-height:46px;padding:12px 13px;border:1px solid #30445e;border-radius:9px;background:#091321;color:#f3f7ff;font-size:13px;box-shadow:inset 0 1px 3px #0003; color-scheme:dark}
+.feature-page .form-stack textarea{min-height:88px;line-height:1.65}
+.feature-page .form-stack input:focus,.feature-page .form-stack textarea:focus,.feature-page .form-stack select:focus{border-color:#328dff;box-shadow:0 0 0 3px #1677ff20,0 0 18px #1677ff12}
+.feature-page .form-stack .primary-btn,.feature-page .form-stack .secondary-btn{width:100%;min-height:47px;margin-top:3px;border-radius:9px}
+.feature-page .form-stack .secondary-btn{background:#17283e;border:1px solid #35577f}
+.feature-page .admin-counts{gap:9px;margin:12px 0}
+.feature-page .admin-count{min-height:94px;justify-content:center;padding:14px;border:1px solid #2b405b;border-radius:11px;background:radial-gradient(circle at 100% 0,#1677ff20,transparent 58%),#111b29}
+.feature-page .admin-count strong{font-size:clamp(20px,6vw,27px);line-height:1.15;overflow-wrap:anywhere}
+.feature-page .admin-count small{font-size:10px;line-height:1.5;color:#9aabc2}
+.feature-page .service-tags span{border:1px solid #2a405d;border-radius:6px;background:#142238;color:#c9dcf5}
+.feature-page .pill{padding:5px 8px;border-radius:5px;font-weight:850;letter-spacing:.3px}
+.feature-page .text-button{min-height:34px;padding:6px 8px;border-radius:7px}
+.feature-page .text-button:active{background:#1677ff18}
+.feature-page .secondary-btn{min-height:42px;border-radius:8px}
+.feature-page .secondary-btn:active{transform:scale(.985)}
+.feature-page .error-state{margin:12px 0;padding:16px;border:1px solid #8c653b;border-radius:10px;background:#2a2118;color:#f1d7b7}
+.feature-page .loading-state{padding:34px 12px;border:1px solid var(--line);border-radius:12px;background:#101722}
+.feature-page .empty-state{margin:12px 0;border:1px dashed #354b68;border-radius:12px;background:#101925}
+.inline-feature-form{margin-top:13px;padding-top:12px;border-top:1px solid #2b3b50}
+.feature-page img.item-image{width:100%;max-height:260px;border-radius:9px;object-fit:cover}
+.feature-page .form-row{align-items:end;gap:9px}
+.feature-page .form-row label{min-width:0}
+.feature-page .form-note{margin:4px 0 0}
+.feature-page .account-panel+.account-panel{margin-top:14px}
+.feature-page .account-panel .account-panel{padding:13px;background:#0c1420}
+@media(min-width:600px){.feature-page{padding-top:30px}.feature-page .account-panel{padding:21px}.feature-page .admin-counts{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:370px){.feature-page{padding-top:18px}.feature-page .account-panel{padding:14px 12px}.feature-page .section-heading{padding:14px 12px}.feature-page .form-row{grid-template-columns:1fr 1fr}.feature-page .admin-count{padding:11px}}
+/* Consistent service-centre and workshop navigation cards */
+.feature-page .service-card{min-height:132px;border-radius:11px}
+.feature-page .service-card strong{font-size:13px}
+.feature-page .service-card .service-icon{margin-bottom:10px}
