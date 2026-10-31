@@ -22,6 +22,8 @@ class MobileAccountController extends Controller
                 'email' => $user->email,
                 'phone' => $user->phone,
                 'is_admin' => (bool) $user->is_admin,
+                'avatar_url' => $user->avatar_path ? url('/storage/' . ltrim($user->avatar_path, '/')) : null,
+                'created_at' => $user->created_at?->toIso8601String(),
             ],
         ]);
     }
@@ -31,16 +33,37 @@ class MobileAccountController extends Controller
         $data = $request->validate([
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'phone' => ['sometimes', 'nullable', 'string', 'max:30', 'regex:/^[0-9+\-\s()]+$/'],
+            'avatar' => ['sometimes', 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
         $user = $request->user();
+        $avatar = $request->file('avatar');
+        unset($data['avatar']);
         $user->fill($data);
+
+        if ($avatar) {
+            $oldAvatar = $user->avatar_path;
+            $newAvatar = $avatar->store('avatars', 'public');
+
+            if ($newAvatar === false) {
+                return response()->json(['message' => 'პროფილის ფოტოს შენახვა ვერ მოხერხდა.'], 500);
+            }
+
+            $user->avatar_path = $newAvatar;
+        }
+
         $user->save();
+
+        if ($avatar && $oldAvatar) {
+            Storage::disk('public')->delete($oldAvatar);
+        }
 
         return response()->json([
             'message' => 'პროფილი განახლდა.',
             'user' => [
                 'id' => $user->id, 'name' => $user->name,
                 'email' => $user->email, 'phone' => $user->phone, 'is_admin' => (bool) $user->is_admin,
+                'avatar_url' => $user->avatar_path ? url('/storage/' . ltrim($user->avatar_path, '/')) : null,
+                'created_at' => $user->created_at?->toIso8601String(),
             ],
         ]);
     }

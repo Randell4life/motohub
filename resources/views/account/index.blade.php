@@ -1087,7 +1087,46 @@
                 font-size: 11px;
             }
         }
-    </style>
+    
+/* Premium personal profile */
+.profile-section{padding-top:12px}
+.profile-hero{position:relative;display:flex;align-items:center;justify-content:space-between;gap:20px;overflow:hidden;margin-bottom:18px;padding:25px 28px;border:1px solid #2b4c72;border-radius:18px;background:radial-gradient(ellipse at 85% 0%,#1677ff3a,transparent 48%),linear-gradient(115deg,#13243a,#0a1422 76%)}
+.profile-hero-copy{position:relative;z-index:1}
+.profile-hero h2{margin:8px 0 5px;font-size:clamp(25px,3vw,34px);font-weight:950;letter-spacing:-1px}
+.profile-hero h2 span{color:#58aaff}
+.profile-hero p{max-width:510px;margin:0;color:#9aacc5;font-size:12px;line-height:1.7}
+.profile-hero-mark{position:absolute;right:24px;top:50%;transform:translateY(-50%);color:#ffffff08;font-size:112px;font-weight:1000;letter-spacing:-10px;pointer-events:none}
+.profile-grid{grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:18px}
+.profile-identity-panel,.profile-edit-panel{padding:24px;border-color:#2a4565;background:linear-gradient(145deg,#121f31,#0a1421);box-shadow:0 16px 40px #0003}
+.profile-person{gap:16px;margin-bottom:18px}
+.profile-person .profile-large-avatar{width:76px;height:76px;flex:0 0 76px;border:2px solid #438bd0;border-radius:19px;background:linear-gradient(145deg,#1c4778,#10243f);box-shadow:0 0 25px #1677ff22;font-size:29px}
+.profile-identity-copy{min-width:0}
+.profile-kicker{display:block;margin-bottom:5px;color:#66b3ff;font-size:9px;font-weight:900;letter-spacing:1.5px}
+.profile-identity-copy h3{font-size:20px!important;font-weight:900;letter-spacing:-.5px}
+.profile-identity-copy p{font-size:11px;overflow-wrap:anywhere}
+.profile-status-line{display:flex;align-items:center;gap:8px;margin:0 0 10px;padding:9px 11px;border:1px solid #235a4a;border-radius:8px;background:#103126;color:#8de5bd;font-size:10px;font-weight:800}
+.profile-status-dot{width:7px;height:7px;border-radius:50%;background:#37d6a0;box-shadow:0 0 10px #37d6a0}
+.profile-identity-panel .info-line{padding:12px 2px;border-color:#263c57}
+.profile-identity-panel .info-value{font-size:13px}
+.profile-edit-heading{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:13px}
+.profile-edit-heading h3{margin:0 0 5px;font-size:18px;font-weight:900}
+.profile-edit-heading .panel-description{margin:0;font-size:11px}
+.profile-edit-icon{display:grid;place-items:center;width:37px;height:37px;border:1px solid #315982;border-radius:10px;background:#142e4b;color:#80c1ff;font-size:18px}
+.profile-upload-row{display:flex;align-items:center;gap:15px;padding:14px;border:1px dashed #365c84;border-radius:12px;background:#0b1726}
+.profile-upload-preview{display:grid;place-items:center;width:66px;height:66px;flex:0 0 66px;overflow:hidden;border:1px solid #3a7db7;border-radius:15px;background:#16365a;color:#a8d5ff;font-size:22px;font-weight:900}
+.profile-upload-control{min-width:0;flex:1}
+.profile-upload-control input[type=file]{width:100%;max-width:100%;color:#aebed3;font-size:11px}
+.profile-upload-control small{display:block;margin-top:6px;color:#8198b5;font-size:10px}
+.profile-error{color:#ff9aa7!important}
+.profile-edit-panel .form-group{margin-top:18px}
+.profile-edit-panel .form-group input:not([type=file]){min-height:48px;padding:12px 14px;border:1px solid #2b425f;border-radius:10px;background:#091522;color:#f4f8ff}
+.profile-edit-panel .form-group input:focus{border-color:#2785ff;box-shadow:0 0 0 3px #2785ff20}
+.profile-save-btn{width:100%;min-height:48px;margin-top:20px}
+.profile-save-btn span{font-size:15px}
+@media(max-width:900px){.profile-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.profile-hero{padding:20px 18px;border-radius:14px}.profile-hero-mark{right:8px;font-size:76px}.profile-grid{gap:12px}.profile-identity-panel,.profile-edit-panel{padding:17px;border-radius:13px}.profile-person .profile-large-avatar{width:64px;height:64px;flex-basis:64px}.profile-identity-copy h3{font-size:17px!important}.profile-upload-row{align-items:flex-start;flex-direction:column}.profile-upload-control{width:100%}}
+
+</style>
 </head>
 
 <body>
@@ -1253,119 +1292,63 @@
                 </div>
             </section>
 
-            <section class="section" id="profile">
-                <div class="section-heading">
-                    <div>
-                        <h2>ჩემი პროფილი</h2>
-                        <p>პირადი ინფორმაცია და საკონტაქტო მონაცემები</p>
+            <section class="section profile-section" id="profile">
+                <div class="profile-hero">
+                    <div class="profile-hero-copy">
+                        <span class="eyebrow">MOTOHUB / PERSONAL SPACE</span>
+                        <h2>შენი პროფილი<span>.</span></h2>
+                        <p>მართე შენი პირადი ინფორმაცია და საკონტაქტო მონაცემები ერთი სივრციდან.</p>
                     </div>
+                    <div class="profile-hero-mark">MH</div>
                 </div>
-
                 <div class="profile-grid">
-                    <div class="panel">
+                    <div class="panel profile-identity-panel">
                         <div class="profile-person">
                             @if ($user->avatar_path)
-    <img src="{{ asset('storage/' . $user->avatar_path) }}" alt="პროფილის ფოტო" class="avatar" style="object-fit: cover;">
-@else
-    <div class="avatar">{{ $initial }}</div>
-@endif
-                            <div>
+                                <img src="{{ asset('storage/' . $user->avatar_path) }}" alt="პროფილის ფოტო" class="avatar profile-large-avatar" style="object-fit:cover;">
+                            @else
+                                <div class="avatar profile-large-avatar">{{ $initial }}</div>
+                            @endif
+                            <div class="profile-identity-copy">
+                                <span class="profile-kicker">MOTOHUB MEMBER</span>
                                 <h3>{{ $user->name }}</h3>
                                 <p>{{ $user->email }}</p>
                             </div>
                         </div>
-
-                        <div class="info-line">
-                            <span class="info-label">სახელი</span>
-                            <span class="info-value">{{ $user->name }}</span>
-                        </div>
-
-                        <div class="info-line">
-                            <span class="info-label">ელფოსტა</span>
-                            <span class="info-value">{{ $user->email }}</span>
-                        </div>
-
-                        <div class="info-line">
-                            <span class="info-label">ტელეფონი</span>
-                            <span class="info-value">
-                                {{ $user->phone ?: 'ტელეფონი ჯერ არ არის მითითებული' }}
-                            </span>
-                        </div>
+                        <div class="profile-status-line"><span class="profile-status-dot"></span> ანგარიში აქტიურია</div>
+                        <div class="info-line"><span class="info-label">სახელი და გვარი</span><span class="info-value">{{ $user->name }}</span></div>
+                        <div class="info-line"><span class="info-label">ელფოსტა</span><span class="info-value">{{ $user->email }}</span></div>
+                        <div class="info-line"><span class="info-label">ტელეფონი</span><span class="info-value">{{ $user->phone ?: 'ტელეფონი ჯერ არ არის მითითებული' }}</span></div>
+                        <div class="info-line"><span class="info-label">MotoHub წევრი</span><span class="info-value">{{ $user->created_at?->format('d.m.Y') ?? '—' }}</span></div>
                     </div>
-
-                    <div class="panel">
-                        <h3>საკონტაქტო ინფორმაციის განახლება</h3>
-                        <p class="panel-description">
-                            მიუთითე აქტიური ტელეფონის ნომერი.
-                        </p>
-
-<form action="{{ route('account.profile.update') }}"
-      method="POST"
-      enctype="multipart/form-data">
+                    <div class="panel profile-edit-panel">
+                        <div class="profile-edit-heading"><div><span class="profile-kicker">ACCOUNT SETTINGS</span><h3>პირადი მონაცემების მართვა</h3><p class="panel-description">განაახლე პროფილის ფოტო და ტელეფონის ნომერი.</p></div><span class="profile-edit-icon">✎</span></div>
+                        <form action="{{ route('account.profile.update') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
-
-                            <div class="form-group">
-    <label for="avatar">პროფილის ფოტო</label>
-
-    @if ($user->avatar_path)
-        <div style="margin-bottom: 12px;">
-            <img
-                src="{{ asset('storage/' . $user->avatar_path) }}"
-                alt="პროფილის ფოტო"
-                style="width: 80px; height: 80px; object-fit: cover; border-radius: 16px;"
-            >
-        </div>
-    @endif
-
-    <input
-        type="file"
-        id="avatar"
-        name="avatar"
-        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-    >
-
-    @error('avatar')
-        <small style="color: #dc2626;">{{ $message }}</small>
-    @enderror
-
-    <small>JPG, PNG ან WEBP — მაქსიმუმ 5 მბ.</small>
-</div>
-
-
-                            <div class="form-group">
-                                <label for="phone">ტელეფონის ნომერი</label>
-
-                                <input
-                                    type="tel"
-                                    id="phone"
-                                    name="phone"
-                                    value="{{ old('phone', $user->phone) }}"
-                                    placeholder="+995 5XX XX XX XX"
-                                    autocomplete="tel"
-                                >
-
-                                @error('phone')
-                                    <span class="form-help" style="color:#ff8995">
-                                        {{ $message }}
-                                    </span>
-                                @enderror
-
-                                <span class="form-help">
-                                    ნომერი გამოიყენება შენთან დასაკავშირებლად.
-                                </span>
+                            <div class="form-group profile-photo-field">
+                                <label for="avatar">პროფილის ფოტო</label>
+                                <div class="profile-upload-row">
+                                    <div class="profile-upload-preview">
+                                        @if ($user->avatar_path)
+                                            <img src="{{ asset('storage/' . $user->avatar_path) }}" alt="პროფილის ფოტო" style="width:100%;height:100%;object-fit:cover;">
+                                        @else
+                                            <span>{{ $initial }}</span>
+                                        @endif
+                                    </div>
+                                    <div class="profile-upload-control">
+                                        <input type="file" id="avatar" name="avatar" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+                                        <small>JPG, PNG ან WEBP · მაქსიმუმ 5 მბ</small>
+                                        @error('avatar')<span class="form-help profile-error">{{ $message }}</span>@enderror
+                                    </div>
+                                </div>
                             </div>
-
-                            <button type="submit"
-                                    class="btn btn-primary"
-                                    style="margin-top:16px">
-                                ინფორმაციის შენახვა
-                            </button>
+                            <div class="form-group"><label for="phone">ტელეფონის ნომერი</label><input type="tel" id="phone" name="phone" value="{{ old('phone', $user->phone) }}" placeholder="+995 5XX XX XX XX" autocomplete="tel">@error('phone')<span class="form-help profile-error">{{ $message }}</span>@enderror<span class="form-help">ნომერი გამოიყენება შენთან დასაკავშირებლად.</span></div>
+                            <button type="submit" class="btn btn-primary profile-save-btn"><span>✓</span> ცვლილებების შენახვა</button>
                         </form>
                     </div>
                 </div>
             </section>
-
             <section class="section" id="motorcycles">
                 <div class="section-heading">
                     <div>
