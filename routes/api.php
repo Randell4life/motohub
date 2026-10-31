@@ -19,6 +19,7 @@ Route::prefix('mobile')->group(function () {
     Route::get('/part-listings', [MobileCatalogController::class, 'partListings']);
     Route::get('/rentals', [MobileCatalogController::class, 'rentals']);
     Route::get('/service-centers', [MobileCatalogController::class, 'serviceCenters']);
+    Route::get('/service-centers/{serviceCenter:slug}/availability', [\\App\\Http\\Controllers\\ServiceCenterController::class, 'availability']);
     Route::get('/workshops', [MobileCatalogController::class, 'workshops']);
     Route::post('/workshops/{slug}/bookings', [MobileBookingController::class, 'workshopBooking'])->middleware('throttle:5,1');
     Route::get('/motorcycles/{motorcycle}/passport', [MobilePassportController::class, 'show'])->whereNumber('motorcycle');
