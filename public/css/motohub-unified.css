@@ -96,3 +96,28 @@ a:hover { color: var(--blue2); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+/* Bring legacy service-center orange accents into the blue MotoHub identity */
+.sc-button {
+  border-color: #168bff !important;
+  background: linear-gradient(135deg,#0865e8,#159cff) !important;
+  color: #fff !important;
+}
+.sc-button:hover {
+  background: linear-gradient(135deg,#0878ff,#25baff) !important;
+  box-shadow: 0 8px 25px rgba(8,120,255,.2) !important;
+}
+.sc-hero::after {
+  border-color: rgba(37,186,255,.18) !important;
+  box-shadow: 0 0 0 45px rgba(37,186,255,.025),0 0 0 90px rgba(37,186,255,.018) !important;
+}
+.sc-benefit:hover { border-color: rgba(22,119,255,.35) !important; }
+.sc-benefit-icon {
+  border-color: rgba(22,119,255,.3) !important;
+  background: rgba(22,119,255,.1) !important;
+  color: var(--blue2) !important;
+}
+.sc-live-dot {
+  background: var(--blue2) !important;
+  box-shadow: 0 0 12px rgba(37,186,255,.45) !important;
+}
