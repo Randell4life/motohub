@@ -10,16 +10,27 @@ use Illuminate\View\View;
 
 class RentalController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         $scooters = RentalScooter::query()
             ->where('status', 'active')
-            ->latest()
-            ->paginate(9);
+            ->when($request->filled('q'), function ($query) use ($request) {
+                $term = trim((string) $request->query('q'));
+                $query->where(fn ($where) => $where->where('title', 'like', "%{$term}%")
+                    ->orWhere('brand', 'like', "%{$term}%")
+                    ->orWhere('model', 'like', "%{$term}%"));
+            })
+            ->when($request->filled('location'), fn ($query) => $query->where('location', 'like', '%' . trim((string) $request->query('location')) . '%'))
+            ->when($request->filled('max_rate') && is_numeric($request->query('max_rate')), fn ($query) => $query->where('daily_rate', '<=', (float) $request->query('max_rate')))
+            ->when($request->filled('min_cc') && is_numeric($request->query('min_cc')), fn ($query) => $query->where('engine_cc', '>=', (int) $request->query('min_cc')))
+            ->when($request->query('sort') === 'price_asc', fn ($query) => $query->orderBy('daily_rate'))
+            ->when($request->query('sort') === 'price_desc', fn ($query) => $query->orderByDesc('daily_rate'))
+            ->when($request->query('sort') === 'engine_desc', fn ($query) => $query->orderByDesc('engine_cc'))
+            ->when(!in_array($request->query('sort'), ['price_asc', 'price_desc', 'engine_desc'], true), fn ($query) => $query->latest())
+            ->paginate(9)->withQueryString();
 
         return view('rentals.index', compact('scooters'));
     }
-
     public function show(RentalScooter $rentalScooter): View
     {
         abort_unless($rentalScooter->status === 'active', 404);
