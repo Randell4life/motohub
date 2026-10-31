@@ -38,7 +38,7 @@ use App\Models\Part;
 
 /*
 |--------------------------------------------------------------------------
-| მთავარი გვერდი
+| бѓ›бѓ—бѓђбѓ•бѓђбѓ бѓ бѓ’бѓ•бѓ”бѓ бѓ“бѓ
 |--------------------------------------------------------------------------
 */
 
@@ -136,7 +136,7 @@ return view('home', compact(
 
 /*
 |--------------------------------------------------------------------------
-| სათადარიგო ნაწილების მოთხოვნები
+| бѓЎбѓђбѓ—бѓђбѓ“бѓђбѓ бѓбѓ’бѓќ бѓњбѓђбѓ¬бѓбѓљбѓ”бѓ‘бѓбѓЎ бѓ›бѓќбѓ—бѓ®бѓќбѓ•бѓњбѓ”бѓ‘бѓ
 |--------------------------------------------------------------------------
 */
 
@@ -150,7 +150,7 @@ Route::post('/part-requests', [PartRequestController::class, 'store'])
 
 /*
 |--------------------------------------------------------------------------
-| გაქირავება
+| бѓ’бѓђбѓҐбѓбѓ бѓђбѓ•бѓ”бѓ‘бѓђ
 |--------------------------------------------------------------------------
 */
 
@@ -171,7 +171,7 @@ Route::post('/rentals/{rentalScooter:slug}/bookings', [
 
 /*
 |--------------------------------------------------------------------------
-| MotoTransport — მოტოციკლების ტრანსპორტირება
+| MotoTransport вЂ” бѓ›бѓќбѓўбѓќбѓЄбѓбѓ™бѓљбѓ”бѓ‘бѓбѓЎ бѓўбѓ бѓђбѓњбѓЎбѓћбѓќбѓ бѓўбѓбѓ бѓ”бѓ‘бѓђ
 |--------------------------------------------------------------------------
 */
 
@@ -195,7 +195,7 @@ Route::post('/transport', [TransportController::class, 'store'])
     ->middleware('throttle:5,1')
     ->name('transport.store');
 
-// გადამზიდავის პანელი
+// бѓ’бѓђбѓ“бѓђбѓ›бѓ–бѓбѓ“бѓђбѓ•бѓбѓЎ бѓћбѓђбѓњбѓ”бѓљбѓ
 Route::middleware('auth')
     ->prefix('transport/partner')
     ->name('transport.partner.')
@@ -237,7 +237,7 @@ Route::get('/orders/{transportRequest}', [
     ->name('requests.status');    
     });
 
-// მომხმარებლის პირადი ტრანსპორტირების გვერდები
+// бѓ›бѓќбѓ›бѓ®бѓ›бѓђбѓ бѓ”бѓ‘бѓљбѓбѓЎ бѓћбѓбѓ бѓђбѓ“бѓ бѓўбѓ бѓђбѓњбѓЎбѓћбѓќбѓ бѓўбѓбѓ бѓ”бѓ‘бѓбѓЎ бѓ’бѓ•бѓ”бѓ бѓ“бѓ”бѓ‘бѓ
 Route::middleware('auth')
     ->prefix('account')
     ->name('account.')
@@ -263,7 +263,7 @@ Route::get('/transport/{transportRequest}', [
 
 
 /*    |--------------------------------------------------------------------------
-| მოტოციკლების კატალოგი
+| бѓ›бѓќбѓўбѓќбѓЄбѓбѓ™бѓљбѓ”бѓ‘бѓбѓЎ бѓ™бѓђбѓўбѓђбѓљбѓќбѓ’бѓ
 |--------------------------------------------------------------------------
 */
 
@@ -285,7 +285,7 @@ Route::get('/motorcycles/{motorcycle:slug}', function (Motorcycle $motorcycle) {
 
 /*
 |--------------------------------------------------------------------------
-| რეგისტრაცია და ავტორიზაცია
+| бѓ бѓ”бѓ’бѓбѓЎбѓўбѓ бѓђбѓЄбѓбѓђ бѓ“бѓђ бѓђбѓ•бѓўбѓќбѓ бѓбѓ–бѓђбѓЄбѓбѓђ
 |--------------------------------------------------------------------------
 */
 
@@ -308,7 +308,7 @@ Route::middleware('guest')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| სათადარიგო ნაწილების კატალოგი
+| бѓЎбѓђбѓ—бѓђбѓ“бѓђбѓ бѓбѓ’бѓќ бѓњбѓђбѓ¬бѓбѓљбѓ”бѓ‘бѓбѓЎ бѓ™бѓђбѓўбѓђбѓљбѓќбѓ’бѓ
 |--------------------------------------------------------------------------
 */
 
@@ -324,7 +324,7 @@ Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
     
-// ახალი და მეორადი ნაწილების განცხადებები
+// бѓђбѓ®бѓђбѓљбѓ бѓ“бѓђ бѓ›бѓ”бѓќбѓ бѓђбѓ“бѓ бѓњбѓђбѓ¬бѓбѓљбѓ”бѓ‘бѓбѓЎ бѓ’бѓђбѓњбѓЄбѓ®бѓђбѓ“бѓ”бѓ‘бѓ”бѓ‘бѓ
 Route::get('/parts/new', fn () => redirect()->route('parts.index', ['source' => 'marketplace', 'condition' => 'new']))
     ->name('part-listings.new');
 
@@ -333,7 +333,7 @@ Route::get('/parts/used', fn () => redirect()->route('parts.index', ['source' =>
 
 /*
 |--------------------------------------------------------------------------
-| მომხმარებლის პირადი კაბინეტი
+| бѓ›бѓќбѓ›бѓ®бѓ›бѓђбѓ бѓ”бѓ‘бѓљбѓбѓЎ бѓћбѓбѓ бѓђбѓ“бѓ бѓ™бѓђбѓ‘бѓбѓњбѓ”бѓўбѓ
 |--------------------------------------------------------------------------
 */
 
@@ -378,7 +378,7 @@ Route::middleware('auth')
             ->name('profile.update');
  
 
-        // ნაწილების განცხადებების მართვა
+        // бѓњбѓђбѓ¬бѓбѓљбѓ”бѓ‘бѓбѓЎ бѓ’бѓђбѓњбѓЄбѓ®бѓђбѓ“бѓ”бѓ‘бѓ”бѓ‘бѓбѓЎ бѓ›бѓђбѓ бѓ—бѓ•бѓђ
 Route::get('/part-listings', [PartListingController::class, 'accountIndex'])
     ->name('part-listings.index');
 
@@ -405,7 +405,7 @@ Route::delete('/part-listings/{partListing}', [PartListingController::class, 'de
 
 /*
 |--------------------------------------------------------------------------
-| ძველი საჯარო სახელოსნოების სისტემა
+| бѓ«бѓ•бѓ”бѓљбѓ бѓЎбѓђбѓЇбѓђбѓ бѓќ бѓЎбѓђбѓ®бѓ”бѓљбѓќбѓЎбѓњбѓќбѓ”бѓ‘бѓбѓЎ бѓЎбѓбѓЎбѓўбѓ”бѓ›бѓђ
 |--------------------------------------------------------------------------
 */
 
@@ -452,7 +452,7 @@ Route::post('/workshops/{slug}/booking', [
 
 /*
 |--------------------------------------------------------------------------
-| ავტორიზებული სახელოსნოს მართვის სისტემა
+| бѓђбѓ•бѓўбѓќбѓ бѓбѓ–бѓ”бѓ‘бѓЈбѓљбѓ бѓЎбѓђбѓ®бѓ”бѓљбѓќбѓЎбѓњбѓќбѓЎ бѓ›бѓђбѓ бѓ—бѓ•бѓбѓЎ бѓЎбѓбѓЎбѓўбѓ”бѓ›бѓђ
 |--------------------------------------------------------------------------
 */
 
@@ -545,7 +545,7 @@ Route::middleware('auth')
 
 /*
 |--------------------------------------------------------------------------
-| MotoHub — მომხმარებლის სერვისის ჯავშნები
+| MotoHub вЂ” бѓ›бѓќбѓ›бѓ®бѓ›бѓђбѓ бѓ”бѓ‘бѓљбѓбѓЎ бѓЎбѓ”бѓ бѓ•бѓбѓЎбѓбѓЎ бѓЇбѓђбѓ•бѓЁбѓњбѓ”бѓ‘бѓ
 |--------------------------------------------------------------------------
 */
 
@@ -568,9 +568,9 @@ Route::middleware('auth')
 
 /*
 |--------------------------------------------------------------------------
-| Workshops1 — ახალი, დამოუკიდებელი სისტემა
+| Workshops1 вЂ” бѓђбѓ®бѓђбѓљбѓ, бѓ“бѓђбѓ›бѓќбѓЈбѓ™бѓбѓ“бѓ”бѓ‘бѓ”бѓљбѓ бѓЎбѓбѓЎбѓўбѓ”бѓ›бѓђ
 |--------------------------------------------------------------------------
-| ეს მარშრუტები განზრახ მოთავსებულია auth ჯგუფის გარეთ.
+| бѓ”бѓЎ бѓ›бѓђбѓ бѓЁбѓ бѓЈбѓўбѓ”бѓ‘бѓ бѓ’бѓђбѓњбѓ–бѓ бѓђбѓ® бѓ›бѓќбѓ—бѓђбѓ•бѓЎбѓ”бѓ‘бѓЈбѓљбѓбѓђ auth бѓЇбѓ’бѓЈбѓ¤бѓбѓЎ бѓ’бѓђбѓ бѓ”бѓ—.
 */
 
 Route::get('/workshops1', [
@@ -595,12 +595,15 @@ Route::post('/workshops1/{slug}/booking', [
 
 /*
 |--------------------------------------------------------------------------
-| MotoHub — სახელოსნოები და ონლაინ დაჯავშნა
+| MotoHub вЂ” бѓЎбѓђбѓ®бѓ”бѓљбѓќбѓЎбѓњбѓќбѓ”бѓ‘бѓ бѓ“бѓђ бѓќбѓњбѓљбѓђбѓбѓњ бѓ“бѓђбѓЇбѓђбѓ•бѓЁбѓњбѓђ
 |--------------------------------------------------------------------------
 */
 
 Route::get('/service-centers', [ServiceCenterController::class, 'index'])
     ->name('service-centers.index');
+
+Route::get('/service-work-orders/{token}', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'customerStatus'])
+    ->middleware('throttle:30,1')->name('service-centers.work-orders.status');
 
 Route::get('/service-centers/{serviceCenter:slug}', [
     ServiceCenterController::class,
@@ -688,6 +691,30 @@ Route::get('/my-service-center/profile', [
     'availability',
 ])->name('service-centers.availability');   
 
+Route::get('/my-service-center/operations', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'index'])
+    ->name('my-service-center.operations');
+
+Route::post('/my-service-center/technicians', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'storeTechnician'])
+    ->name('my-service-center.technicians.store');
+
+Route::post('/my-service-center/bays', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'storeBay'])
+    ->name('my-service-center.bays.store');
+
+Route::post('/my-service-center/inventory', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'storeInventory'])
+    ->name('my-service-center.inventory.store');
+
+Route::patch('/my-service-center/work-orders/{workOrder}/assignment', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'assign'])
+    ->whereNumber('workOrder')->name('my-service-center.work-orders.assignment');
+
+Route::post('/my-service-center/work-orders/{workOrder}/parts', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'addPart'])
+    ->whereNumber('workOrder')->name('my-service-center.work-orders.parts');
+
+Route::post('/my-service-center/work-orders/{workOrder}/payments', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'payment'])
+    ->whereNumber('workOrder')->name('my-service-center.work-orders.payments');
+
+Route::post('/my-service-center/work-orders/{workOrder}/updates', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'notify'])
+    ->whereNumber('workOrder')->name('my-service-center.work-orders.updates');
+
 Route::get(
     '/my-service-center/work-orders',
     [\App\Http\Controllers\WorkOrderController::class, 'index']
@@ -727,7 +754,7 @@ Route::put(
 
 /*
 |--------------------------------------------------------------------------
-| MotoHub — პირადი შეტყობინებები
+| MotoHub вЂ” бѓћбѓбѓ бѓђбѓ“бѓ бѓЁбѓ”бѓўбѓ§бѓќбѓ‘бѓбѓњбѓ”бѓ‘бѓ”бѓ‘бѓ
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
@@ -751,7 +778,7 @@ Route::middleware('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| MotoHub Community — მოტო საზოგადოება
+| MotoHub Community вЂ” бѓ›бѓќбѓўбѓќ бѓЎбѓђбѓ–бѓќбѓ’бѓђбѓ“бѓќбѓ”бѓ‘бѓђ
 |--------------------------------------------------------------------------
 */
 Route::get('/community', [CommunityController::class, 'index'])
@@ -783,7 +810,7 @@ Route::middleware('auth')->prefix('community')->name('community.')->group(functi
 
 /*
 |--------------------------------------------------------------------------
-| MotoHub Growth — My Garage, Marketplace 2.0 and Moto Clubs
+| MotoHub Growth вЂ” My Garage, Marketplace 2.0 and Moto Clubs
 |--------------------------------------------------------------------------
 */
 Route::get('/hub', [\App\Http\Controllers\MotoHubFeaturesController::class, 'hub'])

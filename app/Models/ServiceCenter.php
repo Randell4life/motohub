@@ -49,4 +49,24 @@ class ServiceCenter extends Model
         return $query->where('is_active', true)
             ->where('approval_status', 'approved');
     }
+    public function technicians(): HasMany
+    {
+        return $this->hasMany(ServiceCenterTechnician::class);
+    }
+
+    public function bays(): HasMany
+    {
+        return $this->hasMany(ServiceCenterBay::class);
+    }
+
+    public function inventory(): HasMany
+    {
+        return $this->hasMany(ServiceCenterInventoryItem::class, 'service_center_id');
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(ServiceCenterPayment::class);
+    }
+
 }

@@ -207,14 +207,24 @@ public function show(WorkOrder $workOrder)
         404
     );
 
+    // ძველი შეკვეთებისთვის საჯარო ტოკენის გენერაცია
+if (blank($workOrder->public_token)) {
+    $workOrder->forceFill([
+        'public_token' => (string) \Illuminate\Support\Str::uuid(),
+    ])->save();
+}
+
     $workOrder->load([
         'serviceBooking.service',
         'assignedTechnician',
+        'technician', 'bay', 'parts.inventoryItem', 'payments', 'activityLogs',
     ]);
+
+    $inventory = $center->inventory()->where('is_active', true)->where('quantity', '>', 0)->orderBy('name')->get();
 
     return view(
         'my-service-center.work-orders.show',
-        compact('center', 'workOrder')
+        compact('center', 'workOrder', 'inventory')
     );
 }
 
