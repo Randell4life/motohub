@@ -377,7 +377,7 @@ class MobileExtendedController extends Controller
             ->with(['serviceBooking', 'technician', 'bay', 'parts.inventoryItem', 'payments'])->latest()->limit(60)->get();
         return response()->json([
             'center' => $center->load(['services', 'hours']),
-            'bookings' => $center->bookings()->with('service')->latest('scheduled_at')->limit(60)->get(),
+            'bookings' => $center->bookings()->with(['service','workOrder'])->latest('scheduled_at')->limit(60)->get(),
             'orders' => $orders,
             'technicians' => $center->technicians()->orderBy('name')->get(),
             'bays' => $center->bays()->orderBy('name')->get(),
@@ -624,6 +624,29 @@ class MobileExtendedController extends Controller
         while(\App\Models\Partner::where('slug',$slug)->exists()) $slug=Str::slug($data['name']).'-'.Str::lower(Str::random(5));
         $partner=\App\Models\Partner::create($data+['user_id'=>$request->user()->id,'slug'=>$slug,'type'=>'workshop','is_active'=>false,'application_status'=>'pending']);
         return response()->json(['message'=>'სახელოსნოს განაცხადი გაიგზავნა დასამტკიცებლად.','partner'=>$partner],201);
+    }
+
+
+    public function createServiceWorkOrder(Request $request)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id',$request->user()->id)->firstOrFail();
+        $data = $request->validate([
+            'service_booking_id'=>['required','integer','exists:service_center_bookings,id'],
+            'intake_odometer'=>['nullable','integer','min:0'],'intake_condition'=>['nullable','string','max:5000'],
+            'diagnosis'=>['nullable','string','max:10000'],'work_description'=>['nullable','string','max:10000'],
+            'notes'=>['nullable','string','max:10000'],'labor_cost'=>['nullable','numeric','min:0'],'parts_cost'=>['nullable','numeric','min:0'],
+        ]);
+        $booking = \App\Models\ServiceBooking::where('service_center_id',$center->id)->findOrFail($data['service_booking_id']);
+        abort_if(\App\Models\WorkOrder::where('service_booking_id',$booking->id)->exists(),409,'ამ ჯავშანზე სამუშაო შეკვეთა უკვე არსებობს.');
+        $labor=(float)($data['labor_cost']??0);$parts=(float)($data['parts_cost']??0);
+        $order=\App\Models\WorkOrder::create([
+            'order_number'=>'WO-'.now()->format('Ymd').'-'.strtoupper(bin2hex(random_bytes(4))),
+            'service_booking_id'=>$booking->id,'service_center_id'=>$center->id,'status'=>'received',
+            'intake_odometer'=>$data['intake_odometer']??null,'intake_condition'=>$data['intake_condition']??null,
+            'diagnosis'=>$data['diagnosis']??null,'work_description'=>$data['work_description']??null,
+            'notes'=>$data['notes']??null,'labor_cost'=>$labor,'parts_cost'=>$parts,'total_cost'=>$labor+$parts,
+        ]);
+        return response()->json(['message'=>'სამუშაო შეკვეთა შეიქმნა: '.$order->order_number,'work_order'=>$order],201);
     }
 
 }
