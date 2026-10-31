@@ -187,7 +187,7 @@ class MobileExtendedController extends Controller
         $userId = $request->user()->id;
         $clubs = DB::table('moto_clubs')->leftJoin('moto_club_members', function ($join) {
             $join->on('moto_club_members.club_id', '=', 'moto_clubs.id')->where('moto_club_members.status', '=', 'active');
-        })->select('moto_clubs.id', 'moto_clubs.name', 'moto_clubs.slug', 'moto_clubs.city', 'moto_clubs.description', 'moto_clubs.is_public')
+        })->select('moto_clubs.id', 'moto_clubs.name', 'moto_clubs.slug', 'moto_clubs.city', 'moto_clubs.description', 'moto_clubs.is_public', 'moto_clubs.owner_id')
             ->selectRaw('COUNT(moto_club_members.id) as members_count')
             ->where(function ($q) use ($userId) {
                 $q->where('moto_clubs.is_public', true)->orWhere('moto_clubs.owner_id', $userId)
