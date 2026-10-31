@@ -656,4 +656,22 @@ class MobileExtendedController extends Controller
         return response()->json(['message'=>'სამუშაო შეკვეთა შეიქმნა: '.$order->order_number,'work_order'=>$order],201);
     }
 
+
+    public function notifications(Request $request)
+    {
+        $user=$request->user();
+        return response()->json([
+            'items'=>$user->notifications()->latest()->limit(40)->get()->map(fn($n)=>[
+                'id'=>$n->id,'type'=>$n->type,'data'=>$n->data,'read_at'=>$n->read_at,'created_at'=>$n->created_at,
+            ]),
+            'unread_count'=>$user->unreadNotifications()->count(),
+        ]);
+    }
+
+    public function markNotificationsRead(Request $request)
+    {
+        $request->user()->unreadNotifications()->update(['read_at'=>now()]);
+        return response()->json(['message'=>'შეტყობინებები წაკითხულად მოინიშნა.']);
+    }
+
 }
