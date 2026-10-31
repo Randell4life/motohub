@@ -391,6 +391,7 @@ class MobileExtendedController extends Controller
             ->with(['serviceBooking', 'technician', 'bay', 'parts.inventoryItem', 'payments'])->latest()->limit(60)->get();
         return response()->json([
             'center' => $center->load(['services', 'hours']),
+            'subscription_plans' => \\App\\Models\\ServiceCenter::subscriptionPlans(),
             'bookings' => $center->bookings()->with(['service','workOrder'])->latest('scheduled_at')->limit(60)->get(),
             'orders' => $orders,
             'technicians' => $center->technicians()->orderBy('name')->get(),
@@ -608,7 +609,12 @@ class MobileExtendedController extends Controller
     public function registerServiceCenter(Request $request)
     {
         abort_if(\App\Models\ServiceCenter::where('owner_id',$request->user()->id)->exists(), 409, 'სერვისცენტრი უკვე გაქვს.');
-        $data = $request->validate(['name'=>['required','string','max:160'],'description'=>['nullable','string','max:3000'],'phone'=>['required','string','max:40'],'email'=>['nullable','email','max:255'],'city'=>['required','string','max:120'],'address'=>['required','string','max:255']]);
+        $data = $request->validate(['name'=>['required','string','max:160'],'description'=>['nullable','string','max:3000'],'phone'=>['required','string','max:40'],'email'=>['nullable','email','max:255'],'city'=>['required','string','max:120'],'address'=>['required','string','max:255'],'subscription_plan'=>['required',Rule::in(array_keys(\\App\\Models\\ServiceCenter::subscriptionPlans()))]]);
+        $plan = \\App\\Models\\ServiceCenter::subscriptionPlans()[$data['subscription_plan']];
+        $data['subscription_price'] = $plan['price'];
+        $data['subscription_status'] = 'active';
+        $data['subscription_started_at'] = now();
+        $data['subscription_ends_at'] = $plan['price'] > 0 ? now()->addMonth() : null;
         $center = DB::transaction(function () use ($request,$data) {
             $base = Str::slug($data['name']) ?: 'service-center'; $slug = $base;
             while (\App\Models\ServiceCenter::where('slug',$slug)->exists()) $slug = $base.'-'.Str::lower(Str::random(5));
