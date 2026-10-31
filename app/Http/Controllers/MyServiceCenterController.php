@@ -115,7 +115,7 @@ public function profile(): RedirectResponse|View
 
         $plan = ServiceCenter::subscriptionPlans()[$data['subscription_plan']];
         $data['subscription_price'] = $plan['price'];
-        $data['subscription_status'] = 'active';
+        $data['subscription_status'] = $plan['price'] > 0 ? 'pending_payment' : 'active';
         $data['subscription_started_at'] = now();
         $data['subscription_ends_at'] = $plan['price'] > 0 ? now()->addMonth() : null;
 
