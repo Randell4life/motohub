@@ -891,7 +891,24 @@
                 transition-duration: .01ms !important;
             }
         }
-    </style>
+    
+/* Premium rental discovery and filters */
+.rental-filter-panel{margin:24px 0 28px;padding:22px;border:1px solid #29486d;border-radius:14px;background:radial-gradient(ellipse at 95% 0%,#1677ff20,transparent 42%),linear-gradient(145deg,#121f30,#0a1421);box-shadow:0 18px 45px #0003}
+.rental-filter-top,.rental-filter-actions{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.filter-kicker{color:#64b5ff;font-size:9px;font-weight:900;letter-spacing:1.5px}
+.rental-filter-top h3{margin:4px 0 0;font-size:17px;font-weight:900}
+.rental-reset{color:#8ebfff;font-size:11px;font-weight:800}
+.rental-filter-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:18px}
+.rental-filter-grid label{display:flex;flex-direction:column;gap:7px;color:#aebed3;font-size:10px;font-weight:800}
+.rental-filter-grid .rental-filter-wide{grid-column:span 2}
+.rental-filter-grid input,.rental-filter-grid select{width:100%;min-height:45px;padding:10px 12px;border:1px solid #2a4361;border-radius:8px;outline:none;background:#081321;color:#f4f8ff;font-size:12px}
+.rental-filter-grid input:focus,.rental-filter-grid select:focus{border-color:#2789ff;box-shadow:0 0 0 3px #2789ff20}
+.rental-filter-actions{margin-top:17px;padding-top:15px;border-top:1px solid #ffffff12;color:#8fa4c0;font-size:10px}
+.rental-filter-actions .button-primary{border:0;color:white;cursor:pointer}
+@media(max-width:760px){.rental-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rental-filter-grid .rental-filter-wide{grid-column:span 2}}
+@media(max-width:480px){.rental-filter-panel{padding:16px}.rental-filter-top{align-items:flex-start}.rental-filter-top h3{font-size:14px}.rental-filter-actions{align-items:stretch;flex-direction:column}.rental-filter-actions .button-primary{width:100%}}
+
+</style>
 </head>
 
 <body>
@@ -1002,110 +1019,47 @@
         <div class="container">
             <div class="section-heading">
                 <div>
-                    <div class="section-title-wrap">
-                        <span class="section-mark"></span>
-                        <h2>აირჩიე შენი მოტო</h2>
-                    </div>
-                    <p>იპოვე მოტოციკლი შენი შემდეგი გასეირნებისთვის.</p>
+                    <div class="section-title-wrap"><span class="section-mark"></span><h2>აირჩიე შენი მოტო</h2></div>
+                    <p>შეარჩიე მოტოციკლი ფასის, ძრავის, მდებარეობისა და სახელის მიხედვით.</p>
                 </div>
-
-                <div class="section-label">THE COLLECTION</div>
+                <div class="section-label">THE COLLECTION · {{ $scooters->total() }} ვარიანტი</div>
             </div>
-
+            <form class="rental-filter-panel" method="GET" action="{{ route('rentals.index') }}#motorcycles">
+                <div class="rental-filter-top"><div><span class="filter-kicker">SMART SEARCH</span><h3>იპოვე შენთვის შესაფერისი მოტო</h3></div><a href="{{ route('rentals.index') }}#motorcycles" class="rental-reset">გასუფთავება ↺</a></div>
+                <div class="rental-filter-grid">
+                    <label class="rental-filter-wide">ძებნა<input type="search" name="q" value="{{ request('q') }}" placeholder="მარკა, მოდელი ან დასახელება"></label>
+                    <label>ქალაქი / მდებარეობა<input type="text" name="location" value="{{ request('location') }}" placeholder="მაგ. თბილისი"></label>
+                    <label>მაქს. ფასი / დღე<input type="number" min="0" step="1" name="max_rate" value="{{ request('max_rate') }}" placeholder="₾"></label>
+                    <label>მინ. ძრავი (cc)<input type="number" min="0" step="50" name="min_cc" value="{{ request('min_cc') }}" placeholder="მაგ. 250"></label>
+                    <label>დალაგება<select name="sort"><option value="newest" @selected(request('sort','newest')==='newest')>უახლესი</option><option value="price_asc" @selected(request('sort')==='price_asc')>ფასი: დაბლიდან</option><option value="price_desc" @selected(request('sort')==='price_desc')>ფასი: მაღლიდან</option><option value="engine_desc" @selected(request('sort')==='engine_desc')>ძრავი: დიდიდან</option></select></label>
+                </div>
+                <div class="rental-filter-actions"><span>{{ $scooters->total() }} შედეგი მოიძებნა</span><button type="submit" class="button-primary">ფილტრების გამოყენება ↗</button></div>
+            </form>
             @if($scooters->count())
                 <div class="bike-grid">
                     @foreach($scooters as $scooter)
                         <article class="bike-card">
-                            <a
-                                href="{{ route('rentals.show', $scooter->slug) }}"
-                                class="bike-image-link"
-                                aria-label="{{ $scooter->title }} — დეტალები"
-                            >
+                            <a href="{{ route('rentals.show', $scooter->slug) }}" class="bike-image-link" aria-label="{{ $scooter->title }} — დეტალები">
                                 <div class="bike-image">
-                                    <img
-                                        src="{{ $scooter->image_path ? \Illuminate\Support\Facades\Storage::disk('public')->url($scooter->image_path) : 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=900&q=80' }}"
-                                        alt="{{ $scooter->brand }} {{ $scooter->title }}"
-                                        loading="lazy"
-                                    >
-
-                                    <span class="image-label">ქირაობა</span>
-                                    <span class="image-number">MOTOHUB / RENTAL</span>
+                                    <img src="{{ $scooter->image_path ? IlluminateSupportFacades\Storage::disk('public')->url($scooter->image_path) : 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=900&q=80' }}" alt="{{ $scooter->brand }} {{ $scooter->title }}" loading="lazy">
+                                    <span class="image-label">ქირაობა</span><span class="image-number">MOTOHUB / RENTAL</span>
                                 </div>
                             </a>
-
                             <div class="bike-content">
-                                <div class="bike-brand">
-                                    {{ $scooter->brand }}
-                                </div>
-
-                                <h3 class="bike-title">
-                                    {{ $scooter->title }}
-                                </h3>
-
+                                <div class="bike-brand">{{ $scooter->brand }}</div><h3 class="bike-title">{{ $scooter->title }}</h3>
                                 <div class="bike-specs">
-                                    @if($scooter->year)
-                                        <span>
-                                            <i class="spec-dot"></i>
-                                            {{ $scooter->year }} წელი
-                                        </span>
-                                    @endif
-
-                                    @if($scooter->engine_cc)
-                                        <span>
-                                            <i class="spec-dot"></i>
-                                            {{ $scooter->engine_cc }} cc
-                                        </span>
-                                    @endif
-
-                                    @if($scooter->location)
-                                        <span>
-                                            <i class="spec-dot"></i>
-                                            {{ $scooter->location }}
-                                        </span>
-                                    @endif
+                                    @if($scooter->year)<span><i class="spec-dot"></i>{{ $scooter->year }} წელი</span>@endif
+                                    @if($scooter->engine_cc)<span><i class="spec-dot"></i>{{ $scooter->engine_cc }} cc</span>@endif
+                                    @if($scooter->location)<span><i class="spec-dot"></i>{{ $scooter->location }}</span>@endif
                                 </div>
-
-                                <div class="bike-divider"></div>
-
-                                <div class="bike-bottom">
-                                    <div>
-                                        <span class="price-label">დღიური ღირებულება</span>
-
-                                        <div class="price">
-                                            {{ number_format((float) $scooter->daily_rate, 0) }} ₾
-                                            <small>/ დღე</small>
-                                        </div>
-                                    </div>
-
-                                    <a
-                                        href="{{ route('rentals.show', $scooter->slug) }}"
-                                        class="details-link"
-                                    >
-                                        დეტალები
-                                        <span aria-hidden="true">↗</span>
-                                    </a>
-                                </div>
+                                <div class="bike-card-bottom"><div class="bike-price">₾{{ number_format((float)$scooter->daily_rate,0) }} <small>/ დღე</small></div><a href="{{ route('rentals.show', $scooter->slug) }}" class="details-link">დეტალები <span>↗</span></a></div>
                             </div>
                         </article>
                     @endforeach
                 </div>
-
-                @if($scooters->hasPages())
-                    <div class="pagination">
-                        {{ $scooters->links() }}
-                    </div>
-                @endif
+                @if($scooters->hasPages())<div class="pagination">{{ $scooters->withQueryString()->links() }}</div>@endif
             @else
-                <div class="empty-state">
-                    <div class="empty-icon" aria-hidden="true">↗</div>
-
-                    <h3>მოტოციკლები მალე დაემატება</h3>
-
-                    <p>
-                        ამ ეტაპზე გასაქირავებელი მოტოციკლები არ არის.
-                        მოგვიანებით ისევ შემოგვიერთდი.
-                    </p>
-                </div>
+                <div class="empty-state"><div class="empty-icon">↗</div><h3>ამ ფილტრებით მოტოციკლი ვერ მოიძებნა</h3><p>შეცვალე ძიების პირობები ან გაასუფთავე ფილტრები.</p><a class="button-secondary" href="{{ route('rentals.index') }}#motorcycles">ყველა მოტოციკლის ნახვა</a></div>
             @endif
         </div>
     </section>
