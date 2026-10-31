@@ -277,3 +277,54 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .feature-group-body .notice[hidden]{display:none!important}
 .group-empty{margin:10px 0;padding:13px;border:1px dashed #304761;border-radius:9px;color:#9badc3;text-align:center;font-size:12px}
 @media(max-width:380px){.group-tools{grid-template-columns:1fr}.group-status-filter select{min-height:39px}}
+
+
+/* MotoHub visual refinement — consistent premium mobile-first system */
+:root{--surface:#0d1422;--surface-raised:#121d30;--line:#263b58;--blue-glow:#1677ff30;--radius-card:16px}
+body{background:radial-gradient(ellipse at 50% -8%,#1b3152 0,transparent 42%),linear-gradient(180deg,#080d17 0%,#070a12 58%,#080d17 100%)}
+#app{max-width:820px;padding-bottom:calc(94px + env(safe-area-inset-bottom))}
+.topbar{min-height:72px;padding:12px clamp(17px,4vw,28px);border-color:#263b5866;background:#080d17eF}
+.brand{display:flex;align-items:center;gap:10px;letter-spacing:0}
+.brand-mark{display:grid;place-items:center;width:34px;height:34px;border:1px solid #398eff80;border-radius:9px;background:linear-gradient(145deg,#1c65bf,#102747);box-shadow:0 0 22px #1677ff24;font-size:18px;font-weight:1000}
+.brand-word{display:flex;flex-direction:column;align-items:flex-start;font-size:16px;line-height:1;font-weight:950;letter-spacing:1px}
+.brand-word>span{display:inline;color:#68b0ff}
+.brand-word small{margin-top:5px;color:#7f93ae;font-size:7px;font-weight:800;letter-spacing:1.5px}
+.section{padding:clamp(23px,5vw,34px) clamp(17px,4vw,28px)}
+.hero{min-height:500px;padding:clamp(48px,10vw,76px) clamp(21px,5vw,38px) 36px;background:radial-gradient(ellipse at 88% 40%,#1677ff38,transparent 53%),linear-gradient(120deg,#0c1728,#0a101b 70%)}
+.hero:after{content:"";position:absolute;inset:14px;border:1px solid #6aaeff17;pointer-events:none}
+.hero h1{max-width:600px;font-size:clamp(40px,9vw,68px);line-height:1.07;letter-spacing:-2.6px}
+.hero p{max-width:390px;font-size:14px}
+.hero-mark{right:-4px;bottom:-45px;font-size:clamp(150px,35vw,245px);letter-spacing:-22px;color:#ffffff07}
+.service-grid{gap:12px}
+.service-card{min-height:158px;padding:15px;border-radius:14px;background:linear-gradient(145deg,#14243a 0%,#0d1726 72%);border-color:#2a4262;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.service-card:active{transform:translateY(1px) scale(.985);border-color:#5aa6ff;box-shadow:0 0 0 2px #1677ff20}
+.service-topline{display:flex;width:100%;justify-content:space-between;color:#7694b9;font-size:10px}
+.service-icon{width:42px;height:42px;margin:13px 0 12px;border-radius:12px;background:linear-gradient(145deg,#1677ff30,#1677ff0b);border-color:#398eff55;box-shadow:inset 0 1px #ffffff12}
+.service-card strong{font-size:13px;letter-spacing:.1px}
+.service-card .service-copy{font-size:10px;color:#8ea2bf}
+.item-card,.account-panel,.feature-group{border-radius:var(--radius-card);border-color:#2b405c;background:linear-gradient(150deg,#121e30,#0b1320);box-shadow:0 12px 30px #0003}
+.item-card{overflow:hidden}
+.item-image,.image-placeholder{background:#111e31}
+.item-card-content{padding:14px}
+.item-card h3{font-size:14px;line-height:1.55}
+.price,.bike-detail-price{color:#78baff;text-shadow:0 0 18px #1677ff22}
+.primary-btn{min-height:50px;border-radius:11px;background:linear-gradient(110deg,#1266e8,#42a5ff);box-shadow:0 9px 26px #1677ff30;letter-spacing:.1px}
+.secondary-btn{min-height:45px;border-radius:10px;background:linear-gradient(145deg,#1a2d47,#142239);border-color:#355579}
+.search-box{min-height:54px;border-radius:13px;border-color:#2d4565;background:#0d1726}
+.form-stack input,.form-stack textarea,.form-stack select{border-radius:11px;background:#0a1321;border-color:#2c4260}
+.form-stack input:focus,.form-stack textarea:focus,.form-stack select:focus{border-color:#4b9cff;box-shadow:0 0 0 3px #1677ff20,0 0 20px #1677ff12}
+.bottom-nav{max-width:820px;min-height:76px;padding:9px 7px max(9px,env(safe-area-inset-bottom));border-color:#2b405c;background:#080e19f5;box-shadow:0 -10px 32px #0004}
+.nav-item{gap:6px}
+.nav-item.active{color:#70b6ff}
+.nav-item.active:before{content:"";width:20px;height:2px;margin-top:-3px;border-radius:4px;background:#4da0ff;box-shadow:0 0 12px #1677ff}
+.callout{position:relative;overflow:hidden;border-radius:18px;background:linear-gradient(125deg,#142b49,#0c1728);border-color:#327ed355;box-shadow:0 14px 34px #0003}
+.callout h2{max-width:420px;font-size:clamp(22px,5vw,29px)}
+.app-footer{padding:24px 20px 30px;border-top:1px solid #263b583d;color:#7589a5}
+.feature-page .feature-group>summary{min-height:68px}
+.feature-page .feature-group[open]>summary{background:linear-gradient(100deg,#183252,#111d2e)}
+.group-tools{margin:14px 0 16px}
+.group-search input,.group-status-filter select{min-height:45px;border-radius:10px;background:#091321}
+.admin-page .admin-section{padding:16px;border:1px solid #2b405c;border-radius:15px;background:linear-gradient(150deg,#121e30,#0c1421);margin:13px 0}
+.admin-page .admin-item{padding:14px;border:1px solid #2a405e;border-radius:12px;background:#0d1726;margin:10px 0}
+@media(min-width:600px){#app{box-shadow:0 0 80px #0005}.hero{border-left:1px solid #ffffff08;border-right:1px solid #ffffff08}.catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.service-grid{gap:15px}}
+@media(max-width:380px){.hero{min-height:455px;padding-top:43px}.hero h1{font-size:38px}.service-card{min-height:145px;padding:12px}.section{padding-left:15px;padding-right:15px}}
