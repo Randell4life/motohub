@@ -124,7 +124,15 @@ class MobileCatalogController extends Controller
                 $term = trim((string) $request->query('q'));
                 $builder->where(fn ($where) => $where->where('title', 'like', "%{$term}%")
                     ->orWhere('brand', 'like', "%{$term}%")->orWhere('model', 'like', "%{$term}%"));
-            })->latest()->paginate(min(max((int) $request->query('per_page', 12), 1), 50));
+            })
+            ->when($request->filled('location'), fn ($builder) => $builder->where('location', 'like', '%' . trim((string) $request->query('location')) . '%'))
+            ->when($request->filled('max_rate') && is_numeric($request->query('max_rate')), fn ($builder) => $builder->where('daily_rate', '<=', (float) $request->query('max_rate')))
+            ->when($request->filled('min_cc') && is_numeric($request->query('min_cc')), fn ($builder) => $builder->where('engine_cc', '>=', (int) $request->query('min_cc')))
+            ->when($request->query('sort') === 'price_asc', fn ($builder) => $builder->orderBy('daily_rate'))
+            ->when($request->query('sort') === 'price_desc', fn ($builder) => $builder->orderByDesc('daily_rate'))
+            ->when($request->query('sort') === 'engine_desc', fn ($builder) => $builder->orderByDesc('engine_cc'))
+            ->when(!in_array($request->query('sort'), ['price_asc', 'price_desc', 'engine_desc'], true), fn ($builder) => $builder->latest())
+            ->paginate(min(max((int) $request->query('per_page', 12), 1), 50));
         $scooters->getCollection()->transform(fn ($item) => [
             'id' => $item->id, 'title' => $item->title, 'slug' => $item->slug,
             'brand' => $item->brand, 'model' => $item->model, 'year' => $item->year,
