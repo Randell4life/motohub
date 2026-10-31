@@ -92,6 +92,7 @@ class MobileCatalogController extends Controller
                     ->orWhere('compatible_motorcycle', 'like', "%{$term}%"));
             })
             ->when($request->filled('brand'), fn ($builder) => $builder->where('brand', 'like', '%' . trim((string) $request->query('brand')) . '%'))
+            ->when($request->filled('category'), fn ($builder) => $builder->where('category', 'like', '%' . trim((string) $request->query('category')) . '%'))
             ->when($request->filled('part_number'), fn ($builder) => $builder->where('part_number', 'like', '%' . trim((string) $request->query('part_number')) . '%'))
             ->when($request->filled('compatible_motorcycle'), fn ($builder) => $builder->where('compatible_motorcycle', 'like', '%' . trim((string) $request->query('compatible_motorcycle')) . '%'))
             ->when($request->filled('min_price') && is_numeric($request->query('min_price')), fn ($builder) => $builder->where('price', '>=', (float) $request->query('min_price')))
