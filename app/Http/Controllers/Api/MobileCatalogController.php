@@ -30,7 +30,7 @@ class MobileCatalogController extends Controller
 
         $page = $query->paginate(min(max((int) $request->query('per_page', 12), 1), 50));
         $page->getCollection()->transform(fn ($item) => [
-            'id' => $item->id, 'title' => $item->title, 'slug' => $item->slug,
+            'id' => $item->id, 'user_id' => $item->user_id, 'title' => $item->title, 'slug' => $item->slug,
             'brand' => $item->brand, 'model' => $item->model, 'year' => $item->year,
             'price' => $item->price, 'mileage' => $item->mileage, 'engine_cc' => $item->engine_cc,
             'condition' => $item->condition, 'location' => $item->location,
