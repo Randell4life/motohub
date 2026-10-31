@@ -541,4 +541,68 @@ class MobileExtendedController extends Controller
         return response()->json(['message'=>'მომსახურების ჩანაწერი დაემატა.','record'=>$bike->serviceRecords()->create($data)],201);
     }
 
+
+    public function registerServiceCenter(Request $request)
+    {
+        abort_if(\App\Models\ServiceCenter::where('owner_id',$request->user()->id)->exists(), 409, 'სერვისცენტრი უკვე გაქვს.');
+        $data = $request->validate(['name'=>['required','string','max:160'],'description'=>['nullable','string','max:3000'],'phone'=>['required','string','max:40'],'email'=>['nullable','email','max:255'],'city'=>['required','string','max:120'],'address'=>['required','string','max:255']]);
+        $center = DB::transaction(function () use ($request,$data) {
+            $base = Str::slug($data['name']) ?: 'service-center'; $slug = $base;
+            while (\App\Models\ServiceCenter::where('slug',$slug)->exists()) $slug = $base.'-'.Str::lower(Str::random(5));
+            $center = \App\Models\ServiceCenter::create($data+['owner_id'=>$request->user()->id,'slug'=>$slug,'is_active'=>false,'is_verified'=>false,'approval_status'=>'pending']);
+            foreach(range(0,6) as $day) \App\Models\ServiceCenterHour::create(['service_center_id'=>$center->id,'day_of_week'=>$day,'opens_at'=>$day===0?null:'09:00','closes_at'=>$day===0?null:'18:00','is_closed'=>$day===0]);
+            return $center;
+        });
+        return response()->json(['message'=>'სერვისცენტრის განაცხადი გაიგზავნა დასამტკიცებლად.','center'=>$center],201);
+    }
+
+    public function updateCenterProfile(Request $request)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id',$request->user()->id)->firstOrFail();
+        $data = $request->validate(['name'=>['required','string','max:160'],'description'=>['nullable','string','max:3000'],'phone'=>['required','string','max:40'],'email'=>['nullable','email','max:255'],'city'=>['required','string','max:120'],'address'=>['required','string','max:255']]);
+        $center->update($data);
+        return response()->json(['message'=>'სერვისცენტრის პროფილი განახლდა.','center'=>$center]);
+    }
+
+    public function storeCenterService(Request $request)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id',$request->user()->id)->firstOrFail();
+        $data = $request->validate(['name'=>['required','string','max:160'],'description'=>['nullable','string','max:1500'],'price_type'=>['required','in:fixed,from,quote'],'price'=>['nullable','numeric','min:0','max:99999999'],'duration_minutes'=>['required','integer','min:5','max:1440']]);
+        if($data['price_type']!=='quote' && !isset($data['price'])) throw ValidationException::withMessages(['price'=>'ფასი აუცილებელია.']);
+        $service = $center->services()->create($data+['price'=>$data['price_type']==='quote'?null:$data['price'],'is_active'=>true]);
+        return response()->json(['message'=>'მომსახურება დაემატა.','service'=>$service],201);
+    }
+
+    public function updateCenterService(Request $request, int $service)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id',$request->user()->id)->firstOrFail();
+        $item = $center->services()->findOrFail($service);
+        $data = $request->validate(['name'=>['required','string','max:160'],'description'=>['nullable','string','max:1500'],'price_type'=>['required','in:fixed,from,quote'],'price'=>['nullable','numeric','min:0','max:99999999'],'duration_minutes'=>['required','integer','min:5','max:1440'],'is_active'=>['required','boolean']]);
+        if($data['price_type']!=='quote' && !isset($data['price'])) throw ValidationException::withMessages(['price'=>'ფასი აუცილებელია.']);
+        $item->update($data);
+        return response()->json(['message'=>'მომსახურება განახლდა.']);
+    }
+
+    public function updateCenterHours(Request $request)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id',$request->user()->id)->firstOrFail();
+        $data = $request->validate(['hours'=>['required','array'],'hours.*.is_closed'=>['required','boolean'],'hours.*.opens_at'=>['nullable','date_format:H:i'],'hours.*.closes_at'=>['nullable','date_format:H:i']]);
+        foreach(range(0,6) as $day){
+            $row=$data['hours'][$day]??null; if(!$row) continue;
+            if(!$row['is_closed'] && (!$row['opens_at']||!$row['closes_at']||$row['opens_at'] >= $row['closes_at'])) throw ValidationException::withMessages(['hours.'.$day.'.opens_at'=>'სამუშაო დრო სწორად მიუთითე.']);
+            $center->hours()->updateOrCreate(['day_of_week'=>$day],['is_closed'=>$row['is_closed'],'opens_at'=>$row['is_closed']?null:$row['opens_at'],'closes_at'=>$row['is_closed']?null:$row['closes_at']]);
+        }
+        return response()->json(['message'=>'სამუშაო საათები განახლდა.']);
+    }
+
+    public function applyWorkshop(Request $request)
+    {
+        abort_if(\App\Models\Partner::where('user_id',$request->user()->id)->where('type','workshop')->exists(),409,'სახელოსნოს განაცხადი უკვე არსებობს.');
+        $data=$request->validate(['name'=>['required','string','max:160'],'phone'=>['required','string','max:40'],'email'=>['nullable','email','max:255'],'address'=>['required','string','max:255'],'description'=>['nullable','string','max:3000']]);
+        $slug=Str::slug($data['name']) ?: 'workshop';
+        while(\App\Models\Partner::where('slug',$slug)->exists()) $slug=Str::slug($data['name']).'-'.Str::lower(Str::random(5));
+        $partner=\App\Models\Partner::create($data+['user_id'=>$request->user()->id,'slug'=>$slug,'type'=>'workshop','is_active'=>false,'application_status'=>'pending']);
+        return response()->json(['message'=>'სახელოსნოს განაცხადი გაიგზავნა დასამტკიცებლად.','partner'=>$partner],201);
+    }
+
 }
