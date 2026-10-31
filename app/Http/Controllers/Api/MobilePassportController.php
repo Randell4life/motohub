@@ -1,9 +1,9 @@
 <?php
 
-namespace App\\Http\\Controllers\\Api;
+namespace App\Http\Controllers\Api;
 
-use App\\Http\\Controllers\\Controller;
-use App\\Models\\Motorcycle;
+use App\Http\Controllers\Controller;
+use App\Models\Motorcycle;
 
 class MobilePassportController extends Controller
 {
