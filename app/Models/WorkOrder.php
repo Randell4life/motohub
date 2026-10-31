@@ -17,11 +17,21 @@ class WorkOrder extends Model
         'cancelled',
     ];
 
+    protected static function booted(): void
+    {
+        static::creating(function (self $order) {
+            if (!$order->public_token) {
+                $order->public_token = (string) \Illuminate\Support\Str::uuid();
+            }
+        });
+    }
+
     protected $fillable = [
         'order_number',
         'service_booking_id',
         'service_center_id',
         'assigned_technician_id',
+        'service_center_technician_id',
         'status',
         'intake_odometer',
         'intake_condition',
@@ -80,4 +90,29 @@ class WorkOrder extends Model
             default => $this->status,
         };
     }
+    public function parts(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ServiceCenterWorkOrderPart::class);
+    }
+
+    public function payments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ServiceCenterPayment::class);
+    }
+
+    public function bay(): BelongsTo
+    {
+        return $this->belongsTo(ServiceCenterBay::class, 'service_center_bay_id');
+    }
+
+    public function technician(): BelongsTo
+    {
+        return $this->belongsTo(ServiceCenterTechnician::class, 'service_center_technician_id');
+    }
+
+    public function activityLogs(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ServiceCenterActivityLog::class);
+    }
+
 }
