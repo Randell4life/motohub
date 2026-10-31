@@ -488,7 +488,7 @@ class MobileExtendedController extends Controller
         $customers = $partner->customers()->with('motorcycles')->latest()->limit(100)->get();
         $motorcycles = \App\Models\Motorcycle::where('partner_id',$partner->id)->with('customer')->latest()->limit(100)->get();
         $records = \App\Models\MotorcycleServiceRecord::whereHas('motorcycle',fn($q)=>$q->where('partner_id',$partner->id))->with('motorcycle')->latest('service_date')->limit(100)->get();
-        return response()->json(['partner'=>$partner,'customers'=>$customers,'motorcycles'=>$motorcycles,'service_records'=>$records]);
+        return response()->json(['partner'=>$partner,'customers'=>$customers,'motorcycles'=>$motorcycles,'service_records'=>$records,'unassigned_motorcycles'=>\\App\\Models\\Motorcycle::where('partner_id',$partner->id)->whereNull('customer_id')->orderBy('brand')->get(['id','title','brand','model','year'])]);
     }
 
     public function transportPartnerDashboard(Request $request)
