@@ -51,8 +51,19 @@ class ServiceCenterOperationsController extends Controller
             'open' => $center->workOrders()->whereNotIn('status', ['handed_over', 'cancelled'])->count(),
             'repair' => $center->workOrders()->where('status', 'in_repair')->count(),
             'revenue' => $center->payments()->whereBetween('paid_at', [$from, $to])->sum('amount'),
-            'outstanding' => DB::table('work_orders')->where('service_center_id', $center->id)
-                ->whereNotIn('status', ['cancelled'])->selectRaw('COALESCE(SUM(total_cost),0) - COALESCE((SELECT SUM(amount) FROM service_center_payments WHERE service_center_payments.work_order_id = work_orders.id),0) as due')->value('due'),
+            'outstanding' => (function () use ($center) {
+                $paidByOrder = DB::table('service_center_payments')
+                    ->select('work_order_id')
+                    ->selectRaw('SUM(amount) as paid')
+                    ->groupBy('work_order_id');
+
+                return DB::table('work_orders')
+                    ->leftJoinSub($paidByOrder, 'payments_by_order', fn ($join) => $join->on('payments_by_order.work_order_id', '=', 'work_orders.id'))
+                    ->where('work_orders.service_center_id', $center->id)
+                    ->whereNotIn('work_orders.status', ['cancelled'])
+                    ->selectRaw('COALESCE(SUM(COALESCE(work_orders.total_cost, 0) - COALESCE(payments_by_order.paid, 0)), 0) as due')
+                    ->value('due');
+            })(),
         ];
 
         $payments = $center->payments()->with('workOrder')->latest('paid_at')->limit(12)->get();

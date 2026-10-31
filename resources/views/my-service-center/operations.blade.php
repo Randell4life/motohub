@@ -66,7 +66,7 @@
 <section class="ops-section">
  <h3>კალენდარი · {{ $from->format('d.m.Y') }} — {{ $to->format('d.m.Y') }}</h3>
  <div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>დრო</th><th>შეკვეთა</th><th>კლიენტი</th><th>ხელოსანი</th><th>ბოქსი</th></tr></thead><tbody>
- @forelse($calendar as $entry)<tr><td>{{ $entry->serviceBooking?->scheduled_at?->format('d.m.Y H:i') ?? 'დრო არაა' }}</td><td>{{ $entry->order_number }}</td><td>{{ $entry->serviceBooking?->customer_name ?? '—' }}</td><td>{{ $entry->assignedTechnician?->name ?? '—' }}</td><td>{{ $entry->bay?->name ?? '—' }}</td></tr>@empty<tr><td colspan="5" class="ops-muted">ამ კვირაში დაგეგმილი სამუშაოები არ არის.</td></tr>@endforelse
+ @forelse($calendar as $entry)<tr><td>{{ $entry->serviceBooking?->scheduled_at?->format('d.m.Y H:i') ?? 'დრო არაა' }}</td><td>{{ $entry->order_number }}</td><td>{{ $entry->serviceBooking?->customer_name ?? '—' }}</td><td>{{ $entry->technician?->name ?? $entry->assignedTechnician?->name ?? '—' }}</td><td>{{ $entry->bay?->name ?? '—' }}</td></tr>@empty<tr><td colspan="5" class="ops-muted">ამ კვირაში დაგეგმილი სამუშაოები არ არის.</td></tr>@endforelse
  </tbody></table></div>
 </section>
 

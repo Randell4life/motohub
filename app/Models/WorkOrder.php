@@ -32,6 +32,7 @@ class WorkOrder extends Model
         'service_center_id',
         'assigned_technician_id',
         'service_center_technician_id',
+        'service_center_bay_id',
         'status',
         'intake_odometer',
         'intake_condition',
