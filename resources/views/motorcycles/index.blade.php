@@ -705,6 +705,56 @@
 
         /* Responsive */
 
+
+        /* MotoHub catalogue refresh */
+        .filters{border-color:#345071;box-shadow:0 22px 55px #0004}
+        .filters-heading{margin-bottom:18px}
+        .filters-heading h2{font-size:19px;letter-spacing:-.4px}
+        .field{margin-bottom:17px}
+        .field label{font-size:11px;letter-spacing:.15px}
+        .field input,.field select{min-height:47px;border-color:#2d4260;background:linear-gradient(145deg,#0a1422,#0b111d);font-size:12px}
+        .field input:focus,.field select:focus{border-color:#4b9cff;box-shadow:0 0 0 3px #1677ff20,0 0 22px #1677ff12}
+        .featured-filter{display:flex;align-items:center;gap:11px;margin:4px 0 20px;padding:13px;border:1px solid #31527a;border-radius:11px;background:linear-gradient(110deg,#132b49,#101c2d);cursor:pointer}
+        .featured-filter input{position:absolute;opacity:0;pointer-events:none}
+        .featured-check{display:grid;place-items:center;width:19px;height:19px;flex:0 0 19px;border:1px solid #57779e;border-radius:5px;background:#091321}
+        .featured-filter input:checked+.featured-check{border-color:#4da0ff;background:#1677ff}
+        .featured-filter input:checked+.featured-check:after{content:'✓';font-size:12px;font-weight:900;color:white}
+        .featured-filter strong,.featured-filter small{display:block}
+        .featured-filter strong{font-size:11px;color:#e9f2ff}
+        .featured-filter small{margin-top:2px;color:#8ea4c2;font-size:9px}
+        .catalog-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:-3px 0 16px}
+        .quick-filters{display:flex;flex-wrap:wrap;gap:7px}
+        .quick-chip{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:0 12px;border:1px solid #2b405b;border-radius:99px;background:#101a29;color:#aebed4;font-size:10px;font-weight:800;transition:.2s}
+        .quick-chip:hover,.quick-chip.active{border-color:#398eff;background:#1677ff20;color:#dcecff;box-shadow:0 0 16px #1677ff12}
+        .result-count{white-space:nowrap;color:#8fa4c0;font-size:10px;font-weight:700}
+        .active-filters{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin:-3px 0 17px;color:#8ea1ba;font-size:10px}
+        .active-filter{padding:5px 8px;border:1px solid #31527a;border-radius:6px;background:#12233a;color:#c6dcfa}
+        .active-filters>a{color:#72b5ff;font-weight:800}
+        .results-header{padding:17px 18px;border:1px solid #263d5c;border-radius:14px;background:linear-gradient(120deg,#111f33,#0c1523);margin-bottom:17px}
+        .results-header h2{font-size:clamp(21px,3vw,27px)}
+        .sort select{border-color:#314968;background:#0b1524;min-height:45px}
+        .grid{gap:19px}
+        .card{border-color:#263d5a;border-radius:16px;background:linear-gradient(155deg,#142238,#0b1421);box-shadow:0 12px 32px #0003}
+        .card:hover{border-color:#4b9cff;box-shadow:0 22px 45px #0005,0 0 0 1px #1677ff20}
+        .image-wrap{height:220px;background:radial-gradient(ellipse,#294563,#101827)}
+        .card-body{padding:18px}
+        .card h3{font-size:16px;min-height:48px}
+        .price{color:#eaf3ff;text-shadow:0 0 18px #1677ff20}
+        .details{border-color:#398eff66;background:#1677ff18}
+        .pagination{padding:14px;border:1px solid #263d5a;border-radius:13px;background:#0d1725}
+        .empty{padding:65px 20px;border-color:#3b5271;background:linear-gradient(145deg,#111f32,#0b1421)}
+        @media(max-width:760px){
+            .filters{position:relative;padding:17px;border-radius:15px}
+            .filters-heading{margin-bottom:14px}
+            .catalog-toolbar{align-items:flex-start;flex-direction:column}
+            .quick-filters{width:100%}
+            .quick-chip{flex:1;padding:0 9px}
+            .results-header{padding:15px}
+            .grid{gap:12px}
+            .image-wrap{height:170px}
+        }
+        @media(max-width:420px){.image-wrap{height:205px}.card h3{min-height:0}}
+
         @media (max-width: 1120px) {
             .layout {
                 grid-template-columns: 245px minmax(0,1fr);
@@ -1021,6 +1071,28 @@
                 </div>
 
                 <div class="field">
+                    <label>ძრავის მოცულობა (cc)</label>
+                    <div class="range">
+                        <input type="number" name="min_cc" min="0" value="{{ request('min_cc') }}" placeholder="დან" aria-label="მინიმალური ძრავის მოცულობა">
+                        <input type="number" name="max_cc" min="0" value="{{ request('max_cc') }}" placeholder="მდე" aria-label="მაქსიმალური ძრავის მოცულობა">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>გარბენი (კმ)</label>
+                    <div class="range">
+                        <input type="number" name="min_mileage" min="0" value="{{ request('min_mileage') }}" placeholder="დან" aria-label="მინიმალური გარბენი">
+                        <input type="number" name="max_mileage" min="0" value="{{ request('max_mileage') }}" placeholder="მდე" aria-label="მაქსიმალური გარბენი">
+                    </div>
+                </div>
+
+                <label class="featured-filter">
+                    <input type="checkbox" name="featured" value="1" @checked(request()->boolean('featured'))>
+                    <span class="featured-check"></span>
+                    <span><strong>მხოლოდ გამორჩეული</strong><small>პრემიუმ განცხადებები</small></span>
+                </label>
+
+                <div class="field">
                     <label for="type">მდგომარეობა</label>
                     <select id="type" name="type">
                         <option value="">ყველა მდგომარეობა</option>
@@ -1088,9 +1160,35 @@
                         <option value="year_desc" @selected(request('sort') === 'year_desc')>
                             უახლესი წელი
                         </option>
+                        <option value="mileage_asc" @selected(request('sort') === 'mileage_asc')>გარბენი: ნაკლებიდან</option>
+                        <option value="mileage_desc" @selected(request('sort') === 'mileage_desc')>გარბენი: მეტიდან</option>
+                        <option value="oldest" @selected(request('sort') === 'oldest')>უძველესი განცხადებები</option>
                     </select>
                 </form>
             </div>
+
+            <div class="catalog-toolbar">
+                <div class="quick-filters">
+                    <a class="quick-chip {{ !request('type') ? 'active' : '' }}" href="{{ route('motorcycles.index', request()->except(['type', 'page'])) }}">ყველა</a>
+                    <a class="quick-chip {{ request('type') === 'new' ? 'active' : '' }}" href="{{ route('motorcycles.index', array_merge(request()->except('page'), ['type' => 'new'])) }}">ახალი</a>
+                    <a class="quick-chip {{ request('type') === 'used' ? 'active' : '' }}" href="{{ route('motorcycles.index', array_merge(request()->except('page'), ['type' => 'used'])) }}">მეორადი</a>
+                    <a class="quick-chip {{ request()->boolean('featured') ? 'active' : '' }}" href="{{ route('motorcycles.index', array_merge(request()->except('page'), ['featured' => request()->boolean('featured') ? null : 1])) }}">✦ რჩეული</a>
+                </div>
+                <span class="result-count">{{ $motorcycles->total() }} შედეგი</span>
+            </div>
+
+            @if (request()->hasAny(['q','brand','min_price','max_price','min_year','max_year','min_cc','max_cc','min_mileage','max_mileage','type','location','featured']))
+                <div class="active-filters">
+                    <span>აქტიური ფილტრები</span>
+                    @foreach (request()->only(['q','brand','min_price','max_price','min_year','max_year','min_cc','max_cc','min_mileage','max_mileage','type','location']) as $filterValue)
+                        @if (is_scalar($filterValue) && $filterValue !== '')
+                            <span class="active-filter">{{ $filterValue }}</span>
+                        @endif
+                    @endforeach
+                    @if (request()->boolean('featured')) <span class="active-filter">რჩეული</span> @endif
+                    <a href="{{ route('motorcycles.index') }}">ყველას გასუფთავება ×</a>
+                </div>
+            @endif
 
             <div class="grid">
                 @forelse ($motorcycles as $motorcycle)
