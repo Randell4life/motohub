@@ -54,6 +54,11 @@ Route::prefix('mobile')->group(function () {
         Route::patch('/transport/partner/requests/{transportRequest}/status', [MobileExtendedController::class, 'updateTransportOrderStatus'])->whereNumber('transportRequest');
         Route::post('/moto-assistant/diagnose', [MobileExtendedController::class, 'diagnose'])->middleware('throttle:10,1');
         Route::get('/service-center/dashboard', [MobileExtendedController::class, 'serviceCenterDashboard']);
+        Route::post('/service-center/register', [MobileExtendedController::class, 'registerServiceCenter'])->middleware('throttle:3,1');
+        Route::patch('/service-center/profile', [MobileExtendedController::class, 'updateCenterProfile']);
+        Route::post('/service-center/services', [MobileExtendedController::class, 'storeCenterService']);
+        Route::put('/service-center/services/{service}', [MobileExtendedController::class, 'updateCenterService'])->whereNumber('service');
+        Route::put('/service-center/hours', [MobileExtendedController::class, 'updateCenterHours']);
         Route::patch('/service-center/bookings/{booking}/status', [MobileExtendedController::class, 'updateServiceBookingStatus'])->whereNumber('booking');
         Route::post('/service-center/technicians', [MobileExtendedController::class, 'storeTechnician'])->middleware('throttle:10,1');
         Route::post('/service-center/bays', [MobileExtendedController::class, 'storeBay'])->middleware('throttle:10,1');
@@ -63,6 +68,7 @@ Route::prefix('mobile')->group(function () {
         Route::post('/service-center/work-orders/{workOrder}/payments', [MobileExtendedController::class, 'recordWorkOrderPayment'])->whereNumber('workOrder');
         Route::patch('/service-center/work-orders/{workOrder}/status', [MobileExtendedController::class, 'updateWorkOrderStatus'])->whereNumber('workOrder');
         Route::get('/workshop/dashboard', [MobileExtendedController::class, 'workshopDashboard']);
+        Route::post('/workshop/apply', [MobileExtendedController::class, 'applyWorkshop'])->middleware('throttle:3,1');
         Route::post('/workshop/customers', [MobileExtendedController::class, 'storeWorkshopCustomer'])->middleware('throttle:10,1');
         Route::post('/workshop/customers/{customer}/motorcycles/{motorcycle}/service-records', [MobileExtendedController::class, 'storeWorkshopServiceRecord'])->whereNumber('customer')->whereNumber('motorcycle')->middleware('throttle:10,1');
         Route::get('/me', [MobileAccountController::class, 'show']);
