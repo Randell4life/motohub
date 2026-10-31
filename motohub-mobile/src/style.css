@@ -953,3 +953,93 @@ body{background:radial-gradient(ellipse at 50% -8%,#1b3152 0,transparent 42%),li
 .garage-bottom-note strong{color:#f0f6ff;font-size:19px;line-height:1.3}
 @media(min-width:620px){.garage-hero{padding:27px 25px}.garage-bike-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.garage-bike-photo{height:175px}.garage-hero h1{font-size:39px}}
 @media(max-width:370px){.garage-hero-mark{font-size:24px}.garage-hero h1{font-size:26px}.garage-form-grid{grid-template-columns:1fr}.garage-finance-card{padding:10px}.garage-finance-card strong{font-size:16px}}
+
+
+/* DIGITAL SERVICE PASSPORT — native app experience */
+.digital-service-page{padding-top:13px;padding-bottom:28px}
+.digital-service-back{display:inline-flex;align-items:center;gap:7px;margin:0 0 12px;padding:7px 0;border:0;background:transparent;color:#9bcaff;font-size:10px;font-weight:700}
+.digital-service-hero{position:relative;isolation:isolate;overflow:hidden;padding:21px 17px 16px;border:1px solid #2a4c72;border-radius:20px;background:radial-gradient(ellipse at 88% 5%,#22558b 0,transparent 42%),linear-gradient(135deg,#142c49,#0a1422 75%);box-shadow:0 18px 48px #0006}
+.digital-service-hero:after{content:"";position:absolute;z-index:-1;right:-90px;bottom:-150px;width:260px;height:260px;border:1px solid #75baff20;transform:rotate(38deg)}
+.digital-service-hero>.eyebrow{color:#83c1ff;font-size:8px;letter-spacing:1.7px}
+.digital-service-hero-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.digital-service-hero h1{margin:14px 0 8px;color:#f5f9ff;font-size:clamp(29px,7vw,39px);font-weight:950;line-height:1.1;letter-spacing:-1.2px}
+.digital-service-hero h1 span{color:#65b2ff}
+.digital-service-hero p{max-width:340px;margin:0;color:#a7bdd6;font-size:10px;line-height:1.8}
+.digital-service-seal{display:flex;flex:0 0 70px;align-items:center;justify-content:center;flex-direction:column;width:70px;height:70px;border:1px solid #66b4ff65;border-radius:50%;background:#16395d88;color:#e5f3ff;font-size:26px;font-weight:1000;letter-spacing:-3px;box-shadow:inset 0 0 20px #5daaff20}
+.digital-service-seal>span{color:#61adff}
+.digital-service-seal small{margin-top:0;color:#91bde8;font-size:6px;line-height:1.4;letter-spacing:1px;text-align:center}
+.digital-service-bike{display:flex;align-items:center;gap:11px;margin-top:18px;padding:10px;border:1px solid #ffffff22;border-radius:13px;background:#07132180}
+.digital-service-bike-photo{flex:0 0 76px;width:76px;height:64px;overflow:hidden;border:1px solid #456b91;border-radius:9px;background:#0d2138}
+.digital-service-bike-photo img{width:100%;height:100%;object-fit:cover}
+.digital-service-bike-placeholder{display:flex;align-items:center;justify-content:center;flex-direction:column;height:100%;color:#74b8f7}
+.digital-service-bike-placeholder b{font-size:25px;font-weight:1000;letter-spacing:-4px}
+.digital-service-bike-placeholder span{font-size:5px;letter-spacing:.7px}
+.digital-service-bike-info{flex:1;min-width:0}
+.digital-service-bike-info>span{color:#7eaddb;font-size:7px;letter-spacing:1.1px}
+.digital-service-bike-info h2{overflow:hidden;margin:5px 0;color:#f0f6ff;font-size:14px;font-weight:900;text-overflow:ellipsis;white-space:nowrap}
+.digital-service-bike-info p{color:#91a8c2;font-size:8px}
+.digital-service-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:15px;padding-top:13px;border-top:1px solid #ffffff20}
+.digital-service-stats>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.digital-service-stats strong{overflow:hidden;color:#f4f8ff;font-size:clamp(15px,4vw,20px);font-weight:900;text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums}
+.digital-service-stats small{color:#91a9c6;font-size:8px}
+.digital-service-overview{margin-top:18px;padding:14px;border:1px solid #263e5b;border-radius:15px;background:linear-gradient(145deg,#111f31,#0b1420)}
+.digital-service-overview-heading,.digital-service-history-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
+.digital-service-overview-heading .eyebrow,.digital-service-history-heading .eyebrow{color:#75baff;font-size:8px;letter-spacing:1.6px}
+.digital-service-overview-heading h2,.digital-service-history-heading h2{margin:5px 0 0;color:#f0f6ff;font-size:17px;letter-spacing:-.4px}
+.digital-service-overview-heading h2 span,.digital-service-history-heading h2 span{color:#65b2ff}
+.digital-service-total{display:flex;align-items:flex-end;flex-direction:column;color:#dceeff;font-size:14px;font-weight:900;white-space:nowrap}
+.digital-service-total small{margin-top:3px;color:#829ab6;font-size:7px;font-weight:500}
+.digital-service-spec-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:13px;padding-top:12px;border-top:1px solid #ffffff14}
+.digital-service-spec-grid>div{display:flex;flex-direction:column;gap:5px;min-width:0}
+.digital-service-spec-grid small{color:#7f95af;font-size:7px;line-height:1.4}
+.digital-service-spec-grid strong{overflow:hidden;color:#dceafa;font-size:10px;text-overflow:ellipsis;white-space:nowrap}
+.digital-service-history{margin-top:21px}
+.digital-service-history-heading{margin:0 1px 12px}
+.digital-service-history-heading h2{font-size:19px}
+.digital-service-history-heading p{margin:5px 0 0;color:#849bb6;font-size:8px}
+.digital-service-count{padding:5px 8px;border:1px solid #294563;border-radius:20px;color:#94b5d8;font-size:8px;white-space:nowrap}
+.digital-service-search{display:flex;align-items:center;gap:8px;padding:0 11px;border:1px solid #2a415e;border-radius:10px;background:#0b1421;color:#8bb9e8}
+.digital-service-search>span{font-size:20px}
+.digital-service-search input{flex:1;min-width:0;height:40px;border:0;outline:0;background:transparent;color:#eff6ff;font-size:10px}
+.digital-service-search input::placeholder{color:#6f829a}
+.digital-service-filters{display:flex;gap:6px;overflow-x:auto;margin:10px 0 14px;padding-bottom:2px}
+.digital-service-filter{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;padding:7px 9px;border:1px solid #263e5b;border-radius:25px;background:#101d2d;color:#91a8c3;font-size:8px}
+.digital-service-filter b{display:grid;place-items:center;min-width:16px;height:16px;padding:0 4px;border-radius:20px;background:#20344c;color:#b8d7f7;font-size:7px}
+.digital-service-filter.is-active{border-color:#347fbe;background:#15385b;color:#e0f1ff}
+.digital-service-filter.is-active b{background:#2469a8;color:#fff}
+.digital-service-timeline{display:grid;gap:10px}
+.digital-service-record{display:grid;grid-template-columns:25px minmax(0,1fr);gap:8px}
+.digital-service-record[hidden]{display:none}
+.digital-service-record-rail{position:relative;display:flex;justify-content:center}
+.digital-service-record-rail:after{content:"";position:absolute;top:27px;bottom:-13px;width:1px;background:#2c4d70}
+.digital-service-record:last-child .digital-service-record-rail:after{display:none}
+.digital-service-record-rail>span{z-index:1;display:grid;place-items:center;width:24px;height:24px;border:1px solid #385d82;border-radius:50%;background:#142b45;color:#a9d4ff;font-size:8px;font-weight:900}
+.digital-service-record.is-verified .digital-service-record-rail>span{border-color:#2f8b72;background:#103b34;color:#a3f0d3}
+.digital-service-record-card{min-width:0;padding:11px;border:1px solid #293f5b;border-radius:12px;background:linear-gradient(145deg,#111e30,#0a131f)}
+.digital-service-record.is-verified .digital-service-record-card{border-color:#2c5a59}
+.digital-service-record-top{display:flex;align-items:center;justify-content:space-between;gap:7px}
+.digital-service-category{overflow:hidden;padding:4px 7px;border:1px solid #315b82;border-radius:20px;background:#142e49;color:#a9d2fa;font-size:7px;font-weight:800;text-overflow:ellipsis;white-space:nowrap}
+.digital-service-record.is-verified .digital-service-category{border-color:#327764;background:#10352e;color:#a4e8ce}
+.digital-service-record-top time{flex:0 0 auto;color:#8096b1;font-size:7px}
+.digital-service-record-card h3{margin:8px 0 6px;color:#f0f6ff;font-size:12px;font-weight:900}
+.digital-service-record-meta{display:flex;flex-wrap:wrap;gap:9px;color:#9ab0ca;font-size:8px}
+.digital-service-record-card>p{margin:8px 0 0;color:#9aacc2;font-size:9px;line-height:1.7;overflow-wrap:anywhere}
+.digital-service-record-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-top:10px;padding-top:8px;border-top:1px solid #ffffff12}
+.digital-service-verification{font-size:7px;font-weight:700}
+.digital-service-verification.verified{color:#8fe0bf}
+.digital-service-verification.unverified{color:#c1a77b}
+.digital-service-record-footer>strong{color:#9cb8d6;font-size:7px}
+.digital-service-record-card .digital-service-verification-note{padding:7px;border-left:2px solid #537da7;background:#142337;color:#9db5d0;font-size:8px}
+.digital-service-no-results{padding:15px;text-align:center;color:#8da3bd;font-size:9px}
+.digital-service-no-results[hidden]{display:none}
+.digital-service-empty{padding:26px 16px;border:1px dashed #2c4a6b;border-radius:14px;background:#0c1725;text-align:center}
+.digital-service-empty>span{color:#67b3ff;font-size:30px}
+.digital-service-empty h3{margin:8px 0;color:#eef5ff;font-size:14px}
+.digital-service-empty p{max-width:330px;margin:0 auto 14px;color:#91a6c0;font-size:9px;line-height:1.75}
+.digital-service-primary{padding:9px 13px;border:1px solid #2f7fc4;border-radius:9px;background:linear-gradient(100deg,#14558e,#12395f);color:#e4f3ff;font-size:9px;font-weight:800}
+.digital-service-footnote{margin-top:17px;padding:12px;border:1px solid #263e59;border-radius:11px;background:#0b1522}
+.digital-service-footnote span{color:#7eb9f3;font-size:7px;font-weight:800;letter-spacing:1.6px}
+.digital-service-footnote p{margin:6px 0 0;color:#8399b4;font-size:8px;line-height:1.7}
+.digital-service-loading{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;padding:45px 10px;color:#8ba7c6;font-size:9px}
+@media(min-width:620px){.digital-service-hero{padding:27px 25px}.digital-service-bike-photo{flex-basis:90px;width:90px;height:72px}.digital-service-hero h1{font-size:40px}.digital-service-timeline{gap:13px}.digital-service-record-card{padding:14px}}
+@media(max-width:370px){.digital-service-seal{flex-basis:58px;width:58px;height:58px;font-size:22px}.digital-service-hero h1{font-size:27px}.digital-service-spec-grid{gap:4px}.digital-service-spec-grid small{font-size:6px}.digital-service-spec-grid strong{font-size:9px}}
