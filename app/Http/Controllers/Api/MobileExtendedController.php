@@ -1,0 +1,344 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\CommunityPost;
+use App\Models\Conversation;
+use App\Models\Message;
+use App\Models\Motorcycle;
+use App\Models\Part;
+use App\Models\PartListing;
+use App\Models\TransportOffer;
+use App\Models\TransportRequest;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+
+class MobileExtendedController extends Controller
+{
+    public function garage(Request $request)
+    {
+        $user = $request->user();
+        $motorcycles = $user->motorcycles()->with(['images', 'serviceRecords'])->latest()->get();
+        $reminders = DB::table('motorcycle_maintenance_reminders')
+            ->join('motorcycles', 'motorcycles.id', '=', 'motorcycle_maintenance_reminders.motorcycle_id')
+            ->where('motorcycle_maintenance_reminders.user_id', $user->id)
+            ->whereNull('motorcycle_maintenance_reminders.completed_at')
+            ->orderByRaw('motorcycle_maintenance_reminders.due_date IS NULL')
+            ->orderBy('motorcycle_maintenance_reminders.due_date')
+            ->select('motorcycle_maintenance_reminders.*', 'motorcycles.title as motorcycle_title')
+            ->get();
+        $expenses = DB::table('motorcycle_expenses')
+            ->join('motorcycles', 'motorcycles.id', '=', 'motorcycle_expenses.motorcycle_id')
+            ->where('motorcycle_expenses.user_id', $user->id)
+            ->latest('expense_date')->limit(50)
+            ->select('motorcycle_expenses.*', 'motorcycles.title as motorcycle_title')->get();
+
+        return response()->json([
+            'motorcycles' => $motorcycles,
+            'reminders' => $reminders,
+            'expenses' => $expenses,
+            'total_expenses' => (float) DB::table('motorcycle_expenses')->where('user_id', $user->id)->sum('amount'),
+            'month_expenses' => (float) DB::table('motorcycle_expenses')->where('user_id', $user->id)
+                ->whereBetween('expense_date', [now()->startOfMonth()->toDateString(), now()->endOfMonth()->toDateString()])->sum('amount'),
+        ]);
+    }
+
+    public function storeReminder(Request $request)
+    {
+        $data = $request->validate([
+            'motorcycle_id' => ['required', 'integer'],
+            'title' => ['required', 'string', 'max:160'],
+            'due_date' => ['nullable', 'date', 'after_or_equal:today'],
+            'due_mileage' => ['nullable', 'integer', 'min:0', 'max:2000000'],
+            'notes' => ['nullable', 'string', 'max:2000'],
+        ]);
+        $request->user()->motorcycles()->findOrFail($data['motorcycle_id']);
+        if (empty($data['due_date']) && empty($data['due_mileage'])) {
+            throw ValidationException::withMessages(['due_date' => 'მიუთითე თარიღი ან გარბენი მაინც.']);
+        }
+        $id = DB::table('motorcycle_maintenance_reminders')->insertGetId([
+            'user_id' => $request->user()->id, 'motorcycle_id' => $data['motorcycle_id'],
+            'title' => $data['title'], 'due_date' => $data['due_date'] ?? null,
+            'due_mileage' => $data['due_mileage'] ?? null, 'notes' => $data['notes'] ?? null,
+            'created_at' => now(), 'updated_at' => now(),
+        ]);
+        return response()->json(['message' => 'შეხსენება დაემატა ავტოფარეხს.', 'id' => $id], 201);
+    }
+
+    public function completeReminder(Request $request, int $reminder)
+    {
+        $updated = DB::table('motorcycle_maintenance_reminders')->where('id', $reminder)
+            ->where('user_id', $request->user()->id)->whereNull('completed_at')
+            ->update(['completed_at' => now(), 'updated_at' => now()]);
+        abort_unless($updated, 404);
+        return response()->json(['message' => 'შეხსენება შესრულებულად მოინიშნა.']);
+    }
+
+    public function storeExpense(Request $request)
+    {
+        $data = $request->validate([
+            'motorcycle_id' => ['required', 'integer'], 'category' => ['required', 'string', 'max:80'],
+            'amount' => ['required', 'numeric', 'min:0.01', 'max:999999999'],
+            'expense_date' => ['required', 'date', 'before_or_equal:today'],
+            'vendor' => ['nullable', 'string', 'max:160'], 'notes' => ['nullable', 'string', 'max:2000'],
+        ]);
+        $request->user()->motorcycles()->findOrFail($data['motorcycle_id']);
+        $id = DB::table('motorcycle_expenses')->insertGetId($data + [
+            'user_id' => $request->user()->id, 'created_at' => now(), 'updated_at' => now(),
+        ]);
+        return response()->json(['message' => 'ხარჯი დაემატა.', 'id' => $id], 201);
+    }
+
+    public function deleteExpense(Request $request, int $expense)
+    {
+        $deleted = DB::table('motorcycle_expenses')->where('id', $expense)->where('user_id', $request->user()->id)->delete();
+        abort_unless($deleted, 404);
+        return response()->json(['message' => 'ხარჯის ჩანაწერი წაიშალა.']);
+    }
+
+    public function favorites(Request $request)
+    {
+        $userId = $request->user()->id;
+        $motorcycles = Motorcycle::query()->join('motorcycle_favorites', 'motorcycle_favorites.motorcycle_id', '=', 'motorcycles.id')
+            ->where('motorcycle_favorites.user_id', $userId)->where('motorcycles.status', 'published')
+            ->with('images')->select('motorcycles.*')->latest('motorcycle_favorites.created_at')->get();
+        $parts = DB::table('part_favorites')->where('user_id', $userId)->latest()->get()->map(function ($favorite) {
+            $item = $favorite->source === 'store'
+                ? Part::where('is_active', true)->find($favorite->part_id)
+                : PartListing::where('status', 'published')->find($favorite->part_id);
+            return $item ? ['source' => $favorite->source, 'id' => $item->id, 'title' => $item->title, 'price' => $item->price, 'brand' => $item->brand] : null;
+        })->filter()->values();
+        return response()->json(['motorcycles' => $motorcycles, 'parts' => $parts]);
+    }
+
+    public function toggleMotorcycleFavorite(Request $request, int $motorcycle)
+    {
+        $item = Motorcycle::where('status', 'published')->findOrFail($motorcycle);
+        $query = DB::table('motorcycle_favorites')->where('user_id', $request->user()->id)->where('motorcycle_id', $item->id);
+        if ($query->exists()) { $query->delete(); $saved = false; }
+        else { DB::table('motorcycle_favorites')->insert(['user_id' => $request->user()->id, 'motorcycle_id' => $item->id, 'created_at' => now(), 'updated_at' => now()]); $saved = true; }
+        return response()->json(['saved' => $saved, 'message' => $saved ? 'ფავორიტებში დაემატა.' : 'ფავორიტებიდან ამოიშალა.']);
+    }
+
+    public function togglePartFavorite(Request $request, string $source, int $part)
+    {
+        abort_unless(in_array($source, ['store', 'marketplace'], true), 404);
+        $item = $source === 'store' ? Part::where('is_active', true)->findOrFail($part) : PartListing::where('status', 'published')->findOrFail($part);
+        $query = DB::table('part_favorites')->where('user_id', $request->user()->id)->where('source', $source)->where('part_id', $item->id);
+        if ($query->exists()) { $query->delete(); $saved = false; }
+        else { DB::table('part_favorites')->insert(['user_id' => $request->user()->id, 'source' => $source, 'part_id' => $item->id, 'created_at' => now(), 'updated_at' => now()]); $saved = true; }
+        return response()->json(['saved' => $saved, 'message' => $saved ? 'ფავორიტებში დაემატა.' : 'ფავორიტებიდან ამოიშალა.']);
+    }
+
+    public function compare(Request $request)
+    {
+        $ids = collect((array) $request->query('ids', []))->filter(fn ($id) => is_scalar($id) && ctype_digit((string) $id))->map(fn ($id) => (int) $id)->unique()->take(3);
+        return response()->json(['motorcycles' => Motorcycle::where('status', 'published')->whereIn('id', $ids)->with('images')->get()]);
+    }
+
+    public function community(Request $request)
+    {
+        $userId = $request->user()->id;
+        $posts = CommunityPost::with(['user:id,name,avatar_path', 'motorcycle:id,title,brand,model', 'comments.user:id,name,avatar_path'])
+            ->withCount(['comments', 'likes'])
+            ->withExists(['likes as liked_by_me' => fn ($q) => $q->where('users.id', $userId)])
+            ->latest()->paginate(20);
+        return response()->json($posts);
+    }
+
+    public function storePost(Request $request)
+    {
+        $data = $request->validate(['body' => ['required', 'string', 'min:2', 'max:3000'], 'motorcycle_id' => ['nullable', 'integer', 'exists:motorcycles,id']]);
+        if (!empty($data['motorcycle_id'])) {
+            $request->user()->motorcycles()->where('status', 'published')->findOrFail($data['motorcycle_id']);
+        }
+        $post = CommunityPost::create(['user_id' => $request->user()->id, 'motorcycle_id' => $data['motorcycle_id'] ?? null, 'body' => trim($data['body'])]);
+        return response()->json(['message' => 'პოსტი გამოქვეყნდა.', 'post' => $post->load('user:id,name,avatar_path')], 201);
+    }
+
+    public function commentPost(Request $request, CommunityPost $post)
+    {
+        $data = $request->validate(['body' => ['required', 'string', 'min:1', 'max:1000']]);
+        $comment = $post->comments()->create(['user_id' => $request->user()->id, 'body' => trim($data['body'])]);
+        return response()->json(['message' => 'კომენტარი დაემატა.', 'comment' => $comment->load('user:id,name,avatar_path')], 201);
+    }
+
+    public function likePost(Request $request, CommunityPost $post)
+    {
+        $changes = $post->likes()->toggle($request->user()->id);
+        return response()->json(['liked' => !empty($changes['attached']), 'likes_count' => $post->likes()->count()]);
+    }
+
+    public function deletePost(Request $request, CommunityPost $post)
+    {
+        abort_unless($post->user_id === $request->user()->id, 403);
+        if ($post->image_path) Storage::disk('public')->delete($post->image_path);
+        $post->delete();
+        return response()->json(['message' => 'პოსტი წაიშალა.']);
+    }
+
+    public function clubs(Request $request)
+    {
+        $userId = $request->user()->id;
+        $clubs = DB::table('moto_clubs')->leftJoin('moto_club_members', function ($join) {
+            $join->on('moto_club_members.club_id', '=', 'moto_clubs.id')->where('moto_club_members.status', '=', 'active');
+        })->select('moto_clubs.id', 'moto_clubs.name', 'moto_clubs.slug', 'moto_clubs.city', 'moto_clubs.description', 'moto_clubs.is_public')
+            ->selectRaw('COUNT(moto_club_members.id) as members_count')
+            ->where(function ($q) use ($userId) {
+                $q->where('moto_clubs.is_public', true)->orWhere('moto_clubs.owner_id', $userId)
+                    ->orWhereExists(fn ($sub) => $sub->selectRaw('1')->from('moto_club_members as mine')->whereColumn('mine.club_id', 'moto_clubs.id')->where('mine.user_id', $userId)->where('mine.status', 'active'));
+            })->groupBy('moto_clubs.id', 'moto_clubs.name', 'moto_clubs.slug', 'moto_clubs.city', 'moto_clubs.description', 'moto_clubs.is_public')
+            ->orderByDesc('moto_clubs.created_at')->get();
+        $events = DB::table('moto_events')->join('moto_clubs', 'moto_clubs.id', '=', 'moto_events.club_id')
+            ->where('moto_events.starts_at', '>=', now())->orderBy('moto_events.starts_at')
+            ->select('moto_events.*', 'moto_clubs.name as club_name', 'moto_clubs.slug as club_slug')->limit(30)->get();
+        return response()->json(['clubs' => $clubs, 'events' => $events]);
+    }
+
+    public function storeClub(Request $request)
+    {
+        $data = $request->validate(['name' => ['required', 'string', 'max:140'], 'city' => ['nullable', 'string', 'max:100'], 'description' => ['nullable', 'string', 'max:4000'], 'is_public' => ['required', 'boolean']]);
+        $clubId = DB::transaction(function () use ($request, $data) {
+            $slug = Str::slug($data['name']).'-'.Str::lower(Str::random(5));
+            $id = DB::table('moto_clubs')->insertGetId(['owner_id' => $request->user()->id, 'name' => $data['name'], 'slug' => $slug, 'city' => $data['city'] ?? null, 'description' => $data['description'] ?? null, 'is_public' => (bool) $data['is_public'], 'created_at' => now(), 'updated_at' => now()]);
+            DB::table('moto_club_members')->insert(['club_id' => $id, 'user_id' => $request->user()->id, 'role' => 'owner', 'status' => 'active', 'created_at' => now(), 'updated_at' => now()]);
+            return $id;
+        });
+        return response()->json(['message' => 'მოტოკლუბი შეიქმნა.', 'club' => DB::table('moto_clubs')->find($clubId)], 201);
+    }
+
+    public function joinClub(Request $request, int $club)
+    {
+        $item = DB::table('moto_clubs')->where('is_public', true)->find($club);
+        abort_unless($item, 404);
+        DB::table('moto_club_members')->updateOrInsert(['club_id' => $club, 'user_id' => $request->user()->id], ['role' => 'member', 'status' => 'active', 'created_at' => now(), 'updated_at' => now()]);
+        return response()->json(['message' => 'კლუბს შეუერთდი.']);
+    }
+
+    public function attendEvent(Request $request, int $event)
+    {
+        $item = DB::table('moto_events')->join('moto_clubs', 'moto_clubs.id', '=', 'moto_events.club_id')
+            ->where('moto_events.id', $event)->where(function ($q) use ($request) {
+                $q->where('moto_clubs.is_public', true)->orWhere('moto_clubs.owner_id', $request->user()->id)
+                    ->orWhereExists(fn ($sub) => $sub->selectRaw('1')->from('moto_club_members')->whereColumn('moto_club_members.club_id', 'moto_clubs.id')->where('moto_club_members.user_id', $request->user()->id)->where('moto_club_members.status', 'active'));
+            })->select('moto_events.*')->first();
+        abort_unless($item, 404);
+        $count = DB::table('moto_event_attendees')->where('event_id', $event)->where('status', 'going')->count();
+        if ($item->capacity && $count >= $item->capacity && !DB::table('moto_event_attendees')->where('event_id', $event)->where('user_id', $request->user()->id)->exists()) {
+            throw ValidationException::withMessages(['event' => 'ღონისძიებაზე თავისუფალი ადგილი აღარ არის.']);
+        }
+        DB::table('moto_event_attendees')->updateOrInsert(['event_id' => $event, 'user_id' => $request->user()->id], ['status' => 'going', 'created_at' => now(), 'updated_at' => now()]);
+        return response()->json(['message' => 'ღონისძიებაზე მონაწილეობა დადასტურდა.']);
+    }
+
+    public function conversations(Request $request)
+    {
+        $user = $request->user();
+        $items = $user->conversations()->with(['participants:id,name,avatar_path', 'motorcycle:id,title', 'latestMessage.sender:id,name'])
+            ->withCount(['messages as unread_count' => fn ($q) => $q->whereNull('read_at')->where('sender_id', '!=', $user->id)])
+            ->orderByDesc('last_message_at')->limit(50)->get();
+        return response()->json(['conversations' => $items]);
+    }
+
+    public function conversation(Request $request, Conversation $conversation)
+    {
+        $this->authorizeConversation($request, $conversation);
+        $messages = $conversation->messages()->with('sender:id,name,avatar_path')->oldest()->limit(100)->get();
+        $conversation->messages()->where('sender_id', '!=', $request->user()->id)->whereNull('read_at')->update(['read_at' => now()]);
+        $conversation->participants()->updateExistingPivot($request->user()->id, ['last_read_at' => now()]);
+        return response()->json(['conversation' => $conversation->load(['participants:id,name,avatar_path', 'motorcycle:id,title']), 'messages' => $messages]);
+    }
+
+    public function startConversation(Request $request)
+    {
+        $data = $request->validate(['recipient_id' => ['required', 'integer', 'exists:users,id'], 'body' => ['required', 'string', 'min:1', 'max:5000'], 'motorcycle_id' => ['nullable', 'integer', 'exists:motorcycles,id'], 'subject' => ['nullable', 'string', 'max:160']]);
+        abort_if((int) $data['recipient_id'] === $request->user()->id, 422, 'საკუთარ თავს შეტყობინებას ვერ გაუგზავნით.');
+        $recipient = User::findOrFail($data['recipient_id']);
+        $motorcycle = null;
+        if (!empty($data['motorcycle_id'])) {
+            $motorcycle = Motorcycle::where('status', 'published')->findOrFail($data['motorcycle_id']);
+            abort_unless($motorcycle->user_id === $recipient->id, 422, 'მოტოციკლის გამყიდველი არ ემთხვევა მიმღებს.');
+        }
+        $conversation = DB::transaction(function () use ($request, $recipient, $motorcycle, $data) {
+            $conversation = Conversation::create(['created_by_user_id' => $request->user()->id, 'motorcycle_id' => $motorcycle?->id, 'subject' => $data['subject'] ?? ($motorcycle ? 'მოტოციკლი: '.$motorcycle->title : 'პირადი მიმოწერა'), 'last_message_at' => now()]);
+            $conversation->participants()->attach([$request->user()->id => ['last_read_at' => now()], $recipient->id => ['last_read_at' => null]]);
+            $conversation->messages()->create(['sender_id' => $request->user()->id, 'body' => trim($data['body'])]);
+            return $conversation;
+        });
+        return response()->json(['message' => 'შეტყობინება გაიგზავნა.', 'conversation_id' => $conversation->id], 201);
+    }
+
+    public function sendMessage(Request $request, Conversation $conversation)
+    {
+        $this->authorizeConversation($request, $conversation);
+        $data = $request->validate(['body' => ['required', 'string', 'min:1', 'max:5000']]);
+        $message = $conversation->messages()->create(['sender_id' => $request->user()->id, 'body' => trim($data['body'])]);
+        $conversation->forceFill(['last_message_at' => $message->created_at])->save();
+        $conversation->participants()->updateExistingPivot($request->user()->id, ['last_read_at' => now()]);
+        return response()->json(['message' => 'გაიგზავნა.', 'item' => $message->load('sender:id,name,avatar_path')], 201);
+    }
+
+    private function authorizeConversation(Request $request, Conversation $conversation): void
+    {
+        abort_unless($conversation->participants()->whereKey($request->user()->id)->exists(), 404);
+    }
+
+    public function transportIndex(Request $request)
+    {
+        $companies = DB::table('partners')->where('type', 'transport')->where('application_status', 'approved')->where('is_active', true)
+            ->select('id', 'name', 'slug', 'phone', 'address', 'description')->orderBy('name')->get();
+        $requests = TransportRequest::where('user_id', $request->user()->id)->with(['offers.partner:id,name,phone'])->latest()->limit(30)->get();
+        return response()->json(['companies' => $companies, 'requests' => $requests]);
+    }
+
+    public function storeTransportRequest(Request $request)
+    {
+        $data = $request->validate([
+            'motorcycle_brand' => ['required', 'string', 'max:120'], 'motorcycle_model' => ['required', 'string', 'max:120'],
+            'motorcycle_year' => ['nullable', 'integer', 'min:1900', 'max:'.(date('Y') + 1)],
+            'pickup_city' => ['required', 'string', 'max:150'], 'pickup_address' => ['nullable', 'string', 'max:255'],
+            'destination_city' => ['required', 'string', 'max:150'], 'destination_address' => ['nullable', 'string', 'max:255'],
+            'preferred_date' => ['nullable', 'date', 'after_or_equal:today'], 'motorcycle_details' => ['nullable', 'string', 'max:3000'],
+            'customer_name' => ['required', 'string', 'max:150'], 'customer_phone' => ['required', 'string', 'max:40'],
+            'customer_email' => ['nullable', 'email', 'max:255'], 'customer_notes' => ['nullable', 'string', 'max:3000'],
+        ]);
+        $requestItem = TransportRequest::create($data + ['request_number' => 'MT-'.Str::upper(Str::random(10)), 'user_id' => $request->user()->id, 'status' => 'pending']);
+        return response()->json(['message' => 'ტრანსპორტირების მოთხოვნა გაიგზავნა.', 'request' => $requestItem], 201);
+    }
+
+    public function acceptTransportOffer(Request $request, TransportOffer $offer)
+    {
+        DB::transaction(function () use ($request, $offer) {
+            $transportRequest = TransportRequest::whereKey($offer->transport_request_id)->lockForUpdate()->firstOrFail();
+            abort_unless($transportRequest->user_id === $request->user()->id, 403);
+            if (!in_array($transportRequest->status, ['pending', 'quoted'], true) || $offer->status !== 'pending') {
+                throw ValidationException::withMessages(['offer' => 'ამ შეთავაზების მიღება აღარ შეიძლება.']);
+            }
+            TransportOffer::where('transport_request_id', $transportRequest->id)->where('status', 'pending')->update(['status' => 'rejected']);
+            $offer->update(['status' => 'accepted', 'accepted_at' => now()]);
+            $transportRequest->update(['status' => 'accepted']);
+        });
+        return response()->json(['message' => 'შეთავაზება მიღებულია.']);
+    }
+
+    public function diagnose(Request $request)
+    {
+        $data = $request->validate(['motorcycle' => ['required', 'string', 'max:160'], 'symptom' => ['required', 'string', 'max:3000'], 'when' => ['nullable', 'in:cold,warm,always,under_load'], 'warning_signs' => ['nullable', 'array', 'max:5'], 'warning_signs.*' => ['string', 'in:oil_pressure,overheating,brake_issue,fuel_leak,smoke,none']]);
+        $text = mb_strtolower($data['symptom']);
+        $results = []; $urgent = false;
+        if (str_contains($text, 'brake') || str_contains($text, 'მუხრუჭ') || in_array('brake_issue', $data['warning_signs'] ?? [], true)) { $results[] = ['title' => 'მუხრუჭის სისტემა', 'detail' => 'შესაძლოა პრობლემა იყოს ხუნდებში, სითხის დონეში, ჰაერში ან გაჟონვაში. მუხრუჭის ეფექტიანობის ეჭვისას მოტოციკლი არ მართო და სერვისამდე გადაიყვანე ტრანსპორტირებით.']; $urgent = true; }
+        if (str_contains($text, 'oil') || str_contains($text, 'ზეთი') || in_array('oil_pressure', $data['warning_signs'] ?? [], true)) { $results[] = ['title' => 'ზეთის დონე ან წნევა', 'detail' => 'შეამოწმე ზეთის დონე მხოლოდ მწარმოებლის პროცედურით. ზეთის წნევის ნათურის ან მეტალის ხმისას ძრავა გამორთე და აღარ ამუშაო.']; $urgent = true; }
+        if (str_contains($text, 'heat') || str_contains($text, 'overheat') || str_contains($text, 'ტემპერატ') || str_contains($text, 'ცხელ') || in_array('overheating', $data['warning_signs'] ?? [], true)) { $results[] = ['title' => 'გაგრილების სისტემა', 'detail' => 'შესაძლო მიზეზებია დაბალი სითხე, ვენტილატორი, თერმოსტატი ან გაჟონვა. ცხელ რადიატორს არ შეეხო; გადახურებისას გააჩერე ძრავა.']; $urgent = true; }
+        if (str_contains($text, 'fuel') || str_contains($text, 'gas') || str_contains($text, 'ბენზინ') || str_contains($text, 'საწვავ') || in_array('fuel_leak', $data['warning_signs'] ?? [], true)) { $results[] = ['title' => 'საწვავის სისტემა', 'detail' => 'შესაძლოა პრობლემა იყოს შლანგში, შეერთებაში ან ინჟექტორში. საწვავის გაჟონვისას არ დაქოქო და მოარიდე ცეცხლს.']; $urgent = true; }
+        if (str_contains($text, 'start') || str_contains($text, 'ქოქ') || str_contains($text, 'ბატარე') || str_contains($text, 'battery')) $results[] = ['title' => 'დაქოქვის სისტემა', 'detail' => 'შესამოწმებელია აკუმულატორი, კონტაქტები, დამუხტვა, ფიუზები და სტარტერის წრე.'];
+        if (str_contains($text, 'chain') || str_contains($text, 'ჯაჭვ') || str_contains($text, 'კლაჩ') || str_contains($text, 'clutch') || str_contains($text, 'ვიბრ') || str_contains($text, 'ხმაურ') || str_contains($text, 'noise')) $results[] = ['title' => 'გადაცემათა ნაწილი / ხმაური', 'detail' => 'შესამოწმებელია ჯაჭვის დაჭიმულობა და შეზეთვა, კლაჩის თავისუფალი სვლა და ხმაურის წყარო.'];
+        if (!$results) $results[] = ['title' => 'საჭიროა დამატებითი დიაგნოსტიკა', 'detail' => 'აღწერე სიმპტომის დრო, ცივი/ცხელი ძრავა, სიჩქარე/ბრუნი და გამაფრთხილებელი ნათურები. საბოლოო დიაგნოზი ადგილზე შემოწმებას საჭიროებს.'];
+        if (in_array('smoke', $data['warning_signs'] ?? [], true)) { $urgent = true; $results[] = ['title' => 'კვამლი', 'detail' => 'გააჩერე უსაფრთხო ადგილას და გამორთე ძრავა. კვამლის წყაროს დადგენამდე მოძრაობა არ გააგრძელო.']; }
+        return response()->json(['motorcycle' => $data['motorcycle'], 'urgent' => $urgent, 'results' => $results]);
+    }
+}
