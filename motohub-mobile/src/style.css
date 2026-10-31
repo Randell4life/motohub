@@ -857,3 +857,99 @@ body{background:radial-gradient(ellipse at 50% -8%,#1b3152 0,transparent 42%),li
 .messages-reply-form button{display:grid;place-items:center;flex:0 0 39px;width:39px;height:39px;border:1px solid #2679cf;border-radius:10px;background:#1262b7;color:#fff;font-size:20px}
 @media(min-width:680px){.messages-hero{padding:27px 25px}.messages-hero h1{font-size:38px}.messages-list{grid-template-columns:repeat(2,minmax(0,1fr))}.messages-thread-body{max-height:62vh}}
 @media(max-width:390px){.messages-hero-icon{width:45px;height:45px}.messages-hero h1{font-size:26px}.message-conversation-card{gap:8px;padding:10px}.message-avatar{flex-basis:38px;width:38px;height:38px}}
+
+
+/* PERSONAL GARAGE — premium rider dashboard */
+.garage-page{padding-top:17px}
+.garage-hero{position:relative;isolation:isolate;overflow:hidden;padding:22px 18px 17px;border:1px solid #29496e;border-radius:20px;background:radial-gradient(ellipse at 88% 12%,#1d4e83 0,transparent 43%),linear-gradient(135deg,#142a46,#0b1423 72%);box-shadow:0 18px 48px #0006}
+.garage-hero:after{content:"";position:absolute;z-index:-1;right:-55px;bottom:-135px;width:250px;height:250px;border:1px solid #6bb5ff28;transform:rotate(38deg)}
+.garage-hero>.eyebrow{color:#8ac5ff;font-size:9px;letter-spacing:2px}
+.garage-hero-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.garage-hero h1{margin:14px 0 8px;color:#f5f9ff;font-size:clamp(28px,7vw,39px);font-weight:950;line-height:1.13;letter-spacing:-1.2px}
+.garage-hero h1 span{color:#62adff}
+.garage-hero p{max-width:370px;margin:0;color:#a9bdd5;font-size:10px;line-height:1.8}
+.garage-hero-mark{flex:0 0 auto;color:#eaf5ff;font-size:31px;font-weight:1000;letter-spacing:-3px}
+.garage-hero-mark span{color:#55aaff}
+.garage-hero-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:19px;padding-top:14px;border-top:1px solid #ffffff20}
+.garage-hero-stats>div{display:flex;flex-direction:column;gap:5px;min-width:0}
+.garage-hero-stats strong{overflow:hidden;color:#f5f9ff;font-size:clamp(14px,4vw,20px);font-weight:900;text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums}
+.garage-hero-stats small{color:#91a9c6;font-size:8px;line-height:1.4}
+.garage-section-heading{display:flex;align-items:end;justify-content:space-between;gap:8px;margin:22px 1px 12px}
+.garage-section-heading .eyebrow{color:#70b5ff;font-size:8px;letter-spacing:1.6px}
+.garage-section-heading h2{margin:5px 0 0;color:#f2f7ff;font-size:19px;letter-spacing:-.5px}
+.garage-section-heading h2 span{color:#62adff}
+.garage-add-btn{padding:8px 10px;border:1px solid #327fc7;border-radius:9px;background:#14365a;color:#b9dcff;font-size:9px;font-weight:800}
+.garage-bike-grid{display:grid;gap:12px}
+.garage-bike-card{overflow:hidden;border:1px solid #2a405d;border-radius:16px;background:linear-gradient(150deg,#121f31,#0a121e);box-shadow:0 10px 28px #0003}
+.garage-bike-photo{position:relative;height:155px;overflow:hidden;background:radial-gradient(ellipse at 50% 20%,#1d4167,#0b1421 70%)}
+.garage-bike-photo>img{display:block;width:100%;height:100%;object-fit:cover}
+.garage-bike-photo:after{content:"";position:absolute;inset:45% 0 0;background:linear-gradient(transparent,#08111ee8);pointer-events:none}
+.garage-bike-status{position:absolute;z-index:1;top:11px;right:11px;padding:6px 9px;border:1px solid #ffffff30;border-radius:20px;background:#08111dc9;color:#c4ddf7;font-size:8px;font-weight:800;backdrop-filter:blur(8px)}
+.garage-bike-status.status-published{border-color:#368b6c;background:#0b3028db;color:#9af0cb}
+.garage-bike-status.status-draft{border-color:#a17c38;background:#3b2c12dc;color:#f2d18d}
+.garage-bike-placeholder{display:flex;align-items:center;justify-content:center;flex-direction:column;height:100%;gap:5px;color:#4b91d3}
+.garage-bike-placeholder span{font-size:49px;font-weight:1000;letter-spacing:-6px}
+.garage-bike-placeholder small{color:#6685a7;font-size:8px;letter-spacing:2px}
+.garage-bike-content{padding:13px}
+.garage-bike-overline{color:#6eabeb;font-size:8px;font-weight:800;letter-spacing:1.6px}
+.garage-bike-content h3{margin:6px 0 12px;color:#f2f7ff;font-size:17px;font-weight:900;letter-spacing:-.3px}
+.garage-bike-specs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:10px 0;border-top:1px solid #ffffff13;border-bottom:1px solid #ffffff13}
+.garage-bike-specs>div{display:flex;flex-direction:column;gap:5px;min-width:0}
+.garage-bike-specs small{color:#7188a5;font-size:8px}
+.garage-bike-specs strong{overflow:hidden;color:#d9e8f9;font-size:10px;text-overflow:ellipsis;white-space:nowrap}
+.garage-bike-meta{display:flex;justify-content:space-between;align-items:center;padding:9px 0;color:#849ab4;font-size:9px}
+.garage-bike-meta b{color:#a9d3ff}
+.garage-bike-actions{display:flex;gap:8px}
+.garage-passport-btn{display:flex;flex:1;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid #2b79bf;border-radius:9px;background:linear-gradient(100deg,#14518a,#12365a);color:#e3f2ff;font-size:10px;font-weight:800}
+.garage-passport-btn span{font-size:14px}
+.garage-bike-more{width:39px;border:1px solid #2a405c;border-radius:9px;background:#111e2e;color:#9db5d1;font-size:13px}
+.garage-empty{padding:27px 17px;border:1px dashed #2d4b6e;border-radius:16px;background:linear-gradient(145deg,#111f31,#0a121e);text-align:center}
+.garage-empty>span{font-size:34px}
+.garage-empty h3{margin:9px 0;color:#f1f7ff;font-size:16px}
+.garage-empty p{max-width:330px;margin:0 auto 15px;color:#91a6c0;font-size:10px;line-height:1.75}
+.garage-empty .primary-btn{font-size:10px}
+.garage-finance{margin-top:20px}
+.garage-finance .garage-section-heading{margin-bottom:10px}
+.garage-finance-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.garage-finance-card{display:flex;flex-direction:column;gap:7px;min-width:0;padding:13px;border:1px solid #293f5c;border-radius:13px;background:linear-gradient(145deg,#142237,#0b1420)}
+.garage-finance-card.is-current{border-color:#2b6598;background:linear-gradient(145deg,#153455,#0b1727)}
+.garage-finance-card small{color:#8ba3c0;font-size:9px}
+.garage-finance-card strong{overflow:hidden;color:#f0f6ff;font-size:19px;font-weight:900;text-overflow:ellipsis;white-space:nowrap}
+.garage-finance-card span{color:#7189a6;font-size:8px}
+.garage-tool-section{margin-top:11px;overflow:hidden;border:1px solid #293f5b;border-radius:14px;background:linear-gradient(145deg,#111e30,#0b131f)}
+.garage-tool-section>summary{display:flex;align-items:center;gap:10px;padding:13px;list-style:none;cursor:pointer}
+.garage-tool-section>summary::-webkit-details-marker{display:none}
+.garage-tool-icon{display:grid;place-items:center;flex:0 0 35px;width:35px;height:35px;border:1px solid #315b83;border-radius:10px;background:#15304c;color:#9dceff;font-size:17px}
+.garage-tool-section>summary>span:nth-child(2){display:flex;flex:1;flex-direction:column;gap:4px;min-width:0}
+.garage-tool-section>summary strong{color:#eaf3ff;font-size:11px}
+.garage-tool-section>summary small{color:#8096b1;font-size:9px}
+.garage-tool-chevron{color:#7fa8d2;font-size:17px;transition:transform .2s}
+.garage-tool-section[open] .garage-tool-chevron{transform:rotate(180deg)}
+.garage-tool-body{padding:0 12px 13px;border-top:1px solid #233850}
+.garage-tool-body>.account-panel{margin-top:12px}
+.garage-tool-body .form-stack{gap:10px;padding-top:12px}
+.garage-tool-body .form-stack>label,.garage-tool-body label{color:#b7c9de;font-size:10px}
+.garage-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.garage-reminder-list,.garage-expense-list{display:grid;gap:7px;margin-top:12px}
+.garage-reminder-card{display:flex;align-items:center;gap:9px;padding:10px;border:1px solid #293e58;border-radius:11px;background:#0b1624}
+.garage-reminder-card.is-overdue{border-color:#8a6535;background:#261d12}
+.garage-reminder-icon{display:grid;place-items:center;flex:0 0 29px;width:29px;height:29px;border-radius:9px;background:#173554;color:#9ccfff;font-size:15px;font-weight:900}
+.garage-reminder-card.is-overdue .garage-reminder-icon{background:#5b3b18;color:#ffd48d}
+.garage-reminder-info{display:flex;flex:1;flex-direction:column;gap:4px;min-width:0}
+.garage-reminder-info strong{color:#e6f0fc;font-size:10px}
+.garage-reminder-info small,.garage-reminder-info>span{overflow:hidden;color:#839bb8;font-size:8px;text-overflow:ellipsis;white-space:nowrap}
+.garage-reminder-card.is-overdue .garage-reminder-info>span{color:#e5b66c}
+.garage-done-btn{flex:0 0 29px;width:29px;height:29px;border:1px solid #327b64;border-radius:8px;background:#10352d;color:#9ce8ca;font-size:14px}
+.garage-expense-row{display:flex;align-items:center;gap:9px;padding:10px;border:1px solid #293e58;border-radius:11px;background:#0b1624}
+.garage-expense-icon{display:grid;place-items:center;flex:0 0 30px;width:30px;height:30px;border:1px solid #315d83;border-radius:9px;background:#142e49;color:#a5d2ff;font-size:14px;font-weight:900}
+.garage-expense-row>div{display:flex;flex:1;flex-direction:column;gap:4px;min-width:0}
+.garage-expense-row>div strong{color:#e5effc;font-size:10px}
+.garage-expense-row>div small{overflow:hidden;color:#7f96b2;font-size:8px;text-overflow:ellipsis;white-space:nowrap}
+.garage-expense-row>b{flex:0 0 auto;color:#dcecff;font-size:10px}
+.garage-expense-delete{flex:0 0 25px;width:25px;height:25px;border:1px solid #3c4d61;border-radius:7px;background:#172333;color:#a9bad0;font-size:16px}
+.garage-muted-empty{padding:13px 4px;color:#8298b3;font-size:9px;text-align:center}
+.garage-bottom-note{display:flex;flex-direction:column;gap:8px;margin-top:19px;padding:17px;border:1px solid #294b70;border-radius:14px;background:radial-gradient(ellipse at 90% 0,#1a4b7b 0,transparent 55%),#0e1b2c}
+.garage-bottom-note span{color:#81bfff;font-size:8px;font-weight:800;letter-spacing:1.8px}
+.garage-bottom-note strong{color:#f0f6ff;font-size:19px;line-height:1.3}
+@media(min-width:620px){.garage-hero{padding:27px 25px}.garage-bike-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.garage-bike-photo{height:175px}.garage-hero h1{font-size:39px}}
+@media(max-width:370px){.garage-hero-mark{font-size:24px}.garage-hero h1{font-size:26px}.garage-form-grid{grid-template-columns:1fr}.garage-finance-card{padding:10px}.garage-finance-card strong{font-size:16px}}
