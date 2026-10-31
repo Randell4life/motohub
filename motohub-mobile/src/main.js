@@ -152,6 +152,7 @@ function extendedPage(){
  const d=state.extendedData||{}
  if(state.page==='features')return featuresPage()
  if(state.page==='garage'){
+  if(!state.token)return '<main class="section feature-page garage-page"><section class="garage-hero"><span class="eyebrow">MOTOHUB / RIDER GARAGE</span><h1>შენი მოტოები.<br><span>შენი წესები.</span></h1><p>ავტოფარეხის სანახავად და სამართავად შედი შენს ანგარიშში.</p></section><section class="garage-empty"><span>🏍</span><h3>შენი ავტოფარეხი გელოდება</h3><p>შედი ანგარიშში და დაამატე მოტოციკლები, მომსახურების შეხსენებები და ხარჯები.</p><button class="primary-btn" data-action="account">შესვლა / რეგისტრაცია ↗</button></section></main>';
   const bikes=d.motorcycles||[], reminders=d.reminders||[], expenses=d.expenses||[];
   const bikeOptions=bikes.map(x=>'<option value="'+x.id+'">'+esc(x.title||[x.brand,x.model].filter(Boolean).join(' '))+'</option>').join('');
   const totalKm=bikes.reduce((sum,x)=>sum+Number(x.mileage||0),0);
