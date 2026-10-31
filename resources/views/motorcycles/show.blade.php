@@ -5,6 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $motorcycle->title }} | MotoHub</title>
     <meta name="description" content="{{ \Illuminate\Support\Str::limit(strip_tags($motorcycle->description ?? $motorcycle->title), 155) }}">
+    <link rel="canonical" href="{{ url()->current() }}">
+    <meta property="og:type" content="product">
+    <meta property="og:site_name" content="MotoHub">
+    <meta property="og:title" content="{{ $motorcycle->title }} | MotoHub">
+    <meta property="og:description" content="{{ IlluminateSupportStr::limit(strip_tags($motorcycle->description ?? $motorcycle->title), 155) }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ $motorcycle->image_path ? IlluminateSupportFacades\Storage::url($motorcycle->image_path) : 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=1200&q=85' }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $motorcycle->title }} | MotoHub">
+    <meta name="twitter:description" content="{{ IlluminateSupportStr::limit(strip_tags($motorcycle->description ?? $motorcycle->title), 155) }}">
+    <meta name="twitter:image" content="{{ $motorcycle->image_path ? IlluminateSupportFacades\Storage::url($motorcycle->image_path) : 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=1200&q=85' }}">
+    <script type="application/ld+json">
+    @json([
+        '@context' => 'https://schema.org',
+        '@type' => 'Product',
+        'name' => $motorcycle->title,
+        'description' => IlluminateSupportStr::limit(strip_tags($motorcycle->description ?? $motorcycle->title), 500),
+        'image' => $motorcycle->image_path ? IlluminateSupportFacades\Storage::url($motorcycle->image_path) : null,
+        'brand' => $motorcycle->brand ? ['@type' => 'Brand', 'name' => $motorcycle->brand] : null,
+        'offers' => [
+            '@type' => 'Offer',
+            'price' => (float) $motorcycle->price,
+            'priceCurrency' => 'GEL',
+            'availability' => 'https://schema.org/InStock',
+            'url' => url()->current(),
+        ],
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+    </script>
     <meta name="theme-color" content="#030b18">
 
     <style>
