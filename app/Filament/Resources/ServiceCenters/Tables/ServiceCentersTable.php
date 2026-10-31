@@ -120,8 +120,8 @@ class ServiceCentersTable
                             'subscription_plan' => $data['subscription_plan'],
                             'subscription_status' => $data['subscription_status'],
                             'subscription_price' => $plan['price'],
-                            'subscription_started_at' => $record->subscription_started_at ?: now(),
-                            'subscription_ends_at' => $plan['price'] > 0 ? ($record->subscription_ends_at ?: now()->addMonth()) : null,
+                            'subscription_started_at' => $data['subscription_status'] === 'active' ? now() : $record->subscription_started_at,
+                            'subscription_ends_at' => $data['subscription_status'] === 'active' && $plan['price'] > 0 ? now()->addMonth() : null,
                         ]);
                         Notification::make()->title('გამოწერა განახლდა')->success()->send();
                     }),
