@@ -130,9 +130,10 @@ function featureForm(id,title,fields,endpoint,button='შენახვა'){
 function centerHoursOnly(center={}){
  const days=['კვირა','ორშაბათი','სამშაბათი','ოთხშაბათი','ხუთშაბათი','პარასკევი','შაბათი'];
  const map=new Map((center.hours||[]).map(h=>[Number(h.day_of_week),h]));
- const fields=days.map((day,i)=>{const h=map.get(i)||{};const closed=h.is_closed??(i===0);return '<div class="sc-hour-row"><b>'+day+'</b><label><span>გახსნა</span><input name="open_'+i+'" type="time" value="'+esc(h.opens_at||'09:00')+'" '+(closed?'disabled':'')+'></label><label><span>დახურვა</span><input name="close_'+i+'" type="time" value="'+esc(h.closes_at||'18:00')+'" '+(closed?'disabled':'')+'></label><label class="sc-closed"><input name="closed_'+i+'" type="checkbox" value="1" '+(closed?'checked':'')+' data-hour-closed="'+i+'"> დაკეტილი</label></div>'}).join('');
+ const fields=days.map((day,i)=>{const h=map.get(i)||{},closed=h.is_closed??(i===0);return '<div class="sc-hour-row"><b>'+day+'</b><label><span>გახსნა</span><input name="open_'+i+'" type="time" value="'+esc(h.opens_at||'09:00')+'"></label><label><span>დახურვა</span><input name="close_'+i+'" type="time" value="'+esc(h.closes_at||'18:00')+'"></label><label class="sc-closed"><span>სტატუსი</span><select name="closed_'+i+'"><option value="0" '+(!closed?'selected':'')+'>ღია</option><option value="1" '+(closed?'selected':'')+'>დაკეტილი</option></select></label></div>'}).join('');
  return featureForm('center-hours-form','კვირის სამუშაო გრაფიკი',fields,'/api/mobile/service-center/hours','საათების შენახვა');
 }
+
 function centerExtraForms(center={}){
  const days=['კვირა','ორშაბათი','სამშაბათი','ოთხშაბათი','ხუთშაბათი','პარასკევი','შაბათი'];
  const hours=days.map((day,i)=>'<div class="form-row"><label>'+day+'<select name="closed_'+i+'"><option value="0">ღია</option><option value="1" '+(i===0?'selected':'')+'>დაკეტილი</option></select></label><label>გახსნა<input name="open_'+i+'" type="time" value="09:00"></label><label>დახურვა<input name="close_'+i+'" type="time" value="18:00"></label></div>').join('');
