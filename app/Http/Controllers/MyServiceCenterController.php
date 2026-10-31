@@ -117,7 +117,7 @@ public function profile(): RedirectResponse|View
         $data['subscription_price'] = $plan['price'];
         $data['subscription_status'] = $plan['price'] > 0 ? 'pending_payment' : 'active';
         $data['subscription_started_at'] = now();
-        $data['subscription_ends_at'] = $plan['price'] > 0 ? now()->addMonth() : null;
+        $data['subscription_ends_at'] = null;
 
         DB::transaction(function () use ($data) {
             $baseSlug = Str::slug($data['name']) ?: 'service-center';
