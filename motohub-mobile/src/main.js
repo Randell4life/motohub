@@ -290,6 +290,20 @@ function filterFeatureGroup(body){
  const empty=body.querySelector('[data-group-empty]');
  if(empty)empty.hidden=visible!==0;
 }
+function filterClubs(){
+ const query=(app.querySelector('[data-club-search]')?.value||'').trim().toLocaleLowerCase('ka');
+ const filter=state.clubsFilter||'all';let count=0;
+ app.querySelectorAll('.club-card').forEach(card=>{
+  const show=(!query||card.dataset.clubSearch.includes(query))&&(filter==='all'||card.dataset.clubMember==='1');
+  card.hidden=!show;if(show)count++;
+ });
+ const empty=app.querySelector('.clubs-no-results');if(empty)empty.hidden=count!==0;
+}
+function filterClubEvents(){
+ const query=(app.querySelector('[data-event-search]')?.value||'').trim().toLocaleLowerCase('ka');let count=0;
+ app.querySelectorAll('.event-card').forEach(card=>{const show=!query||card.dataset.eventSearch.includes(query);card.hidden=!show;if(show)count++});
+ const empty=app.querySelector('.events-no-results');if(empty)empty.hidden=count!==0;
+}
 function filterPassportRecords(){
  const query=(app.querySelector('[data-service-record-search]')?.value||'').trim().toLocaleLowerCase('ka');
  const filter=state.passportFilter||'all';
@@ -327,6 +341,8 @@ async function preview(){try{const data=await api('/api/mobile/motorcycles?per_p
 function bind(){
  app.querySelectorAll('[data-message-search]').forEach(input=>input.addEventListener('input',()=>filterMessages()));
  app.querySelectorAll('[data-service-record-search]').forEach(input=>input.addEventListener('input',()=>filterPassportRecords()));
+ app.querySelectorAll('[data-club-search]').forEach(input=>input.addEventListener('input',()=>filterClubs()));
+ app.querySelectorAll('[data-event-search]').forEach(input=>input.addEventListener('input',()=>filterClubEvents()));
  app.querySelectorAll('[data-group-search]').forEach(input=>input.addEventListener('input',()=>filterFeatureGroup(input.closest('.feature-group-body'))));
  app.querySelectorAll('[data-group-status]').forEach(select=>select.addEventListener('change',()=>filterFeatureGroup(select.closest('.feature-group-body'))));
 app.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',async()=>{
@@ -335,6 +351,7 @@ if(['edit-listing','delete-listing','cancel-booking'].includes(a))return;
 if(a==='passport'){return loadPassport(Number(b.dataset.id))}
 if(a==='retry-passport'){return loadPassport(state.passportData?.motorcycle?.id)}
  if(a==='passport-filter'){state.passportFilter=b.dataset.filter;app.querySelectorAll('.digital-service-filter').forEach(x=>x.classList.toggle('is-active',x===b));filterPassportRecords();return}
+ if(a==='clubs-filter'){state.clubsFilter=b.dataset.filter;app.querySelectorAll('.clubs-filter').forEach(x=>x.classList.toggle('is-active',x===b));filterClubs();return}
 if(a==='service-details'){const center=state.items.find(x=>String(x.id)===b.dataset.id);if(!center)return;state.selectedServiceCenter=center;state.page='service-detail';state.error='';render();return}
 if(a==='clear-service-filters'){state.servicesFilters={};state.search='';return loadCatalog()}
 if(a==='part-details'){const part=state.items.find(x=>String(x.id)===b.dataset.id);if(!part)return;state.selectedPart={...part,source:state.page==='parts'?'store':'marketplace'};state.page='part-detail';state.error='';render();return}
