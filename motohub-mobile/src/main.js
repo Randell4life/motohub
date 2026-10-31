@@ -266,6 +266,17 @@ function filterFeatureGroup(body){
  const empty=body.querySelector('[data-group-empty]');
  if(empty)empty.hidden=visible!==0;
 }
+function filterPassportRecords(){
+ const query=(app.querySelector('[data-service-record-search]')?.value||'').trim().toLocaleLowerCase('ka');
+ const filter=state.passportFilter||'all';
+ let count=0;
+ app.querySelectorAll('.digital-service-record').forEach(card=>{
+  const verified=card.dataset.serviceVerified==='1';
+  const show=(!query||card.textContent.toLocaleLowerCase('ka').includes(query))&&(filter==='all'||(filter==='verified'?verified:!verified));
+  card.hidden=!show;if(show)count++;
+ });
+ const empty=app.querySelector('.digital-service-no-results');if(empty)empty.hidden=count!==0;
+}
 function filterMessages(){
  const query=(app.querySelector('[data-message-search]')?.value||'').trim().toLocaleLowerCase('ka');
  const filter=state.messagesFilter||'all';
@@ -291,6 +302,7 @@ async function loadCatalog(url){if(!cfg[state.page])return;state.loading=true;st
 async function preview(){try{const data=await api('/api/mobile/motorcycles?per_page=4');const el=document.querySelector('#home-preview');if(el)el.innerHTML=(data.data||[]).map(x=>'<article class="preview-card">'+image(x.image_url,x.title)+'<strong>'+esc(x.title)+'</strong><span>'+money(x.price)+'</span></article>').join('')||'<p class="muted">გამოქვეყნებული განცხადებები ჯერ არ არის.</p>'}catch{const el=document.querySelector('#home-preview');if(el)el.innerHTML='<p class="muted">კატალოგის სანახავად შეამოწმე სერვერის კავშირი პარამეტრებში.</p>'}}
 function bind(){
  app.querySelectorAll('[data-message-search]').forEach(input=>input.addEventListener('input',()=>filterMessages()));
+ app.querySelectorAll('[data-service-record-search]').forEach(input=>input.addEventListener('input',()=>filterPassportRecords()));
  app.querySelectorAll('[data-group-search]').forEach(input=>input.addEventListener('input',()=>filterFeatureGroup(input.closest('.feature-group-body'))));
  app.querySelectorAll('[data-group-status]').forEach(select=>select.addEventListener('change',()=>filterFeatureGroup(select.closest('.feature-group-body'))));
 app.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',async()=>{
@@ -298,6 +310,7 @@ const a=b.dataset.action;
 if(['edit-listing','delete-listing','cancel-booking'].includes(a))return;
 if(a==='passport'){return loadPassport(Number(b.dataset.id))}
 if(a==='retry-passport'){return loadPassport(state.passportData?.motorcycle?.id)}
+ if(a==='passport-filter'){state.passportFilter=b.dataset.filter;app.querySelectorAll('.digital-service-filter').forEach(x=>x.classList.toggle('is-active',x===b));filterPassportRecords();return}
 if(a==='service-details'){const center=state.items.find(x=>String(x.id)===b.dataset.id);if(!center)return;state.selectedServiceCenter=center;state.page='service-detail';state.error='';render();return}
 if(a==='clear-service-filters'){state.servicesFilters={};state.search='';return loadCatalog()}
 if(a==='part-details'){const part=state.items.find(x=>String(x.id)===b.dataset.id);if(!part)return;state.selectedPart={...part,source:state.page==='parts'?'store':'marketplace'};state.page='part-detail';state.error='';render();return}
