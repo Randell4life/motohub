@@ -603,3 +603,77 @@ body{background:radial-gradient(ellipse at 50% -8%,#1b3152 0,transparent 42%),li
 .part-detail-open{min-height:40px;margin-top:10px}
 @media(max-width:680px){.part-detail-layout{grid-template-columns:1fr}.part-detail-buy{position:static;order:-1}.part-detail-gallery{min-height:210px}.part-detail-gallery>img{max-height:330px}.part-detail-heading .page-title{font-size:27px}}
 @media(max-width:390px){.part-detail-buy,.part-detail-description,.part-detail-specs{padding:14px}.part-detail-breadcrumb>span{font-size:7px}.part-detail-spec-grid{gap:6px}.part-detail-spec-grid>div{padding:8px}}
+
+
+/* MotoHub native service-center experience */
+.service-filter-panel{margin:16px 0 22px;padding:16px;border:1px solid #263b59;border-radius:15px;background:linear-gradient(145deg,#111e31,#0b111c);box-shadow:0 14px 35px #0003}
+.service-filter-panel .filter-panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
+.service-filter-panel .filter-panel-head>div{display:grid;gap:5px}
+.service-filter-panel .filter-panel-head strong{font-size:15px;color:#f4f8ff}
+.service-filter-panel .filter-panel-head small{font-size:11px;color:#91a4c0}
+.service-filter-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.service-filter-grid label{display:flex;flex-direction:column;gap:7px;color:#dce7f7;font-size:11px;font-weight:800}
+.service-filter-grid input:not([type=checkbox]){width:100%;min-width:0;min-height:43px;padding:10px 11px;border:1px solid #2b4262;border-radius:9px;outline:0;background:#080f1b;color:#f4f8ff;font:inherit;font-weight:500}
+.service-filter-grid input:focus{border-color:#2888ff;box-shadow:0 0 0 3px #1677ff20}
+.service-filter-grid .service-verified-filter{grid-column:1/-1;flex-direction:row;align-items:center;gap:9px;padding:10px 0 0;color:#b9cbe3}
+.service-filter-grid input[type=checkbox]{accent-color:#1677ff;width:17px;height:17px}
+.service-center-card{border-color:#263b59;background:linear-gradient(155deg,#111d30 0%,#0a111d 75%);box-shadow:0 10px 28px #0002;transition:transform .2s,border-color .2s,box-shadow .2s}
+.service-center-card:active{transform:scale(.985);border-color:#368cff}
+.service-center-cover{position:relative;display:flex;align-items:center;justify-content:space-between;height:104px;overflow:hidden;padding:15px;background:radial-gradient(ellipse at 80% 25%,#17477d 0%,#10223b 38%,#09111e 78%);border-bottom:1px solid #2b4262}
+.service-center-cover:before,.service-center-cover:after{content:"";position:absolute;right:-20px;top:35px;width:190px;height:34px;transform:rotate(-24deg);border-top:1px solid #4ba0ff55;border-bottom:1px solid #4ba0ff35}
+.service-center-cover:after{top:58px;right:-42px;width:220px;opacity:.5}
+.service-center-mark{position:relative;z-index:1;color:#f4f8ff;font-size:39px;font-weight:1000;letter-spacing:-5px;text-shadow:0 5px 20px #0008}
+.service-center-mark:first-letter{color:#62b1ff}
+.service-center-status{position:relative;z-index:1;padding:6px 8px;border:1px solid #4b8ddc66;border-radius:6px;background:#081626bd;color:#9dccff;font-size:8px;font-weight:900;letter-spacing:1px}
+.service-center-cover-index{position:absolute;left:16px;bottom:9px;color:#7188a8;font-size:8px;font-weight:850;letter-spacing:1.6px}
+.service-center-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.service-center-heading .eyebrow{font-size:8px;letter-spacing:1.4px;color:#67adff}
+.service-center-heading h3{margin:5px 0 0;font-size:16px;line-height:1.35;font-weight:950}
+.service-center-arrow{color:#70b8ff;font-size:22px;font-weight:800}
+.service-center-location{margin-top:10px!important;font-size:10px}
+.service-center-description{min-height:38px;margin:9px 0;color:#aebed3;font-size:10px;line-height:1.7}
+.service-center-tags{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0 13px}
+.service-center-tags span{padding:5px 7px;border:1px solid #2c4567;border-radius:6px;background:#14253b;color:#c9dcf5;font-size:9px;font-weight:700}
+.service-center-card-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:11px;border-top:1px solid #263b59;color:#8ea2bf;font-size:10px}
+.service-center-card-footer strong{color:#f4f8ff;font-size:15px}
+.service-center-open{padding:8px 10px;border:1px solid #287ce0;border-radius:8px;background:#1268d7;color:white;font-size:10px;font-weight:900}
+.service-center-call{display:block;margin-top:9px;padding:8px;border:1px solid #29415f;border-radius:8px;color:#8fc3ff;text-align:center;font-size:10px;font-weight:800;text-decoration:none}
+.service-detail-page{padding-top:17px}
+.service-detail-page>.detail-breadcrumb{display:inline-flex;margin-bottom:14px;padding:8px 0;border:0;background:none;color:#8eadd2;font-size:11px}
+.service-detail-hero{position:relative;overflow:hidden;padding:22px 18px 19px;border:1px solid #2a4263;border-radius:17px;background:radial-gradient(ellipse at 100% 0%,#174477 0%,#10233d 32%,#0b1422 76%);box-shadow:0 18px 45px #0003}
+.service-detail-hero:after{content:"";position:absolute;right:-75px;top:70px;width:220px;height:220px;border:1px solid #4d9cff33;border-radius:50%;box-shadow:0 0 0 24px #4d9cff0b,0 0 0 48px #4d9cff08;pointer-events:none}
+.service-detail-hero-top{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.service-detail-hero-top .eyebrow{font-size:8px;letter-spacing:1.4px;color:#83bfff}
+.service-detail-brand{position:relative;z-index:1;margin-top:21px;color:#f4f8ff;font-size:29px;font-weight:1000;letter-spacing:-3px}
+.service-detail-brand span{color:#55a8ff}
+.service-detail-hero h1{position:relative;z-index:1;margin:5px 0 8px;font-size:clamp(27px,7vw,38px);font-weight:1000;line-height:1.15;letter-spacing:-1px}
+.service-detail-hero>p{position:relative;z-index:1;max-width:520px;margin:0;color:#b7c8df;font-size:11px;line-height:1.8}
+.service-detail-meta{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:9px 14px;margin-top:17px;padding-top:13px;border-top:1px solid #ffffff20;color:#c5d7ee;font-size:10px}
+.service-detail-meta a{color:#80bdff;text-decoration:none}
+.service-detail-section{margin-top:25px}
+.service-detail-section .section-heading{align-items:flex-end;margin-bottom:12px}
+.service-detail-section h2,.service-hours-panel h2,.service-contact-panel h2{margin:5px 0 0;font-size:20px;font-weight:950;letter-spacing:-.5px}
+.service-detail-section h2 span{color:#60aaff}
+.service-detail-section .section-count{color:#7794b8;font-size:8px;letter-spacing:1.2px}
+.service-detail-row{display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;padding:13px 11px;border:1px solid #273e5d;border-radius:12px;background:linear-gradient(145deg,#111d2e,#0b121e);margin-bottom:8px}
+.service-detail-icon{display:grid;place-items:center;width:34px;height:34px;border:1px solid #2e5685;border-radius:9px;background:#142b47;color:#7ebcff}
+.service-detail-info{min-width:0}
+.service-detail-info strong{font-size:12px;color:#f2f7ff}
+.service-detail-info p{margin:4px 0;color:#94a8c4;font-size:10px;line-height:1.6}
+.service-detail-info>span{color:#7793b5;font-size:9px}
+.service-detail-price{grid-column:2;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:2px}
+.service-detail-price strong{color:#79baff;font-size:13px}
+.service-detail-price .primary-btn{min-height:34px;padding:7px 11px;font-size:10px}
+.service-detail-bottom{display:grid;gap:12px;margin-top:19px}
+.service-hours-panel,.service-contact-panel{padding:16px;border:1px solid #293f5e;border-radius:14px;background:linear-gradient(145deg,#111d2e,#0b121e)}
+.service-hours-panel .eyebrow,.service-contact-panel .eyebrow{font-size:8px;letter-spacing:1.4px;color:#72b6ff}
+.service-hour-row{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #26374f;color:#aebed3;font-size:10px}
+.service-hour-row:last-child{border-bottom:0}
+.service-hour-row strong{color:#dceaff;font-size:10px}
+.service-hour-row.is-today{color:#fff}
+.service-hour-row.is-today strong{color:#75baff}
+.service-contact-panel p{color:#a7b8ce;font-size:11px;line-height:1.75}
+.service-contact-panel .primary-btn{display:flex;align-items:center;justify-content:center;margin-top:14px;text-decoration:none}
+.service-contact-note{display:block;margin-top:12px;color:#7d9abc;font-size:9px;line-height:1.7}
+@media(min-width:600px){.service-detail-bottom{grid-template-columns:1fr 1fr}.service-detail-row{grid-template-columns:38px minmax(0,1fr) auto;align-items:center}.service-detail-price{grid-column:auto;flex-direction:column;align-items:flex-end}.service-detail-icon{width:38px;height:38px}}
+@media(max-width:380px){.service-filter-grid{grid-template-columns:1fr}.service-filter-grid .service-verified-filter{grid-column:auto}.service-center-cover{height:88px}.service-center-heading h3{font-size:14px}.service-detail-hero{padding:18px 14px}}
