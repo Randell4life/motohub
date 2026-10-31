@@ -25,6 +25,7 @@ Route::prefix('mobile')->group(function () {
     Route::get('/motorcycles/{motorcycle}/passport', [MobilePassportController::class, 'show'])->whereNumber('motorcycle');
 
     Route::middleware(AuthenticateMobileToken::class)->group(function () {
+        Route::post('/service-centers/{serviceCenter:slug}/bookings', [MobileBookingController::class, 'serviceBooking'])->middleware('throttle:5,1');
         Route::get('/garage', [MobileExtendedController::class, 'garage']);
         Route::post('/garage/reminders', [MobileExtendedController::class, 'storeReminder'])->middleware('throttle:10,1');
         Route::patch('/garage/reminders/{reminder}/complete', [MobileExtendedController::class, 'completeReminder'])->whereNumber('reminder');
