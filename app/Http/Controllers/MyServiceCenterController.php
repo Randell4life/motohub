@@ -92,7 +92,9 @@ public function profile(): RedirectResponse|View
             return redirect()->route('my-service-center.dashboard');
         }
 
-        return view('my-service-center.register');
+        $plans = ServiceCenter::subscriptionPlans();
+
+        return view('my-service-center.register', compact('plans'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -108,7 +110,14 @@ public function profile(): RedirectResponse|View
             'email' => ['nullable', 'email', 'max:255'],
             'city' => ['required', 'string', 'max:120'],
             'address' => ['required', 'string', 'max:255'],
+            'subscription_plan' => ['required', Rule::in(array_keys(ServiceCenter::subscriptionPlans()))],
         ]);
+
+        $plan = ServiceCenter::subscriptionPlans()[$data['subscription_plan']];
+        $data['subscription_price'] = $plan['price'];
+        $data['subscription_status'] = $plan['price'] > 0 ? 'pending_payment' : 'active';
+        $data['subscription_started_at'] = now();
+        $data['subscription_ends_at'] = null;
 
         DB::transaction(function () use ($data) {
             $baseSlug = Str::slug($data['name']) ?: 'service-center';

@@ -10,6 +10,25 @@
         <div class="field"><label for="email">ელფოსტა</label><input id="email" type="email" name="email" value="{{ old('email') }}" maxlength="255" placeholder="garage@example.com"></div>
         <div class="field"><label for="city">ქალაქი *</label><input id="city" name="city" value="{{ old('city') }}" required maxlength="120" placeholder="თბილისი"></div>
         <div class="field span-two"><label for="address">ზუსტი მისამართი *</label><input id="address" name="address" value="{{ old('address') }}" required maxlength="255" placeholder="ქუჩა, ნომერი, რაიონი"></div>
+        <div class="field span-two">
+            <label>აირჩიე გამოწერის პაკეტი *</label>
+            <div class="mh-plan-grid">
+                @foreach ($plans as $key => $plan)
+                    <label class="mh-plan-card">
+                        <input type="radio" name="subscription_plan" value="{{ $key }}" @checked(old('subscription_plan', 'start') === $key) required>
+                        <span class="mh-plan-name">{{ $plan['name'] }}</span>
+                        <strong class="mh-plan-price">{{ $plan['price'] === 0 ? 'უფასო' : $plan['price'] . ' ₾' }}<small>{{ $plan['price'] === 0 ? '' : '/ თვე' }}</small></strong>
+                        <span class="mh-plan-description">{{ $plan['description'] }}</span>
+                        <span class="mh-plan-features">
+                            @foreach ($plan['features'] as $feature)
+                                <span>✓ {{ $feature }}</span>
+                            @endforeach
+                        </span>
+                    </label>
+                @endforeach
+            </div>
+            <p class="muted small">ფასიანი პაკეტები ამ ეტაპზე რეგისტრირდება სატესტო რეჟიმში. ონლაინ გადახდის ჩართვამდე გამოწერას ადმინისტრატორი დაადასტურებს.</p>
+        </div>
         <div class="field span-two"><label for="description">სახელოსნოს შესახებ</label><textarea id="description" name="description" maxlength="3000" placeholder="მოკლედ აღწერე შენი მომსახურებები და გამოცდილება">{{ old('description') }}</textarea></div>
         <div class="span-two" style="display:flex;gap:12px;align-items:center;justify-content:flex-end;flex-wrap:wrap"><a class="btn btn-outline" href="{{ route('service-centers.index') }}">გაუქმება</a><button class="btn" type="submit">სახელოსნოს შექმნა →</button></div>
     </form>
