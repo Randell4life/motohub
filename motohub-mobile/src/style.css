@@ -550,3 +550,56 @@ body{background:radial-gradient(ellipse at 50% -8%,#1b3152 0,transparent 42%),li
 .parts-stock.is-available{color:#79d4a8}
 .parts-stock.is-empty{color:#d4a3a3}
 @media(max-width:380px){.parts-filter-panel{padding:12px}.parts-filter-panel .filter-panel-head strong{font-size:12px}}
+
+/* Native app — premium motorcycle part detail */
+.part-detail-page{padding-bottom:42px}
+.part-detail-breadcrumb{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 17px}
+.part-detail-breadcrumb button{padding:7px 0;border:0;background:none;color:#82bfff;font-size:10px;font-weight:850}
+.part-detail-breadcrumb>span{color:#7188a6;font-size:8px;letter-spacing:1px}
+.part-detail-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
+.part-detail-heading .page-title{margin:6px 0 9px;font-size:clamp(25px,6vw,38px);line-height:1.12}
+.part-detail-tags{display:flex;flex-wrap:wrap;gap:6px}
+.part-detail-tags span{padding:6px 9px;border:1px solid #2b4665;border-radius:20px;background:#102035;color:#a9c4e2;font-size:9px;font-weight:800}
+.part-detail-id{padding:7px 9px;border:1px solid #2b4665;border-radius:7px;color:#7caedb;font-size:10px;font-weight:900}
+.part-detail-layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(235px,.8fr);align-items:start;gap:15px}
+.part-detail-main{min-width:0}
+.part-detail-gallery{position:relative;display:grid;place-items:center;min-height:260px;overflow:hidden;border:1px solid #294765;border-radius:13px;background:radial-gradient(ellipse at 50% 35%,#1b3b5d,#0a1421 72%);box-shadow:0 16px 40px #0004}
+.part-detail-gallery>img{display:block;width:100%;max-height:430px;aspect-ratio:16/10;object-fit:contain;padding:12px}
+.part-detail-placeholder{display:flex;flex-direction:column;align-items:center;gap:7px;color:#4e85bd}
+.part-detail-placeholder strong{font-size:29px;letter-spacing:4px;font-weight:1000}
+.part-detail-placeholder strong span{color:#f0f7ff}
+.part-detail-placeholder small{font-size:8px;letter-spacing:2px;color:#6d88a8}
+.part-image-label{position:absolute;left:12px;bottom:12px;padding:7px 9px;border:1px solid #ffffff1c;border-radius:6px;background:#071321d9;color:#a9c9e9;font-size:8px;font-weight:900;letter-spacing:1px}
+.part-detail-buy{position:sticky;top:12px;padding:18px;border:1px solid #315276;border-radius:13px;background:radial-gradient(ellipse at 100% 0%,#1677ff24,transparent 48%),linear-gradient(150deg,#14243a,#0a1421);box-shadow:0 15px 38px #0004}
+.part-buy-kicker{color:#7cbcff;font-size:9px;font-weight:950;letter-spacing:1.4px}
+.part-detail-price{margin:9px 0 13px;color:#f3f8ff;font-size:clamp(25px,5vw,34px);font-weight:1000;letter-spacing:-1px}
+.part-stock-state{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:10px;font-weight:900}
+.part-stock-state i{width:8px;height:8px;border-radius:50%;background:#6bd4a0;box-shadow:0 0 12px #6bd4a066}
+.part-stock-state.unavailable i{background:#d49b9b;box-shadow:none}
+.part-stock-state.available{color:#7ed9ac}
+.part-stock-state.unavailable{color:#d6a5a5}
+.part-buy-source{margin-bottom:14px;color:#8198b5;font-size:9px}
+.part-contact-btn,.part-favorite-btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:45px;margin-top:9px;border-radius:8px;font-size:11px;font-weight:950;text-decoration:none}
+.part-contact-btn{border:1px solid #3989d7;background:linear-gradient(110deg,#1677ff,#2798ff);color:#fff}
+.part-favorite-btn{border:1px solid #36516f;background:#14263b;color:#c6ddf5}
+.part-contact-unavailable{padding:11px;border:1px solid #3b4c61;border-radius:8px;color:#8da2bc;font-size:9px;text-align:center}
+.part-safe-note{margin-top:15px;padding:12px;border:1px solid #29496a;border-radius:9px;background:#102238}
+.part-safe-note strong{color:#d9eaff;font-size:10px}
+.part-safe-note p{margin:6px 0 0;color:#91a7c3;font-size:9px;line-height:1.65}
+.part-back-btn{width:100%;margin-top:14px;padding:10px;border:0;background:none;color:#8bbef0;font-size:10px;font-weight:850}
+.part-detail-description,.part-detail-specs{margin-top:15px;padding:17px;border:1px solid #273f5b;border-radius:12px;background:linear-gradient(145deg,#111e2e,#0a1420)}
+.part-detail-section-title .eyebrow{color:#70b6ff;font-size:8px;font-weight:950;letter-spacing:1.4px}
+.part-detail-section-title h2{margin:5px 0 13px;color:#f2f7ff;font-size:17px;font-weight:950}
+.part-detail-section-title h2 span{color:#77baff}
+.part-detail-description>p{margin:0;color:#a9bad0;font-size:11px;line-height:1.85;white-space:pre-line;overflow-wrap:anywhere}
+.part-detail-spec-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.part-detail-spec-grid>div{min-width:0;padding:10px;border:1px solid #263f5b;border-radius:8px;background:#0b1726}
+.part-detail-spec-grid small{display:block;margin-bottom:5px;color:#8198b5;font-size:9px}
+.part-detail-spec-grid strong{display:block;color:#e1edfb;font-size:11px;overflow-wrap:anywhere}
+.part-fitment-card{margin-top:14px;padding:14px;border:1px solid #2c5a78;border-radius:10px;background:linear-gradient(110deg,#102a3d,#102036)}
+.part-fitment-card>span{display:block;color:#72bcff;font-size:8px;font-weight:950;letter-spacing:1.2px}
+.part-fitment-card strong{display:block;margin:7px 0;color:#e1f0ff;font-size:13px}
+.part-fitment-card p{margin:0;color:#8fa9c4;font-size:9px;line-height:1.6}
+.part-detail-open{min-height:40px;margin-top:10px}
+@media(max-width:680px){.part-detail-layout{grid-template-columns:1fr}.part-detail-buy{position:static;order:-1}.part-detail-gallery{min-height:210px}.part-detail-gallery>img{max-height:330px}.part-detail-heading .page-title{font-size:27px}}
+@media(max-width:390px){.part-detail-buy,.part-detail-description,.part-detail-specs{padding:14px}.part-detail-breadcrumb>span{font-size:7px}.part-detail-spec-grid{gap:6px}.part-detail-spec-grid>div{padding:8px}}

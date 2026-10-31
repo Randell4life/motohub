@@ -117,7 +117,7 @@ class MobileCatalogController extends Controller
     public function partListings(Request $request)
     {
         $sort = $request->query('sort');
-        $listings = PartListing::query()->where('status', 'published')
+        $listings = PartListing::query()->with('user:id,name,phone')->where('status', 'published')
             ->when(in_array($request->query('condition'), ['new', 'used'], true), fn ($builder) => $builder->where('condition', $request->query('condition')))
             ->when($request->filled('q'), function ($builder) use ($request) {
                 $term = trim((string) $request->query('q'));
@@ -143,6 +143,7 @@ class MobileCatalogController extends Controller
             'brand' => $item->brand, 'category' => $item->category, 'condition' => $item->condition,
             'part_number' => $item->part_number, 'compatible_motorcycle' => $item->compatible_motorcycle,
             'description' => $item->description, 'price' => $item->price, 'image_url' => $this->storageUrl($item->image_path),
+            'seller' => $item->user ? ['name' => $item->user->name, 'phone' => $item->user->phone] : null,
         ]);
 
         return response()->json($listings);
