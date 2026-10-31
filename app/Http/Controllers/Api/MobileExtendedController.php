@@ -341,4 +341,173 @@ class MobileExtendedController extends Controller
         if (in_array('smoke', $data['warning_signs'] ?? [], true)) { $urgent = true; $results[] = ['title' => 'კვამლი', 'detail' => 'გააჩერე უსაფრთხო ადგილას და გამორთე ძრავა. კვამლის წყაროს დადგენამდე მოძრაობა არ გააგრძელო.']; }
         return response()->json(['motorcycle' => $data['motorcycle'], 'urgent' => $urgent, 'results' => $results]);
     }
+
+    public function approveClubMember(Request $request, int $club, int $member)
+    {
+        $clubRow = DB::table('moto_clubs')->where('id', $club)->where('owner_id', $request->user()->id)->first();
+        abort_unless($clubRow, 403);
+        $updated = DB::table('moto_club_members')->where('id', $member)->where('club_id', $club)->where('status', 'pending')
+            ->update(['status' => 'active', 'updated_at' => now()]);
+        abort_unless($updated, 404);
+        return response()->json(['message' => 'გაწევრიანების მოთხოვნა დადასტურდა.']);
+    }
+
+    public function storeEvent(Request $request, int $club)
+    {
+        $clubRow = DB::table('moto_clubs')->where('id', $club)->where('owner_id', $request->user()->id)->first();
+        abort_unless($clubRow, 403);
+        $data = $request->validate([
+            'title' => ['required', 'string', 'max:160'], 'description' => ['nullable', 'string', 'max:3000'],
+            'location' => ['required', 'string', 'max:180'], 'starts_at' => ['required', 'date', 'after:now'],
+            'ends_at' => ['nullable', 'date', 'after:starts_at'], 'capacity' => ['nullable', 'integer', 'min:2', 'max:100000'],
+        ]);
+        $id = DB::table('moto_events')->insertGetId($data + [
+            'club_id' => $club, 'created_by' => $request->user()->id,
+            'starts_at' => \Illuminate\Support\Carbon::parse($data['starts_at'])->format('Y-m-d H:i:s'),
+            'ends_at' => !empty($data['ends_at']) ? \Illuminate\Support\Carbon::parse($data['ends_at'])->format('Y-m-d H:i:s') : null,
+            'created_at' => now(), 'updated_at' => now(),
+        ]);
+        return response()->json(['message' => 'ღონისძიება გამოქვეყნდა.', 'event' => DB::table('moto_events')->find($id)], 201);
+    }
+
+    public function serviceCenterDashboard(Request $request)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        $orders = \App\Models\WorkOrder::where('service_center_id', $center->id)
+            ->with(['serviceBooking', 'technician', 'bay', 'parts.inventoryItem', 'payments'])->latest()->limit(60)->get();
+        return response()->json([
+            'center' => $center->load(['services', 'hours']),
+            'bookings' => $center->bookings()->with('service')->latest('scheduled_at')->limit(60)->get(),
+            'orders' => $orders,
+            'technicians' => $center->technicians()->orderBy('name')->get(),
+            'bays' => $center->bays()->orderBy('name')->get(),
+            'inventory' => $center->inventory()->orderBy('name')->get(),
+            'payments' => $center->payments()->with('workOrder')->latest('paid_at')->limit(40)->get(),
+        ]);
+    }
+
+    public function storeTechnician(Request $request)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        $data = $request->validate(['name' => ['required','string','max:160'], 'phone' => ['nullable','string','max:40'], 'specialty' => ['nullable','string','max:160']]);
+        return response()->json(['message' => 'ხელოსანი დაემატა.', 'technician' => $center->technicians()->create($data)], 201);
+    }
+
+    public function storeBay(Request $request)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        $data = $request->validate(['name' => ['required','string','max:100'], 'description' => ['nullable','string','max:255']]);
+        return response()->json(['message' => 'სამუშაო ბოქსი დაემატა.', 'bay' => $center->bays()->create($data)], 201);
+    }
+
+    public function storeInventory(Request $request)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        $data = $request->validate([
+            'sku'=>['nullable','string','max:80'],'name'=>['required','string','max:180'],'brand'=>['nullable','string','max:120'],
+            'category'=>['nullable','string','max:120'],'fitment'=>['nullable','string','max:255'],'quantity'=>['required','integer','min:0'],
+            'min_quantity'=>['required','integer','min:0'],'cost_price'=>['required','numeric','min:0'],'sale_price'=>['required','numeric','min:0'],
+            'location'=>['nullable','string','max:120'],
+        ]);
+        $item = DB::transaction(function () use ($center, $data, $request) {
+            $item = $center->inventory()->create($data);
+            if ($item->quantity > 0) DB::table('service_center_inventory_movements')->insert([
+                'service_center_id'=>$center->id,'inventory_item_id'=>$item->id,'user_id'=>$request->user()->id,
+                'type'=>'in','quantity'=>$item->quantity,'unit_cost'=>$item->cost_price,'note'=>'საწყობის საწყისი ნაშთი',
+                'created_at'=>now(),'updated_at'=>now(),
+            ]);
+            return $item;
+        });
+        return response()->json(['message' => 'ნაწილი დაემატა საწყობს.', 'item' => $item], 201);
+    }
+
+    public function assignWorkOrder(Request $request, int $workOrder)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        $order = \App\Models\WorkOrder::where('service_center_id', $center->id)->findOrFail($workOrder);
+        $data = $request->validate(['assigned_technician_id'=>['nullable','integer'],'service_center_bay_id'=>['nullable','integer']]);
+        if (!empty($data['assigned_technician_id'])) abort_unless($center->technicians()->whereKey($data['assigned_technician_id'])->exists(), 422);
+        if (!empty($data['service_center_bay_id'])) abort_unless($center->bays()->whereKey($data['service_center_bay_id'])->exists(), 422);
+        $order->update(['service_center_technician_id'=>$data['assigned_technician_id'] ?? null,'service_center_bay_id'=>$data['service_center_bay_id'] ?? null]);
+        return response()->json(['message' => 'ხელოსანი და ბოქსი მიენიჭა შეკვეთას.']);
+    }
+
+    public function addWorkOrderPart(Request $request, int $workOrder)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        $order = \App\Models\WorkOrder::where('service_center_id', $center->id)->findOrFail($workOrder);
+        $data = $request->validate(['inventory_item_id'=>['required','integer'],'quantity'=>['required','integer','min:1']]);
+        DB::transaction(function () use ($center, $order, $data, $request) {
+            $item = $center->inventory()->whereKey($data['inventory_item_id'])->lockForUpdate()->firstOrFail();
+            if ($item->quantity < $data['quantity']) throw ValidationException::withMessages(['quantity'=>'საწყობში საკმარისი რაოდენობა არ არის.']);
+            $line = \App\Models\ServiceCenterWorkOrderPart::firstOrNew(['work_order_id'=>$order->id,'inventory_item_id'=>$item->id]);
+            $line->quantity = ($line->exists ? $line->quantity : 0) + (int)$data['quantity'];
+            $line->unit_price = $item->sale_price; $line->total = $line->quantity * $item->sale_price; $line->save();
+            $item->decrement('quantity', (int)$data['quantity']);
+            DB::table('service_center_inventory_movements')->insert(['service_center_id'=>$center->id,'inventory_item_id'=>$item->id,'work_order_id'=>$order->id,'user_id'=>$request->user()->id,'type'=>'out','quantity'=>$data['quantity'],'unit_cost'=>$item->cost_price,'note'=>'სამუშაო შეკვეთა '.$order->order_number,'created_at'=>now(),'updated_at'=>now()]);
+            $partsTotal = $order->parts()->sum('total');
+            $order->update(['parts_cost'=>$partsTotal,'total_cost'=>(float)$order->labor_cost+(float)$partsTotal]);
+        });
+        return response()->json(['message' => 'ნაწილი შეკვეთას მიება და საწყობიდან ჩამოიწერა.']);
+    }
+
+    public function recordWorkOrderPayment(Request $request, int $workOrder)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        $order = \App\Models\WorkOrder::where('service_center_id', $center->id)->findOrFail($workOrder);
+        $data = $request->validate(['amount'=>['required','numeric','gt:0'],'method'=>['required','in:cash,card,transfer,other'],'reference'=>['nullable','string','max:120'],'note'=>['nullable','string','max:2000']]);
+        $due = round((float)$order->total_cost-(float)$order->payments()->sum('amount'),2);
+        if ((float)$data['amount'] > $due) throw ValidationException::withMessages(['amount'=>'გადასახდელ ნაშთზე მეტი თანხა არ შეიძლება.']);
+        \App\Models\ServiceCenterPayment::create($data+['service_center_id'=>$center->id,'work_order_id'=>$order->id,'received_by'=>$request->user()->id,'paid_at'=>now()]);
+        return response()->json(['message' => 'გადახდა აღირიცხა.']);
+    }
+
+    public function updateWorkOrderStatus(Request $request, int $workOrder)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        $order = \App\Models\WorkOrder::where('service_center_id', $center->id)->findOrFail($workOrder);
+        $data = $request->validate(['status'=>['required','in:received,diagnostics,waiting_for_parts,in_repair,completed,handed_over,cancelled']]);
+        $changes = ['status'=>$data['status']];
+        if ($data['status']==='completed') $changes['completed_at']=now();
+        if ($data['status']==='handed_over') $changes['handed_over_at']=now();
+        $order->update($changes);
+        return response()->json(['message'=>'შეკვეთის სტატუსი განახლდა.']);
+    }
+
+    public function workshopDashboard(Request $request)
+    {
+        $partner = \App\Models\Partner::where('user_id',$request->user()->id)->where('type','workshop')->where('application_status','approved')->where('is_active',true)->firstOrFail();
+        $customers = $partner->customers()->with('motorcycles')->latest()->limit(100)->get();
+        $motorcycles = \App\Models\Motorcycle::where('partner_id',$partner->id)->with('customer')->latest()->limit(100)->get();
+        $records = \App\Models\MotorcycleServiceRecord::whereHas('motorcycle',fn($q)=>$q->where('partner_id',$partner->id))->with('motorcycle')->latest('service_date')->limit(100)->get();
+        return response()->json(['partner'=>$partner,'customers'=>$customers,'motorcycles'=>$motorcycles,'service_records'=>$records]);
+    }
+
+    public function transportPartnerDashboard(Request $request)
+    {
+        $partner = \App\Models\Partner::where('user_id',$request->user()->id)->where('type','transport')->where('application_status','approved')->where('is_active',true)->firstOrFail();
+        $offers = TransportOffer::where('partner_id',$partner->id)->with(['transportRequest','user'])->latest()->limit(100)->get();
+        $orders = TransportRequest::where('partner_id',$partner->id)->with(['offers','user'])->latest()->limit(100)->get();
+        return response()->json(['partner'=>$partner,'offers'=>$offers,'orders'=>$orders]);
+    }
+
+    public function createTransportOffer(Request $request, int $transportRequest)
+    {
+        $partner = \App\Models\Partner::where('user_id',$request->user()->id)->where('type','transport')->where('application_status','approved')->where('is_active',true)->firstOrFail();
+        $order = TransportRequest::whereKey($transportRequest)->firstOrFail();
+        $data = $request->validate(['price'=>['required','numeric','gt:0'],'estimated_days'=>['required','integer','min:1','max:365'],'message'=>['nullable','string','max:2000']]);
+        $offer = TransportOffer::create(['transport_request_id'=>$order->id,'partner_id'=>$partner->id,'user_id'=>$request->user()->id]+$data);
+        $order->update(['partner_id'=>$partner->id,'status'=>'quoted']);
+        return response()->json(['message'=>'შეთავაზება გაიგზავნა.','offer'=>$offer],201);
+    }
+
+    public function updateTransportOrderStatus(Request $request, int $transportRequest)
+    {
+        $partner = \App\Models\Partner::where('user_id',$request->user()->id)->where('type','transport')->where('application_status','approved')->where('is_active',true)->firstOrFail();
+        $order = TransportRequest::where('partner_id',$partner->id)->findOrFail($transportRequest);
+        $data = $request->validate(['status'=>['required','in:accepted,in_progress,completed,cancelled']]);
+        $order->update(['status'=>$data['status']]);
+        return response()->json(['message'=>'ტრანსპორტირების სტატუსი განახლდა.']);
+    }
+
 }
