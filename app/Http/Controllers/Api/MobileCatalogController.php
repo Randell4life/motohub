@@ -82,6 +82,7 @@ class MobileCatalogController extends Controller
 
     public function parts(Request $request)
     {
+        $sort = $request->query('sort');
         $parts = Part::query()->where('is_active', true)
             ->when($request->filled('q'), function ($builder) use ($request) {
                 $term = trim((string) $request->query('q'));
@@ -89,31 +90,61 @@ class MobileCatalogController extends Controller
                     ->orWhere('brand', 'like', "%{$term}%")
                     ->orWhere('part_number', 'like', "%{$term}%")
                     ->orWhere('compatible_motorcycle', 'like', "%{$term}%"));
-            })->latest()->paginate(min(max((int) $request->query('per_page', 12), 1), 50));
+            })
+            ->when($request->filled('brand'), fn ($builder) => $builder->where('brand', 'like', '%' . trim((string) $request->query('brand')) . '%'))
+            ->when($request->filled('category'), fn ($builder) => $builder->where('category', 'like', '%' . trim((string) $request->query('category')) . '%'))
+            ->when($request->filled('part_number'), fn ($builder) => $builder->where('part_number', 'like', '%' . trim((string) $request->query('part_number')) . '%'))
+            ->when($request->filled('compatible_motorcycle'), fn ($builder) => $builder->where('compatible_motorcycle', 'like', '%' . trim((string) $request->query('compatible_motorcycle')) . '%'))
+            ->when($request->filled('min_price') && is_numeric($request->query('min_price')), fn ($builder) => $builder->where('price', '>=', (float) $request->query('min_price')))
+            ->when($request->filled('max_price') && is_numeric($request->query('max_price')), fn ($builder) => $builder->where('price', '<=', (float) $request->query('max_price')))
+            ->when($request->boolean('in_stock'), fn ($builder) => $builder->where('stock', '>', 0))
+            ->when($sort === 'price_asc', fn ($builder) => $builder->orderBy('price'))
+            ->when($sort === 'price_desc', fn ($builder) => $builder->orderByDesc('price'))
+            ->when($sort === 'name_asc', fn ($builder) => $builder->orderBy('title'))
+            ->when(!in_array($sort, ['price_asc', 'price_desc', 'name_asc'], true), fn ($builder) => $builder->latest())
+            ->paginate(min(max((int) $request->query('per_page', 12), 1), 50));
+
         $parts->getCollection()->transform(fn ($item) => [
             'id' => $item->id, 'title' => $item->title, 'slug' => $item->slug,
             'brand' => $item->brand, 'category' => $item->category, 'part_number' => $item->part_number,
             'compatible_motorcycle' => $item->compatible_motorcycle, 'description' => $item->description,
             'price' => $item->price, 'stock' => $item->stock, 'image_url' => $this->storageUrl($item->image_path),
         ]);
+
         return response()->json($parts);
     }
 
     public function partListings(Request $request)
     {
+        $sort = $request->query('sort');
         $listings = PartListing::query()->where('status', 'published')
             ->when(in_array($request->query('condition'), ['new', 'used'], true), fn ($builder) => $builder->where('condition', $request->query('condition')))
             ->when($request->filled('q'), function ($builder) use ($request) {
                 $term = trim((string) $request->query('q'));
                 $builder->where(fn ($where) => $where->where('title', 'like', "%{$term}%")
-                    ->orWhere('brand', 'like', "%{$term}%")->orWhere('part_number', 'like', "%{$term}%"));
-            })->latest()->paginate(min(max((int) $request->query('per_page', 12), 1), 50));
+                    ->orWhere('brand', 'like', "%{$term}%")
+                    ->orWhere('part_number', 'like', "%{$term}%")
+                    ->orWhere('compatible_motorcycle', 'like', "%{$term}%"));
+            })
+            ->when($request->filled('brand'), fn ($builder) => $builder->where('brand', 'like', '%' . trim((string) $request->query('brand')) . '%'))
+            ->when($request->filled('category'), fn ($builder) => $builder->where('category', 'like', '%' . trim((string) $request->query('category')) . '%'))
+            ->when($request->filled('part_number'), fn ($builder) => $builder->where('part_number', 'like', '%' . trim((string) $request->query('part_number')) . '%'))
+            ->when($request->filled('compatible_motorcycle'), fn ($builder) => $builder->where('compatible_motorcycle', 'like', '%' . trim((string) $request->query('compatible_motorcycle')) . '%'))
+            ->when($request->filled('min_price') && is_numeric($request->query('min_price')), fn ($builder) => $builder->where('price', '>=', (float) $request->query('min_price')))
+            ->when($request->filled('max_price') && is_numeric($request->query('max_price')), fn ($builder) => $builder->where('price', '<=', (float) $request->query('max_price')))
+            ->when($sort === 'price_asc', fn ($builder) => $builder->orderBy('price'))
+            ->when($sort === 'price_desc', fn ($builder) => $builder->orderByDesc('price'))
+            ->when($sort === 'name_asc', fn ($builder) => $builder->orderBy('title'))
+            ->when(!in_array($sort, ['price_asc', 'price_desc', 'name_asc'], true), fn ($builder) => $builder->latest())
+            ->paginate(min(max((int) $request->query('per_page', 12), 1), 50));
+
         $listings->getCollection()->transform(fn ($item) => [
             'id' => $item->id, 'title' => $item->title, 'slug' => $item->slug,
             'brand' => $item->brand, 'category' => $item->category, 'condition' => $item->condition,
             'part_number' => $item->part_number, 'compatible_motorcycle' => $item->compatible_motorcycle,
             'description' => $item->description, 'price' => $item->price, 'image_url' => $this->storageUrl($item->image_path),
         ]);
+
         return response()->json($listings);
     }
 
