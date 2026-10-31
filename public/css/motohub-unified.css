@@ -1,0 +1,97 @@
+/* MotoHub unified visual system — based on the homepage */
+:root {
+  color-scheme: dark;
+  --bg: #050a13;
+  --panel: #08172b;
+  --panel2: #0d1b2e;
+  --line: rgba(91,151,224,.24);
+  --blue: #0878ff;
+  --blue2: #25baff;
+  --cyan: #25baff;
+  --accent: #0878ff;
+  --light: #25baff;
+  --sc-bg: #050a13;
+  --sc-surface: #08172b;
+  --sc-surface-hover: #0d1b2e;
+  --sc-border: rgba(91,151,224,.24);
+  --sc-text: #f4f8ff;
+  --sc-muted: #9aabc2;
+  --sc-accent: #0878ff;
+  --sc-accent-soft: #25baff;
+  --surface: #08172b;
+  --surface2: #0d1b2e;
+  --border: rgba(91,151,224,.24);
+  --text: #f4f8ff;
+  --muted: #9aabc2;
+  --mh-bg: #050a13;
+  --mh-surface: #08172b;
+  --mh-surface-raised: #0d1b2e;
+  --mh-border: rgba(91,151,224,.24);
+  --mh-blue: #0878ff;
+  --mh-blue-light: #25baff;
+  --mh-text: #f4f8ff;
+  --mh-muted: #9aabc2;
+  --mh-radius: 14px;
+}
+html { color-scheme: dark; scroll-behavior: smooth; scroll-padding-top: 88px; }
+body {
+  background: radial-gradient(ellipse at 50% -15%, #0b1d35 0%, #050a13 48%) !important;
+  color: #f4f8ff;
+  font-family: "Fira GO", "Noto Sans Georgian", "Segoe UI", Arial, sans-serif !important;
+}
+.top, .header, .topbar, .site-header, .mh-topbar {
+  background: rgba(3,9,19,.95) !important;
+  border-color: var(--line) !important;
+  box-shadow: 0 10px 35px rgba(0,0,0,.22);
+  backdrop-filter: blur(18px);
+}
+a { text-underline-offset: 3px; }
+a:hover { color: var(--blue2); }
+:where(.card,.panel,.listing,.item-card,.service-card,.post,.stat,.benefit,.benefits,.featured,.account-panel,.callout,.preview-card,.sc-benefit,.sc-card,.sc-panel,.work-order-card,.mh-card) {
+  border-color: var(--line) !important;
+  border-radius: 14px !important;
+}
+:where(.card,.panel,.listing,.item-card,.service-card,.post,.stat,.benefit,.benefits,.featured,.account-panel,.preview-card,.sc-benefit,.sc-card,.sc-panel,.work-order-card,.mh-card) {
+  background-color: var(--panel) !important;
+}
+:where(.btn,.button,.primary-btn,.add-btn,.sc-button,.mh-button,.btn-primary,.action-primary) {
+  border-color: #168bff !important;
+  background: linear-gradient(135deg,#0865e8,#159cff) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 22px rgba(0,109,255,.16);
+}
+:where(.btn,.button,.primary-btn,.add-btn,.sc-button,.mh-button,.btn-primary,.action-primary):hover {
+  filter: brightness(1.12);
+  transform: translateY(-1px);
+}
+:where(.btn-outline,.btn.ghost,.ghost,.secondary-btn,.btn-secondary,.action-secondary,.sc-button-outline) {
+  border-color: #31577e !important;
+  background: #0a1930 !important;
+  color: #eaf4ff !important;
+}
+:where(input:not([type=checkbox]):not([type=radio]):not([type=hidden]),select,textarea) {
+  border-color: #294363;
+  border-radius: 9px;
+  background-color: #061225;
+  color: #f4f8ff;
+}
+:where(input,select,textarea):focus {
+  border-color: var(--blue2) !important;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(22,119,255,.15);
+}
+:where(input,textarea)::placeholder { color: #8195b1; }
+:where(table) { border-color: var(--line); }
+:where(th) { background: rgba(8,120,255,.09) !important; color: #b9d7f7 !important; }
+:where(td,th) { border-color: rgba(91,151,224,.16) !important; }
+:where(.eyebrow,.sc-eyebrow,.page-kicker) { color: var(--blue2) !important; }
+:where(.pagination .active,.page-item.active a) { background: var(--blue) !important; border-color: var(--blue) !important; }
+:where(.empty,.empty-state) { border-color: var(--line) !important; }
+:focus-visible { outline: 2px solid var(--blue2); outline-offset: 3px; }
+@media (max-width: 680px) {
+  html { scroll-padding-top: 72px; }
+  :where(.card,.panel,.listing,.item-card,.post,.account-panel) { border-radius: 12px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
