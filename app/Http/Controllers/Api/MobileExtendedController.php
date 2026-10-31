@@ -615,7 +615,7 @@ class MobileExtendedController extends Controller
         $data['subscription_price'] = $plan['price'];
         $data['subscription_status'] = $plan['price'] > 0 ? 'pending_payment' : 'active';
         $data['subscription_started_at'] = now();
-        $data['subscription_ends_at'] = $plan['price'] > 0 ? now()->addMonth() : null;
+        $data['subscription_ends_at'] = null;
         $center = DB::transaction(function () use ($request,$data) {
             $base = Str::slug($data['name']) ?: 'service-center'; $slug = $base;
             while (\App\Models\ServiceCenter::where('slug',$slug)->exists()) $slug = $base.'-'.Str::lower(Str::random(5));
