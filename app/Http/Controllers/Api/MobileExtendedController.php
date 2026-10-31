@@ -486,18 +486,39 @@ class MobileExtendedController extends Controller
     public function transportPartnerDashboard(Request $request)
     {
         $partner = \App\Models\Partner::where('user_id',$request->user()->id)->where('type','transport')->where('application_status','approved')->where('is_active',true)->firstOrFail();
+        $availableRequests = TransportRequest::query()
+            ->whereIn('status',['pending','quoted'])
+            ->where(fn($q)=>$q->whereNull('partner_id')->orWhere('partner_id',$partner->id))
+            ->whereDoesntHave('offers',fn($q)=>$q->where('partner_id',$partner->id))
+            ->with('user:id,name')
+            ->latest()->limit(100)->get();
         $offers = TransportOffer::where('partner_id',$partner->id)->with(['transportRequest','user'])->latest()->limit(100)->get();
-        $orders = TransportRequest::where('partner_id',$partner->id)->with(['offers','user'])->latest()->limit(100)->get();
-        return response()->json(['partner'=>$partner,'offers'=>$offers,'orders'=>$orders]);
+        $orders = TransportRequest::whereIn('status',['accepted','in_transit','delivered'])
+            ->whereHas('offers',fn($q)=>$q->where('partner_id',$partner->id)->where('status','accepted'))
+            ->with(['offers'=>fn($q)=>$q->where('partner_id',$partner->id)->where('status','accepted'),'user'])
+            ->latest()->limit(100)->get();
+        return response()->json(['partner'=>$partner,'available_requests'=>$availableRequests,'offers'=>$offers,'orders'=>$orders]);
     }
 
     public function createTransportOffer(Request $request, int $transportRequest)
     {
         $partner = \App\Models\Partner::where('user_id',$request->user()->id)->where('type','transport')->where('application_status','approved')->where('is_active',true)->firstOrFail();
-        $order = TransportRequest::whereKey($transportRequest)->firstOrFail();
-        $data = $request->validate(['price'=>['required','numeric','gt:0'],'estimated_days'=>['required','integer','min:1','max:365'],'message'=>['nullable','string','max:2000']]);
-        $offer = TransportOffer::create(['transport_request_id'=>$order->id,'partner_id'=>$partner->id,'user_id'=>$request->user()->id]+$data);
-        $order->update(['partner_id'=>$partner->id,'status'=>'quoted']);
+        $data = $request->validate(['price'=>['required','numeric','gt:0','max:99999999'],'estimated_days'=>['required','integer','min:1','max:365'],'message'=>['nullable','string','max:2000']]);
+        $offer = DB::transaction(function () use ($partner,$transportRequest,$data,$request) {
+            $order = TransportRequest::whereKey($transportRequest)->lockForUpdate()->firstOrFail();
+            if ($order->partner_id !== null && (int)$order->partner_id !== (int)$partner->id) {
+                throw ValidationException::withMessages(['transport'=>'ეს მოთხოვნა სხვა სატრანსპორტო კომპანიისთვის არის განკუთვნილი.']);
+            }
+            if (!in_array($order->status,['pending','quoted'],true)) {
+                throw ValidationException::withMessages(['transport'=>'ამ მოთხოვნაზე შეთავაზებების გაგზავნა აღარ შეიძლება.']);
+            }
+            if (TransportOffer::where('transport_request_id',$order->id)->where('partner_id',$partner->id)->exists()) {
+                throw ValidationException::withMessages(['transport'=>'ამ მოთხოვნაზე უკვე გაგზავნილი გაქვს შეთავაზება.']);
+            }
+            $offer = TransportOffer::create(['transport_request_id'=>$order->id,'partner_id'=>$partner->id,'user_id'=>$request->user()->id]+$data);
+            $order->update(['partner_id'=>$partner->id,'status'=>'quoted']);
+            return $offer;
+        });
         return response()->json(['message'=>'შეთავაზება გაიგზავნა.','offer'=>$offer],201);
     }
 
@@ -505,7 +526,7 @@ class MobileExtendedController extends Controller
     {
         $partner = \App\Models\Partner::where('user_id',$request->user()->id)->where('type','transport')->where('application_status','approved')->where('is_active',true)->firstOrFail();
         $order = TransportRequest::where('partner_id',$partner->id)->findOrFail($transportRequest);
-        $data = $request->validate(['status'=>['required','in:accepted,in_progress,completed,cancelled']]);
+        $data = $request->validate(['status'=>['required','in:in_transit,delivered']]);
         $order->update(['status'=>$data['status']]);
         return response()->json(['message'=>'ტრანსპორტირების სტატუსი განახლდა.']);
     }
