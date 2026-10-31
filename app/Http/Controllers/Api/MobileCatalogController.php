@@ -44,6 +44,20 @@ class MobileCatalogController extends Controller
         return response()->json($page);
     }
 
+
+    public function workshops(Request $request)
+    {
+        $items = \Illuminate\Support\Facades\DB::table('partners')
+            ->where('type','workshop')->where('application_status','approved')->where('is_active',true)
+            ->when($request->filled('q'),fn($q)=>$q->where(function($sub)use($request){$term='%'.trim($request->query('q')).'%';$sub->where('name','like',$term)->orWhere('address','like',$term)->orWhere('description','like',$term);}))
+            ->orderBy('name')->paginate(min(max((int)$request->query('per_page',12),1),50));
+        $items->getCollection()->transform(function($item){
+            $item->services=\Illuminate\Support\Facades\DB::table('services')->where('partner_id',$item->id)->where('is_active',true)->orderBy('title')->get(['id','title','category','description','price']);
+            return $item;
+        });
+        return response()->json($items);
+    }
+
     public function parts(Request $request)
     {
         $parts = Part::query()->where('is_active', true)
