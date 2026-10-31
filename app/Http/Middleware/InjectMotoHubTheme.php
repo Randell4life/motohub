@@ -1,10 +1,10 @@
 <?php
 
-namespace App\\Http\\Middleware;
+namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\\Http\\Request;
-use Symfony\\Component\\HttpFoundation\\Response;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class InjectMotoHubTheme
 {
@@ -14,7 +14,7 @@ class InjectMotoHubTheme
         $response = $next($request);
 
         if (
-            $request->is('api', 'api/*', 'livewire/*', 'admin', 'admin/*')
+            $request->is('api', 'api/*', 'livewire/*')
             || ! str_contains((string) $response->headers->get('Content-Type'), 'text/html')
         ) {
             return $response;
