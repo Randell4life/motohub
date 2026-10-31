@@ -478,3 +478,51 @@ body{background:radial-gradient(ellipse at 50% -8%,#1b3152 0,transparent 42%),li
 .catalog-page:has(.rental-mobile-filter) .catalog-grid .item-image{aspect-ratio:16/10}
 .catalog-page:has(.rental-mobile-filter) .catalog-grid .item-card-content{padding:14px}
 .catalog-page:has(.rental-mobile-filter) .catalog-grid .price{color:#68b7ff}
+
+/* Native app rental checkout — premium booking flow */
+.rental-checkout-page{padding-bottom:42px}
+.rental-checkout-page>.intro{max-width:680px;margin:8px 0 22px;font-size:12px;line-height:1.7}
+.rental-checkout-layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(230px,.8fr);align-items:start;gap:15px}
+.rental-checkout-main{min-width:0}
+.rental-checkout-bike{display:flex;align-items:center;gap:14px;overflow:hidden;margin-bottom:13px;padding:12px;border:1px solid #2c4b70;border-radius:13px;background:radial-gradient(ellipse at 100% 0%,#1677ff25,transparent 45%),linear-gradient(145deg,#14263b,#0a1421)}
+.rental-checkout-bike>img,.rental-checkout-placeholder{width:116px;height:88px;flex:0 0 116px;object-fit:cover;border-radius:8px;background:#10243b}
+.rental-checkout-placeholder{display:grid;place-items:center;color:#6bb6ff;font-size:16px;font-weight:1000;letter-spacing:2px}
+.rental-checkout-bike-info{min-width:0}
+.rental-checkout-kicker{color:#69b7ff;font-size:9px;font-weight:950;letter-spacing:1.3px}
+.rental-checkout-bike-info h2{margin:5px 0;color:#f4f8ff;font-size:17px;font-weight:950;overflow-wrap:anywhere}
+.rental-checkout-bike-info p{margin:0 0 8px;color:#91a7c3;font-size:10px}
+.rental-checkout-bike-info>strong{color:#74bdff;font-size:17px;font-weight:950}
+.rental-checkout-bike-info>strong small{color:#91a7c3;font-size:10px}
+.rental-checkout-form,.rental-checkout-summary{padding:18px;border:1px solid #2a4565;border-radius:13px;background:linear-gradient(145deg,#111e2e,#0a1420)}
+.rental-step-heading{display:flex;align-items:center;gap:11px;margin:2px 0 15px}
+.rental-step-heading>span{display:grid;place-items:center;width:32px;height:32px;flex:0 0 32px;border:1px solid #2d6194;border-radius:9px;background:#132d49;color:#7fc1ff;font-size:11px;font-weight:950}
+.rental-step-heading h2{margin:0 0 3px;color:#f2f7ff;font-size:15px;font-weight:950}
+.rental-step-heading p{margin:0;color:#8298b5;font-size:10px}
+.rental-date-grid,.rental-contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:19px}
+.rental-checkout-form label{display:flex;flex-direction:column;gap:7px;color:#b4c4d8;font-size:10px;font-weight:850}
+.rental-checkout-form input,.rental-checkout-form textarea{width:100%;min-height:45px;padding:11px 12px;border:1px solid #2a4361;border-radius:8px;outline:none;background:#081321;color:#f4f8ff;font-size:12px}
+.rental-checkout-form input:focus,.rental-checkout-form textarea:focus{border-color:#2789ff;box-shadow:0 0 0 3px #2789ff20}
+.rental-checkout-form input:invalid:not(:placeholder-shown){border-color:#8b5260}
+.rental-duration-hint{margin:-8px 0 20px;padding:10px 11px;border:1px solid #24466a;border-radius:8px;background:#10243a;color:#8fc6ff;font-size:10px;line-height:1.5}
+.rental-notes-label{margin:0 0 14px}
+.rental-notes-label>span{color:#788da8;font-weight:500}
+.rental-checkout-form textarea{min-height:80px;resize:vertical}
+.rental-booking-disclaimer{margin:0 0 14px;padding:11px 12px;border-left:2px solid #398ee3;background:#102138;color:#9cb1cb;font-size:10px;line-height:1.65}
+.rental-booking-disclaimer strong{color:#dcecff}
+.rental-submit-btn{min-height:48px;font-weight:950}
+.rental-checkout-summary{position:sticky;top:14px}
+.rental-checkout-summary h2{margin:6px 0 19px;color:#f2f7ff;font-size:16px;font-weight:950}
+.rental-summary-row,.rental-summary-total{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:12px 0;color:#94a9c3;font-size:11px}
+.rental-summary-row strong{color:#e6f1ff;font-size:12px}
+.rental-summary-divider{height:1px;margin:15px 0;background:#ffffff18}
+.rental-summary-total{align-items:flex-start;color:#c6d6e9;font-weight:850}
+.rental-summary-total strong{color:#72bcff;font-size:21px;font-weight:1000;text-align:right}
+.rental-summary-note{color:#8196b1;font-size:9px;line-height:1.6}
+.rental-summary-security{margin-top:15px;padding:12px;border:1px solid #28513f;border-radius:9px;background:#10271f;color:#a5d9c0;font-size:9px;line-height:2}
+.rental-booking-success{margin-top:13px;padding:14px;border:1px solid #2d7657;border-radius:10px;background:#10291f;color:#c3f3d9}
+.rental-booking-success[hidden]{display:none}
+.rental-booking-success strong{font-size:14px}
+.rental-booking-success p{margin:7px 0;font-size:11px}
+.rental-booking-success small{color:#91d9b5;font-size:10px}
+@media(max-width:680px){.rental-checkout-layout{grid-template-columns:1fr}.rental-checkout-summary{position:static;order:-1}.rental-checkout-summary h2{margin-bottom:13px}.rental-summary-security{margin-top:12px}}
+@media(max-width:420px){.rental-checkout-form,.rental-checkout-summary{padding:14px}.rental-checkout-bike{gap:10px;padding:10px}.rental-checkout-bike>img,.rental-checkout-placeholder{width:94px;height:78px;flex-basis:94px}.rental-checkout-bike-info h2{font-size:14px}.rental-date-grid,.rental-contact-grid{gap:8px}.rental-checkout-form input{padding:9px;font-size:11px}}
