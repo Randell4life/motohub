@@ -73,7 +73,13 @@ Route::prefix('mobile')->group(function () {
         Route::get('/workshop/dashboard', [MobileExtendedController::class, 'workshopDashboard']);
         Route::post('/workshop/apply', [MobileExtendedController::class, 'applyWorkshop'])->middleware('throttle:3,1');
         Route::post('/workshop/customers', [MobileExtendedController::class, 'storeWorkshopCustomer'])->middleware('throttle:10,1');
+        Route::patch('/workshop/customers/{customer}', [MobileExtendedController::class, 'updateWorkshopCustomer'])->whereNumber('customer');
+        Route::delete('/workshop/customers/{customer}', [MobileExtendedController::class, 'deleteWorkshopCustomer'])->whereNumber('customer');
+        Route::post('/workshop/customers/{customer}/motorcycles', [MobileExtendedController::class, 'attachWorkshopMotorcycle'])->whereNumber('customer');
+        Route::delete('/workshop/customers/{customer}/motorcycles/{motorcycle}', [MobileExtendedController::class, 'detachWorkshopMotorcycle'])->whereNumber('customer')->whereNumber('motorcycle');
         Route::post('/workshop/customers/{customer}/motorcycles/{motorcycle}/service-records', [MobileExtendedController::class, 'storeWorkshopServiceRecord'])->whereNumber('customer')->whereNumber('motorcycle')->middleware('throttle:10,1');
+        Route::put('/workshop/customers/{customer}/motorcycles/{motorcycle}/service-records/{record}', [MobileExtendedController::class, 'updateWorkshopServiceRecord'])->whereNumber('customer')->whereNumber('motorcycle')->whereNumber('record');
+        Route::delete('/workshop/customers/{customer}/motorcycles/{motorcycle}/service-records/{record}', [MobileExtendedController::class, 'deleteWorkshopServiceRecord'])->whereNumber('customer')->whereNumber('motorcycle')->whereNumber('record');
         Route::get('/me', [MobileAccountController::class, 'show']);
         Route::get('/admin/dashboard', [MobileAdminController::class, 'dashboard']);
         Route::patch('/admin/{type}/{id}/status', [MobileAdminController::class, 'updateStatus'])->whereIn('type', ['motorcycles', 'part-requests', 'rental-bookings', 'service-bookings', 'service-centers'])->whereNumber('id')->middleware('throttle:30,1');
