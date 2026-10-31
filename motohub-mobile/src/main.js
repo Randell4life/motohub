@@ -243,6 +243,20 @@ function filterFeatureGroup(body){
  const empty=body.querySelector('[data-group-empty]');
  if(empty)empty.hidden=visible!==0;
 }
+function filterMessages(){
+ const query=(app.querySelector('[data-message-search]')?.value||'').trim().toLocaleLowerCase('ka');
+ const filter=state.messagesFilter||'all';
+ let visible=0;
+ app.querySelectorAll('.message-conversation-card').forEach(card=>{
+  const text=card.textContent.toLocaleLowerCase('ka');
+  const unread=card.classList.contains('has-unread');
+  const show=(!query||text.includes(query))&&(filter==='all'||unread);
+  card.hidden=!show;
+  if(show)visible++;
+ });
+ const empty=app.querySelector('.messages-filter-empty');
+ if(empty)empty.hidden=visible!==0;
+}
 function bindExtendedForms(){
  app.querySelectorAll('[data-feature-form]').forEach(form=>form.addEventListener('submit',e=>{e.preventDefault();submitFeatureForm(form)}))
 }
@@ -253,6 +267,7 @@ function go(page){state.page=page;state.search='';state.error='';state.items=[];
 async function loadCatalog(url){if(!cfg[state.page])return;state.loading=true;state.error='';const page=state.page;render();try{let path=url;if(!path){const params=new URLSearchParams();if(state.search)params.set('q',state.search);if(page==='listings'&&state.listingCondition)params.set('condition',state.listingCondition);if(page==='rentals')Object.entries(state.rentalFilters||{}).forEach(([key,value])=>{if(value!=='')params.set(key,value)});if(page==='services'){if(state.servicesFilters.city)params.set('city',state.servicesFilters.city);if(state.servicesFilters.service)params.set('service',state.servicesFilters.service);if(state.servicesFilters.verified)params.set('verified','1')}if(page==='parts'||page==='listings')Object.entries(state.partFilters||{}).forEach(([key,value])=>{if(value!=='')params.set(key,value)});if(page==='bikes')Object.entries(state.bikeFilters).forEach(([key,value])=>{if(value!==''&&value!==false&&value!==null&&value!==undefined)params.set(key,value===true?'1':value)});path=cfg[page].url+(params.toString()?'?'+params.toString():'')}const base=state.apiBase.replace(/\/+$/,'');if(path.startsWith(base))path=path.slice(base.length);const data=await api(path);if(state.page!==page)return;state.pageData=data;state.items=data.data||data.items||[]}catch(e){if(state.page===page){state.error=e.message||'სერვერთან კავშირი ვერ მოხერხდა.';state.items=[]}}finally{state.loading=false;if(state.page===page)render()}}
 async function preview(){try{const data=await api('/api/mobile/motorcycles?per_page=4');const el=document.querySelector('#home-preview');if(el)el.innerHTML=(data.data||[]).map(x=>'<article class="preview-card">'+image(x.image_url,x.title)+'<strong>'+esc(x.title)+'</strong><span>'+money(x.price)+'</span></article>').join('')||'<p class="muted">გამოქვეყნებული განცხადებები ჯერ არ არის.</p>'}catch{const el=document.querySelector('#home-preview');if(el)el.innerHTML='<p class="muted">კატალოგის სანახავად შეამოწმე სერვერის კავშირი პარამეტრებში.</p>'}}
 function bind(){
+ app.querySelectorAll('[data-message-search]').forEach(input=>input.addEventListener('input',()=>filterMessages()));
  app.querySelectorAll('[data-group-search]').forEach(input=>input.addEventListener('input',()=>filterFeatureGroup(input.closest('.feature-group-body'))));
  app.querySelectorAll('[data-group-status]').forEach(select=>select.addEventListener('change',()=>filterFeatureGroup(select.closest('.feature-group-body'))));
 app.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',async()=>{
@@ -280,6 +295,8 @@ if(a==='features')return go('features');
 if(a==='feature-open')return go(b.dataset.page);
 if(a==='feature-reload')return loadExtended(state.page);
 if(a==='compare-add'){if(!state.compareIds.includes(Number(b.dataset.id))){if(state.compareIds.length>=3){alert('ერთდროულად მაქსიმუმ სამი მოტოციკლის შედარებაა შესაძლებელი.');return}state.compareIds.push(Number(b.dataset.id))}state.page='compare';return loadExtended('compare')}
+if(a==='messages'){return go('messages')}
+if(a==='messages-filter'){state.messagesFilter=b.dataset.filter;app.querySelectorAll('.messages-filter').forEach(x=>x.classList.toggle('is-active',x===b));filterMessages();return}
 if(a==='open-conversation'){state.activeConversation=b.dataset.id;return go('messages-thread')}
 if(a==='message-seller'){state.messageRecipientId=b.dataset.user;state.messageMotorcycleId=b.dataset.bike;return go('messages')}
 if(a==='feature-request'){try{await api(b.dataset.path,{method:b.dataset.method||'POST'});await loadExtended(state.page)}catch(e){alert(e.message)}return}
