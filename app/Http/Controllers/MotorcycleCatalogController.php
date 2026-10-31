@@ -43,6 +43,12 @@ class MotorcycleCatalogController extends Controller
                 $query->where('year', '<=', (int) $request->input('max_year'));
             })
 
+            ->when($request->filled('min_cc') && is_numeric($request->input('min_cc')), fn ($query) => $query->where('engine_cc', '>=', (int) $request->input('min_cc')))
+            ->when($request->filled('max_cc') && is_numeric($request->input('max_cc')), fn ($query) => $query->where('engine_cc', '<=', (int) $request->input('max_cc')))
+            ->when($request->filled('min_mileage') && is_numeric($request->input('min_mileage')), fn ($query) => $query->where('mileage', '>=', (int) $request->input('min_mileage')))
+            ->when($request->filled('max_mileage') && is_numeric($request->input('max_mileage')), fn ($query) => $query->where('mileage', '<=', (int) $request->input('max_mileage')))
+            ->when($request->boolean('featured'), fn ($query) => $query->where('is_featured', true))
+
             ->when(
                 in_array($request->input('type'), ['new', 'used'], true),
                 function ($query) use ($request) {
@@ -62,11 +68,12 @@ class MotorcycleCatalogController extends Controller
                 $query->orderByDesc('price');
             })
 
-            ->when($request->input('sort') === 'year_desc', function ($query) {
-                $query->orderByDesc('year');
-            })
+            ->when($request->input('sort') === 'year_desc', fn ($query) => $query->orderByDesc('year'))
+            ->when($request->input('sort') === 'mileage_asc', fn ($query) => $query->orderBy('mileage'))
+            ->when($request->input('sort') === 'mileage_desc', fn ($query) => $query->orderByDesc('mileage'))
+            ->when($request->input('sort') === 'oldest', fn ($query) => $query->orderBy('published_at'))
 
-            ->when(!in_array($request->input('sort'), ['price_asc', 'price_desc', 'year_desc'], true), function ($query) {
+            ->when(!in_array($request->input('sort'), ['price_asc', 'price_desc', 'year_desc', 'mileage_asc', 'mileage_desc', 'oldest'], true), function ($query) {
                 $query->orderByDesc('is_featured')
                     ->orderByDesc('published_at')
                     ->orderByDesc('created_at');
