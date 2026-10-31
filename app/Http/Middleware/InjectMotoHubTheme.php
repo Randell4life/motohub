@@ -30,7 +30,7 @@ class InjectMotoHubTheme
             return $response;
         }
 
-        $stylesheet = '<link rel="stylesheet" href="' . e(asset('css/motohub-unified.css')) . '?v=1">';
+        $stylesheet = '<link rel="stylesheet" href="' . e(asset('css/motohub-unified.css')) . '?v=2">';
 
         $response->setContent(
             preg_replace('/<\\/head>/i', $stylesheet . PHP_EOL . '</head>', $html, 1) ?? $html
