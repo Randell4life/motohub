@@ -148,6 +148,7 @@ class MobileExtendedController extends Controller
             ->withCount(['comments', 'likes'])
             ->withExists(['likes as liked_by_me' => fn ($q) => $q->where('users.id', $userId)])
             ->latest()->paginate(20);
+        $posts->getCollection()->transform(function ($post) { $post->image_url = $post->image_path ? Storage::disk('public')->url($post->image_path) : null; return $post; });
         return response()->json($posts);
     }
 
