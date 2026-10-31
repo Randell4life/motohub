@@ -675,4 +675,61 @@ class MobileExtendedController extends Controller
         return response()->json(['message'=>'შეტყობინებები წაკითხულად მოინიშნა.']);
     }
 
+
+    public function updateWorkshopCustomer(Request $request, int $customer)
+    {
+        $partner=\App\Models\Partner::where('user_id',$request->user()->id)->where('type','workshop')->where('application_status','approved')->where('is_active',true)->firstOrFail();
+        $item=$partner->customers()->findOrFail($customer);
+        $data=$request->validate(['name'=>['required','string','max:150'],'phone'=>['required','string','max:30'],'email'=>['nullable','email','max:255'],'address'=>['nullable','string','max:255'],'notes'=>['nullable','string','max:5000']]);
+        $item->update($data);
+        return response()->json(['message'=>'კლიენტის მონაცემები განახლდა.']);
+    }
+
+    public function deleteWorkshopCustomer(Request $request, int $customer)
+    {
+        $partner=\App\Models\Partner::where('user_id',$request->user()->id)->where('type','workshop')->where('application_status','approved')->where('is_active',true)->firstOrFail();
+        $item=$partner->customers()->findOrFail($customer);
+        $item->delete();
+        return response()->json(['message'=>'კლიენტი წაიშალა.']);
+    }
+
+    public function attachWorkshopMotorcycle(Request $request, int $customer)
+    {
+        $partner=\App\Models\Partner::where('user_id',$request->user()->id)->where('type','workshop')->where('application_status','approved')->where('is_active',true)->firstOrFail();
+        $customerRow=$partner->customers()->findOrFail($customer);
+        $data=$request->validate(['motorcycle_id'=>['required','integer','min:1']]);
+        $bike=Motorcycle::where('partner_id',$partner->id)->whereNull('customer_id')->findOrFail($data['motorcycle_id']);
+        $bike->update(['customer_id'=>$customerRow->id]);
+        return response()->json(['message'=>'მოტოციკლი კლიენტს მიება.']);
+    }
+
+    public function detachWorkshopMotorcycle(Request $request, int $customer, int $motorcycle)
+    {
+        $partner=\App\Models\Partner::where('user_id',$request->user()->id)->where('type','workshop')->where('application_status','approved')->where('is_active',true)->firstOrFail();
+        $customerRow=$partner->customers()->findOrFail($customer);
+        $bike=Motorcycle::where('partner_id',$partner->id)->where('customer_id',$customerRow->id)->findOrFail($motorcycle);
+        $bike->update(['customer_id'=>null]);
+        return response()->json(['message'=>'მოტოციკლი კლიენტს მოეხსნა.']);
+    }
+
+    public function updateWorkshopServiceRecord(Request $request, int $customer, int $motorcycle, int $record)
+    {
+        $partner=\App\Models\Partner::where('user_id',$request->user()->id)->where('type','workshop')->where('application_status','approved')->where('is_active',true)->firstOrFail();
+        $customerRow=$partner->customers()->findOrFail($customer);
+        $bike=Motorcycle::where('partner_id',$partner->id)->where('customer_id',$customerRow->id)->findOrFail($motorcycle);
+        $item=$bike->serviceRecords()->findOrFail($record);
+        $data=$request->validate(['service_date'=>['required','date','before_or_equal:today'],'mileage'=>['nullable','integer','min:0'],'category'=>['required','string','max:100'],'title'=>['required','string','max:255'],'description'=>['nullable','string','max:5000'],'cost'=>['required','numeric','min:0','max:99999999.99'],'notes'=>['nullable','string','max:5000']]);
+        $item->update($data);
+        return response()->json(['message'=>'მომსახურების ჩანაწერი განახლდა.']);
+    }
+
+    public function deleteWorkshopServiceRecord(Request $request, int $customer, int $motorcycle, int $record)
+    {
+        $partner=\App\Models\Partner::where('user_id',$request->user()->id)->where('type','workshop')->where('application_status','approved')->where('is_active',true)->firstOrFail();
+        $customerRow=$partner->customers()->findOrFail($customer);
+        $bike=Motorcycle::where('partner_id',$partner->id)->where('customer_id',$customerRow->id)->findOrFail($motorcycle);
+        $bike->serviceRecords()->findOrFail($record)->delete();
+        return response()->json(['message'=>'მომსახურების ჩანაწერი წაიშალა.']);
+    }
+
 }
