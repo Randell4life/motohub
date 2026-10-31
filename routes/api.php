@@ -32,6 +32,8 @@ Route::prefix('mobile')->group(function () {
         Route::post('/favorites/parts/{source}/{part}', [MobileExtendedController::class, 'togglePartFavorite'])->whereIn('source', ['store', 'marketplace'])->whereNumber('part');
         Route::get('/compare', [MobileExtendedController::class, 'compare']);
         Route::get('/community', [MobileExtendedController::class, 'community']);
+        Route::get('/notifications', [MobileExtendedController::class, 'notifications']);
+        Route::post('/notifications/read', [MobileExtendedController::class, 'markNotificationsRead']);
         Route::post('/community/posts', [MobileExtendedController::class, 'storePost'])->middleware('throttle:10,1');
         Route::post('/community/posts/{post}/comments', [MobileExtendedController::class, 'commentPost'])->whereNumber('post')->middleware('throttle:20,1');
         Route::post('/community/posts/{post}/like', [MobileExtendedController::class, 'likePost'])->whereNumber('post');
