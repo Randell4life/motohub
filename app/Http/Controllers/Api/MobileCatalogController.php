@@ -15,7 +15,7 @@ class MobileCatalogController extends Controller
     public function motorcycles(Request $request)
     {
         $query = Motorcycle::query()
-            ->with('images')
+            ->with(['images', 'user:id,name,phone,avatar_path', 'partner:id,name,phone,logo_path'])
             ->where('status', 'published')
             ->when($request->filled('q'), function ($builder) use ($request) {
                 $term = trim((string) $request->query('q'));
@@ -55,6 +55,13 @@ class MobileCatalogController extends Controller
                 'url' => $this->storageUrl($image->image_path ?? $image->path ?? null),
             ])->values(),
             'is_featured' => (bool) $item->is_featured,
+            'published_at' => $item->published_at?->toIso8601String(),
+            'seller' => [
+                'name' => $item->partner?->name ?: ($item->user?->name ?: 'MotoHub გამყიდველი'),
+                'phone' => $item->user?->phone ?: $item->partner?->phone,
+                'avatar_url' => $this->storageUrl($item->partner?->logo_path ?: $item->user?->avatar_path),
+                'type' => $item->partner?->type,
+            ],
         ]);
         return response()->json($page);
     }
