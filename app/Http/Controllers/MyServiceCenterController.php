@@ -92,7 +92,9 @@ public function profile(): RedirectResponse|View
             return redirect()->route('my-service-center.dashboard');
         }
 
-        return view('my-service-center.register');
+        $plans = ServiceCenter::subscriptionPlans();
+
+        return view('my-service-center.register', compact('plans'));
     }
 
     public function store(Request $request): RedirectResponse
