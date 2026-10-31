@@ -42,6 +42,25 @@ class ServiceCentersTable
                     ->label('აღწერა')
                     ->limit(45)
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('subscription_plan')
+                    ->label('პაკეტი')
+                    ->badge()
+                    ->formatStateUsing(fn ($state): string => strtoupper((string) $state)),
+                TextColumn::make('subscription_price')
+                    ->label('ფასი / თვე')
+                    ->money('GEL')
+                    ->sortable(),
+                TextColumn::make('subscription_status')
+                    ->label('გამოწერის სტატუსი')
+                    ->badge()
+                    ->formatStateUsing(fn ($state): string => match ($state) {
+                        'active' => 'აქტიური',
+                        'past_due' => 'გადახდა ვადაგადაცილებულია',
+                        'expired' => 'ვადაგასული',
+                        'cancelled' => 'გაუქმებული',
+                        default => 'უცნობი',
+                    })
+                    ->color(fn ($state): string => $state === 'active' ? 'success' : 'warning'),
                 TextColumn::make('approval_status')
                     ->label('განაცხადის სტატუსი')
                     ->badge()
@@ -70,6 +89,40 @@ class ServiceCentersTable
                     ]),
             ])
             ->recordActions([
+                Action::make('subscription')
+                    ->label('პაკეტის მართვა')
+                    ->icon('heroicon-o-credit-card')
+                    ->color('info')
+                    ->fillForm(fn (ServiceCenter $record): array => [
+                        'subscription_plan' => $record->subscription_plan ?: 'start',
+                        'subscription_status' => $record->subscription_status ?: 'active',
+                    ])
+                    ->form([
+                        Select::make('subscription_plan')
+                            ->label('პაკეტი')
+                            ->options(collect(ServiceCenter::subscriptionPlans())->mapWithKeys(fn ($plan, $key) => [$key => $plan['name'] . ' — ' . $plan['price'] . ' ₾ / თვე'])->all())
+                            ->required(),
+                        Select::make('subscription_status')
+                            ->label('სტატუსი')
+                            ->options([
+                                'active' => 'აქტიური',
+                                'past_due' => 'გადახდა ვადაგადაცილებულია',
+                                'expired' => 'ვადაგასული',
+                                'cancelled' => 'გაუქმებული',
+                            ])
+                            ->required(),
+                    ])
+                    ->action(function (ServiceCenter $record, array $data): void {
+                        $plan = ServiceCenter::subscriptionPlans()[$data['subscription_plan']];
+                        $record->update([
+                            'subscription_plan' => $data['subscription_plan'],
+                            'subscription_status' => $data['subscription_status'],
+                            'subscription_price' => $plan['price'],
+                            'subscription_started_at' => $record->subscription_started_at ?: now(),
+                            'subscription_ends_at' => $plan['price'] > 0 ? ($record->subscription_ends_at ?: now()->addMonth()) : null,
+                        ]);
+                        Notification::make()->title('გამოწერა განახლდა')->success()->send();
+                    }),
                 Action::make('approve')
                     ->label('დამტკიცება')
                     ->icon('heroicon-o-check-circle')
