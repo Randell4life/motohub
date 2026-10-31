@@ -38,3 +38,45 @@ html,body{background:#080b10;color:var(--text)}body{background:radial-gradient(e
 .admin-page .admin-status{display:inline-flex;padding:5px 8px;border:1px solid #1677ff35;border-radius:7px;background:#1677ff12}
 .form-stack button:focus-visible,.secondary-btn:focus-visible,.primary-btn:focus-visible,.text-button:focus-visible{outline:2px solid var(--blue2);outline-offset:3px}
 @media(max-width:390px){.request-page .form-stack,.booking-page .form-stack{padding:13px}.admin-count{padding:12px}.admin-count strong{font-size:24px}.admin-actions .secondary-btn{flex-basis:100%}}
+
+/* Shared MotoHub homepage identity — mobile app */
+:root {
+  --blue: #0878ff;
+  --blue2: #25baff;
+  --bg: #050a13;
+  --panel: #08172b;
+  --panel2: #0d1b2e;
+  --muted: #9aabc2;
+  --border: rgba(91,151,224,.24);
+}
+html, body { background: radial-gradient(ellipse at 50% -15%,#0b1d35 0%,#050a13 48%) !important; }
+#app { background: transparent; }
+.topbar, .bottom-nav {
+  background: rgba(3,9,19,.96);
+  border-color: var(--border);
+  box-shadow: 0 10px 35px rgba(0,0,0,.2);
+}
+.topbar { min-height: 72px; }
+.service-card, .item-card, .account-panel, .admin-item, .admin-count, .callout, .preview-card {
+  border-color: var(--border);
+  background: linear-gradient(145deg,#0d1b2e,#071222);
+  border-radius: 14px;
+}
+.primary-btn, .search-box button {
+  background: linear-gradient(135deg,#0865e8,#159cff);
+  box-shadow: 0 8px 22px rgba(0,109,255,.16);
+}
+.secondary-btn, .icon-button {
+  background: #0a1930;
+  border-color: #31577e;
+}
+.service-icon { background: #0878ff18; border-color: #0878ff55; color: #25baff; }
+.nav-item.active { color: #25baff; }
+.search-box, .form-stack input, .form-stack textarea {
+  border-color: #294363;
+  background-color: #061225;
+}
+@media (min-width: 760px) {
+  #app { max-width: 980px; }
+  .hero { padding-left: 34px; padding-right: 34px; }
+}
