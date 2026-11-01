@@ -16,13 +16,14 @@ class MobileAuthController extends Controller
     {
         $request->merge([
             'email' => mb_strtolower(trim((string) $request->input('email', ''))),
+            'referral_code' => strtoupper(trim((string) $request->input('referral_code', ''))),
         ]);
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'phone' => ['nullable', 'string', 'max:30'],
-            'referral_code' => ['nullable', 'string', 'max:20'],
+            'referral_code' => ['nullable', 'string', 'min:4', 'max:20', 'alpha_num', 'exists:users,referral_code'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 

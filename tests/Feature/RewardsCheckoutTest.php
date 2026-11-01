@@ -82,6 +82,95 @@ class RewardsCheckoutTest extends TestCase
         $this->assertTrue(collect($second['badges'])->firstWhere('key', 'first_post')['unlocked']);
     }
 
+    public function test_registration_accepts_referral_code_and_rewards_both_users(): void
+    {
+        $referrer = User::factory()->create();
+        $referrer->forceFill(['referral_code' => 'RIDER2026'])->save();
+
+        $response = $this->post(route('register.store'), [
+            'name' => 'New Rider',
+            'email' => 'new-rider@example.com',
+            'phone' => '+995555123456',
+            'password' => 'StrongPass123!',
+            'password_confirmation' => 'StrongPass123!',
+            'referral_code' => ' rider2026 ',
+        ]);
+
+        $response->assertRedirect(route('home'));
+        $this->assertAuthenticated();
+        $newUser = User::where('email', 'new-rider@example.com')->firstOrFail();
+        $this->assertSame($referrer->id, $newUser->referred_by_user_id);
+        $this->assertDatabaseHas('reward_transactions', [
+            'user_id' => $newUser->id,
+            'action_key' => 'referral-signup:' . $newUser->id,
+        ]);
+        $this->assertDatabaseHas('reward_transactions', [
+            'user_id' => $referrer->id,
+            'action_key' => 'referral-signup-referrer:' . $newUser->id,
+        ]);
+    }
+
+    public function test_registration_rejects_unknown_referral_code(): void
+    {
+        $response = $this->from(route('register'))->post(route('register.store'), [
+            'name' => 'Unknown Referral Rider',
+            'email' => 'unknown-referral@example.com',
+            'password' => 'StrongPass123!',
+            'password_confirmation' => 'StrongPass123!',
+            'referral_code' => 'NOTREAL123',
+        ]);
+
+        $response->assertRedirect(route('register'));
+        $response->assertSessionHasErrors('referral_code');
+        $this->assertDatabaseMissing('users', ['email' => 'unknown-referral@example.com']);
+    }
+
+    public function test_mobile_registration_accepts_referral_code_and_rejects_unknown_code(): void
+    {
+        $referrer = User::factory()->create();
+        $referrer->forceFill(['referral_code' => 'MOBILE2026'])->save();
+
+        $response = $this->postJson('/api/mobile/register', [
+            'name' => 'Mobile Rider',
+            'email' => 'mobile-rider@example.com',
+            'password' => 'StrongPass123!',
+            'password_confirmation' => 'StrongPass123!',
+            'referral_code' => 'mobile2026',
+        ]);
+
+        $response->assertCreated()->assertJsonPath('user.email', 'mobile-rider@example.com');
+        $newUser = User::where('email', 'mobile-rider@example.com')->firstOrFail();
+        $this->assertSame($referrer->id, $newUser->referred_by_user_id);
+
+        $invalid = $this->postJson('/api/mobile/register', [
+            'name' => 'Invalid Mobile Rider',
+            'email' => 'invalid-mobile@example.com',
+            'password' => 'StrongPass123!',
+            'password_confirmation' => 'StrongPass123!',
+            'referral_code' => 'UNKNOWN123',
+        ]);
+        $invalid->assertUnprocessable()->assertJsonValidationErrors('referral_code');
+        $this->assertDatabaseMissing('users', ['email' => 'invalid-mobile@example.com']);
+    }
+
+    public function test_weekly_and_monthly_leaderboards_rank_earned_points(): void
+    {
+        $first = User::factory()->create(['name' => 'Top Rider']);
+        $second = User::factory()->create(['name' => 'Second Rider']);
+        RewardTransaction::create(['user_id' => $first->id, 'points' => 300, 'type' => 'test', 'description' => 'weekly', 'action_key' => 'leaderboard-first:' . $first->id]);
+        RewardTransaction::create(['user_id' => $second->id, 'points' => 150, 'type' => 'test', 'description' => 'weekly', 'action_key' => 'leaderboard-second:' . $second->id]);
+        RewardTransaction::create(['user_id' => $first->id, 'points' => -100, 'type' => 'test', 'description' => 'spent', 'action_key' => 'leaderboard-spent:' . $first->id]);
+
+        $service = app(\\App\\Services\\RewardsService::class);
+        $weekly = $service->leaderboard($first, 'week');
+        $monthly = $service->leaderboard($first, 'month');
+
+        $this->assertSame('Top Rider', $weekly['entries'][0]['name']);
+        $this->assertSame(300, $weekly['entries'][0]['points']);
+        $this->assertSame(1, $weekly['current_user']['rank']);
+        $this->assertSame(1, $monthly['current_user']['rank']);
+    }
+
     public function test_points_discount_is_capped_at_thirty_percent(): void
     {
         $user = User::factory()->create();

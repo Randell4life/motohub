@@ -11,9 +11,9 @@ use Illuminate\View\View;
 
 class AuthController extends Controller
 {
-    public function showRegister(): View
+    public function showRegister(Request $request): View
     {
-        return view('auth.register');
+        return view('auth.register', ['referralCode' => $request->session()->get('referral_code')]);
     }
 
     public function showLogin(): View
@@ -23,9 +23,10 @@ class AuthController extends Controller
 
     public function register(Request $request, RewardsService $rewards)
     {
+        $request->merge(['referral_code' => strtoupper(trim((string) ($request->input('referral_code') ?: $request->session()->get('referral_code', ''))))]);
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:users,name'],
-            'referral_code' => ['nullable', 'string', 'max:20'],
+            'referral_code' => ['nullable', 'string', 'min:4', 'max:20', 'alpha_num', 'exists:users,referral_code'],
             'email' => [
                 'required',
                 'string',
