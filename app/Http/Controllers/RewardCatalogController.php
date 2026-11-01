@@ -109,7 +109,7 @@ class RewardCatalogController extends Controller
         DB::transaction(function () use ($order, $data) {
             $locked = RewardCatalogOrder::whereKey($order->id)->lockForUpdate()->firstOrFail();
             $allowedTransitions = match ($locked->status) {
-                'pending' => ['approved', 'rejected', 'cancelled'],
+                'pending' => ['approved', 'processing', 'rejected', 'cancelled'],
                 'approved' => ['processing', 'shipped', 'fulfilled', 'rejected', 'cancelled'],
                 'processing' => ['shipped', 'fulfilled', 'rejected', 'cancelled'],
                 'shipped' => ['fulfilled'],
