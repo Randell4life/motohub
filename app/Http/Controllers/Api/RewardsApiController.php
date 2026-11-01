@@ -33,7 +33,8 @@ class RewardsApiController extends Controller
             'referral_url' => url('/invite/' . $code),
             'referrals_count' => User::where('referred_by_user_id', $user->id)->count(),
             'transactions' => RewardTransaction::where('user_id', $user->id)->latest()->limit(30)->get(),
-            'redemptions' => RewardRedemption::where('user_id', $user->id)->latest()->limit(15)->get(),\n            'prizes' => RewardPrize::with('winner:id,name')->where('winner_user_id', $user->id)->latest('awarded_at')->limit(10)->get(),
+            'redemptions' => RewardRedemption::where('user_id', $user->id)->latest()->limit(15)->get(),
+            'prizes' => RewardPrize::with('winner:id,name')->where('winner_user_id', $user->id)->latest('awarded_at')->limit(10)->get(),
             'ways_to_earn' => [
                 ['title' => 'რეგისტრაცია', 'points' => $rewards->setting('signup_points', 100)],
                 ['title' => 'პირველი პოსტი', 'points' => $rewards->setting('first_post_points', 150)],
@@ -81,7 +82,12 @@ class RewardsApiController extends Controller
         abort_unless((bool) $request->user()->is_admin, 403);
         return response()->json([
             'redemptions' => RewardRedemption::with('user:id,name,email')->latest()->limit(100)->get(),
-            'settings' => DB::table('reward_settings')->pluck('value', 'key'),\n            'prizes' => RewardPrize::with('winner:id,name')->latest('period_start')->latest('rank')->limit(50)->get(),\n            'leaderboards' => [\n                'week' => app(RewardsService::class)->leaderboard($request->user(), 'week'),\n                'month' => app(RewardsService::class)->leaderboard($request->user(), 'month'),\n            ],
+            'settings' => DB::table('reward_settings')->pluck('value', 'key'),
+            'prizes' => RewardPrize::with('winner:id,name')->latest('period_start')->latest('rank')->limit(50)->get(),
+            'leaderboards' => [
+                'week' => app(RewardsService::class)->leaderboard($request->user(), 'week'),
+                'month' => app(RewardsService::class)->leaderboard($request->user(), 'month'),
+            ],
         ]);
     }
 
