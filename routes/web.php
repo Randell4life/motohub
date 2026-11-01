@@ -108,54 +108,8 @@ $partListings = PartListing::query()
     ->limit(4)
     ->get();
 
-$partFitments = Part::query()
-    ->where('is_active', true)
-    ->get([
-        'motorcycle_brand',
-        'motorcycle_model',
-        'motorcycle_year',
-        'engine_cc',
-    ])
-    ->concat(
-        PartListing::query()
-            ->where('status', 'published')
-            ->get([
-                'motorcycle_brand',
-                'motorcycle_model',
-                'motorcycle_year',
-                'engine_cc',
-            ])
-    )
-    ->filter(fn ($item) => $item->motorcycle_brand)
-    ->unique(fn ($item) => implode('|', [
-        $item->motorcycle_brand,
-        $item->motorcycle_model,
-        $item->motorcycle_year,
-        $item->engine_cc,
-    ]))
-    ->values();
 
-$partCategories = Part::query()
-    ->where('is_active', true)
-    ->whereNotNull('category')
-    ->pluck('category')
-    ->merge(
-        PartListing::query()
-            ->where('status', 'published')
-            ->whereNotNull('category')
-            ->pluck('category')
-    )
-    ->filter()
-    ->unique()
-    ->sort()
-    ->values();
-
-return view('home', compact(
-    'motorcycles',
-    'partListings',
-    'partFitments',
-    'partCategories'
-));
+return view('home', compact('motorcycles', 'partListings'));
 })->name('home');
 
 
