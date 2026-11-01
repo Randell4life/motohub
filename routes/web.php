@@ -691,6 +691,9 @@ Route::get('/my-service-center/profile', [
     'availability',
 ])->name('service-centers.availability');   
 
+Route::post('/my-service-center/subscription', [MyServiceCenterController::class, 'requestSubscriptionChange'])
+    ->name('my-service-center.subscription.request');
+
 Route::get('/my-service-center/operations', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'index'])
     ->name('my-service-center.operations');
 
