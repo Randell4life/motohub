@@ -91,6 +91,14 @@ h1{font-size:clamp(54px,6.2vw,88px);letter-spacing:-3px}
 footer{margin-top:48px;padding:32px 0;background:#030711}
 @media(max-width:1020px){.wrap{width:calc(100% - 44px)}nav{min-height:68px}.hero,.hero-inner{min-height:440px}.categories{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:650px){.wrap{width:calc(100% - 28px)}.hero,.hero-inner{min-height:430px}.hero-copy{padding:42px 0 60px}h1{font-size:clamp(43px,11vw,62px);letter-spacing:-1.8px}.hero p{font-size:13px}.search-wrap{margin-top:10px}.search{padding:13px;border-radius:13px}.categories{padding:19px 0 25px}.category{min-height:118px}.home-grid{gap:12px;padding-bottom:35px}.mini img{height:110px}.section{padding:34px 0}.listing-image{height:225px}.callout{padding:23px}.callout h2{font-size:23px}}
+
+/* მთავარი ნავიგაცია — პირადი შეტყობინებები */
+.messages-nav-btn{min-width:150px;gap:9px;padding-inline:15px;box-shadow:0 7px 22px #0878ff30}
+.messages-nav-btn .ico{width:18px;height:18px;flex:none}
+.messages-nav-btn span{white-space:nowrap}
+.messages-nav-btn:hover{filter:brightness(1.12);transform:translateY(-1px);box-shadow:0 10px 26px #0878ff45}
+@media(max-width:1280px){.messages-nav-btn{min-width:132px;padding-inline:11px}}
+@media(max-width:1020px){.messages-nav-btn{width:100%;min-height:44px}}
 </style>
 </head>
 <body>
@@ -106,7 +114,17 @@ footer{margin-top:48px;padding:32px 0;background:#030711}
 </div>
 <div class="actions" id="navActions">
 <a class="icon-btn" href="{{ route('motorcycles.index') }}" aria-label="ძებნა"><svg class="ico" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg></a>
-<a class="add-btn" href="{{ route('account.motorcycles.create') }}">＋ განცხადების დამატება</a>
+@auth
+<a class="add-btn messages-nav-btn" href="{{ route('messages.index') }}" aria-label="შეტყობინებები">
+<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v12H8l-4 3v-15Z"/><path d="M8 10h8M8 14h5"/></svg>
+<span>შეტყობინებები</span>
+</a>
+@else
+<a class="add-btn messages-nav-btn" href="{{ route('login') }}" aria-label="შეტყობინებები">
+<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v12H8l-4 3v-15Z"/><path d="M8 10h8M8 14h5"/></svg>
+<span>შეტყობინებები</span>
+</a>
+@endauth
 @guest<a class="account-link" href="{{ route('login') }}">შესვლა</a><a class="account-link" href="{{ route('register') }}">რეგისტრაცია</a>@else
 <a class="account-link" href="{{ route('account.index') }}"><span>♙</span> ჩემი კაბინეტი</a>
 <form class="logout-form" method="POST" action="{{ route('logout') }}">@csrf<button class="logout-btn" type="submit"><svg class="logout-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg> ანგარიშიდან გასვლა</button></form>
