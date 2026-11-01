@@ -27,4 +27,22 @@ class RewardsCheckout
         }
         return ['points' => $points, 'discount' => round($points / $rate, 2), 'total' => max(0, round($amount - ($points / $rate), 2)), 'max_discount' => $maxDiscount];
     }
+    public function refundServiceBooking(ServiceBooking $booking): void
+    {
+        DB::transaction(function () use ($booking) {
+            $item = ServiceBooking::whereKey($booking->id)->lockForUpdate()->firstOrFail();
+            if ((int) $item->points_used <= 0) return;
+            $key = 'service-booking-refund:' . $item->id;
+            if (RewardTransaction::where('action_key', $key)->exists()) return;
+            RewardTransaction::create([
+                'user_id' => $item->user_id,
+                'points' => (int) $item->points_used,
+                'type' => 'refund',
+                'description' => 'გაუქმებული სერვისის ჯავშნის ქულების დაბრუნება #' . $item->id,
+                'action_key' => $key,
+                'metadata' => ['service_booking_id' => $item->id],
+            ]);
+        });
+    }
+
 }
