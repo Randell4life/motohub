@@ -908,7 +908,50 @@
 @media(max-width:760px){.rental-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rental-filter-grid .rental-filter-wide{grid-column:span 2}}
 @media(max-width:480px){.rental-filter-panel{padding:16px}.rental-filter-top{align-items:flex-start}.rental-filter-top h3{font-size:14px}.rental-filter-actions{align-items:stretch;flex-direction:column}.rental-filter-actions .button-primary{width:100%}}
 
-</style>
+
+
+/* MotoHub rental catalogue — responsive polish */
+.rental-filter-panel{position:relative}
+.rental-filter-panel :where(input,select,button,a):focus-visible,
+.bike-card :where(a,button):focus-visible{outline:2px solid var(--accent-light);outline-offset:3px}
+.rental-filter-panel input,.rental-filter-panel select{min-height:46px}
+.bike-card{min-width:0;display:flex;flex-direction:column}
+.bike-content{display:flex;flex:1;flex-direction:column;min-width:0}
+.bike-card-bottom{margin-top:auto}
+.bike-image img{width:100%;height:100%;object-fit:cover}
+.bike-title,.bike-specs span{overflow-wrap:anywhere}
+@media(max-width:760px){
+ .container{width:calc(100% - 30px)}
+ .hero{min-height:470px}
+ .hero-content{max-width:100%}
+ .benefits{grid-template-columns:1fr;gap:12px}
+ .benefit{min-height:0}
+ .section-heading{align-items:flex-start;flex-direction:column;gap:10px}
+ .rental-filter-panel{padding:16px;border-radius:15px}
+ .rental-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+ .rental-filter-wide{grid-column:1/-1}
+ .rental-filter-grid label{min-width:0}
+ .rental-filter-actions{align-items:stretch;flex-direction:column}
+ .rental-filter-actions .button-primary{width:100%;justify-content:center}
+ .bike-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+ .bike-card{min-width:0}
+ .bike-image{aspect-ratio:4/3;height:auto}
+ .bike-content{padding:13px}
+ .bike-title{font-size:16px}
+ .bike-specs{gap:6px}
+ .bike-card-bottom{align-items:flex-start;gap:8px;flex-direction:column}
+ .details-link{padding:7px 0}
+}
+@media(max-width:440px){
+ .rental-filter-grid{grid-template-columns:1fr}
+ .rental-filter-wide{grid-column:auto}
+ .bike-grid{grid-template-columns:1fr}
+ .bike-image{aspect-ratio:16/9}
+ .hero{min-height:430px}
+ .hero h1{font-size:clamp(38px,11vw,54px)}
+}
+
+    </style>
 </head>
 
 <body>
