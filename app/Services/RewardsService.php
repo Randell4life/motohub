@@ -59,6 +59,11 @@ class RewardsService
         $this->award($referrer, $this->setting('referral_signup_points', 100), 'referral', 'მეგობრის მოწვევა', 'referral-signup-referrer:' . $user->id, ['referred_user_id' => $user->id]);
     }
 
+    public function onFirstMotorcycleListing(User $user, int $motorcycleId): void
+    {
+        $this->award($user, $this->setting('first_listing_points', 150), 'activity', 'პირველი მოტოციკლის განცხადების დამატება', 'first-motorcycle-listing:' . $user->id, ['motorcycle_id' => $motorcycleId]);
+    }
+
     public function onFirstCommunityPost(User $user, int $postId): void
     {
         $this->award($user, $this->setting('first_post_points', 150), 'activity', 'პირველი პოსტის გამოქვეყნება', 'first-community-post:' . $user->id, ['post_id' => $postId]);
