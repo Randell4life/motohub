@@ -48,6 +48,7 @@ class RewardsApiController extends Controller
         if ($data['points'] < $minimum) throw ValidationException::withMessages(['points' => 'მინიმუმ ' . $minimum . ' ქულაა საჭირო.']);
 
         $redemption = DB::transaction(function () use ($data, $user, $rewards) {
+            User::whereKey($user->id)->lockForUpdate()->firstOrFail();
             $balance = $rewards->balance($user);
             if ($data['points'] > $balance) throw ValidationException::withMessages(['points' => 'ბალანსი არასაკმარისია.']);
             $rate = max(1, $rewards->setting('points_per_gel', 100));
