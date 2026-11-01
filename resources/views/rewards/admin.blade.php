@@ -1,6 +1,6 @@
 @extends('layouts.motohub-features')
 @section('content')
-<main class="container" style="max-width:1180px;padding:35px 18px 70px;color:#f4f8ff">
+<main class="container mh-rewards mh-rewards-admin" style="max-width:1180px;padding:35px 18px 70px;color:#f4f8ff">
  <div style="padding:25px;border:1px solid #294766;border-radius:18px;background:linear-gradient(140deg,#142b45,#091421)">
   <span style="color:#78bdff;font-size:11px;font-weight:900;letter-spacing:2px">MOTOHUB / ADMIN</span><h1 style="margin:8px 0;font-size:34px">Rewards <span style="color:#70baff">Control.</span></h1><p style="color:#9bb2cc">ქულების ეკონომიკა, მოთხოვნები, მაღაზიის შეკვეთები და მომხმარებლების ჯილდოები.</p>
  </div>

@@ -1,6 +1,6 @@
 @extends('layouts.motohub-features')
 @section('content')
-<main class="container" style="max-width:1180px;padding:35px 18px 70px;color:#f4f8ff">
+<main class="container mh-rewards mh-rewards-catalog-admin" style="max-width:1180px;padding:35px 18px 70px;color:#f4f8ff">
  <div style="padding:24px;border:1px solid #294766;border-radius:18px;background:linear-gradient(140deg,#142b45,#091421)"><small style="color:#78bdff;letter-spacing:2px;font-weight:900">MOTOHUB / REWARDS ADMIN</small><h1 style="font-size:32px;margin:8px 0">საჩუქრების <span style="color:#70baff">მართვა.</span></h1><p style="color:#9bb2cc">კატალოგი, მარაგი და მომხმარებლების შეკვეთები.</p><a href="{{ route('admin.rewards.index') }}" style="color:#9dccff">← Rewards Admin</a></div>
  @if(session('success'))<p style="padding:12px;color:#9ce6c9">{{ session('success') }}</p>@endif
  @if($errors->any())<p style="padding:12px;color:#ffb5b5">{{ $errors->first() }}</p>@endif
