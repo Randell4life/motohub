@@ -424,6 +424,8 @@ class MobileExtendedController extends Controller
     {
         $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
         abort_unless($center->canUseFeature('team'), 403, $center->featureLockedMessage('team'));
+        $limit = $center->technicianLimit();
+        abort_if($limit !== null && $center->technicians()->count() >= $limit, 422, 'შენი პაკეტის ლიმიტია '.$limit.' ხელოსანი.');
         $data = $request->validate(['name' => ['required','string','max:160'], 'phone' => ['nullable','string','max:40'], 'specialty' => ['nullable','string','max:160']]);
         return response()->json(['message' => 'ხელოსანი დაემატა.', 'technician' => $center->technicians()->create($data)], 201);
     }
@@ -432,6 +434,8 @@ class MobileExtendedController extends Controller
     {
         $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
         abort_unless($center->canUseFeature('team'), 403, $center->featureLockedMessage('team'));
+        $limit = $center->bayLimit();
+        abort_if($limit !== null && $center->bays()->count() >= $limit, 422, 'შენი პაკეტის ლიმიტია '.$limit.' სამუშაო ბოქსი.');
         $data = $request->validate(['name' => ['required','string','max:100'], 'description' => ['nullable','string','max:255']]);
         return response()->json(['message' => 'სამუშაო ბოქსი დაემატა.', 'bay' => $center->bays()->create($data)], 201);
     }
