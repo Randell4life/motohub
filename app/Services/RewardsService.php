@@ -45,6 +45,59 @@ class RewardsService
         });
     }
 
+    /** Award one check-in per day and a bonus every seventh consecutive day. */
+    public function dailyCheckIn(User $user): array
+    {
+        return DB::transaction(function () use ($user) {
+            $lockedUser = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $today = now()->toDateString();
+            $todayKey = 'daily-checkin:' . $lockedUser->id . ':' . $today;
+            $alreadyCheckedIn = RewardTransaction::where('action_key', $todayKey)->exists();
+
+            $streak = 0;
+            $date = now()->startOfDay();
+            if (!$alreadyCheckedIn) {
+                $date = $date->subDay();
+            }
+            for ($i = 0; $i < 366; $i++) {
+                $key = 'daily-checkin:' . $lockedUser->id . ':' . $date->toDateString();
+                if (!RewardTransaction::where('action_key', $key)->exists()) break;
+                $streak++;
+                $date->subDay();
+            }
+
+            $awarded = 0;
+            $bonus = 0;
+            if (!$alreadyCheckedIn) {
+                $base = $this->setting('daily_checkin_points', 10);
+                $nextStreak = $streak + 1;
+                $bonus = $nextStreak % 7 === 0 ? $this->setting('weekly_streak_bonus_points', 50) : 0;
+                $awarded = $base + $bonus;
+                if ($awarded > 0) {
+                    RewardTransaction::create([
+                        'user_id' => $lockedUser->id,
+                        'points' => $awarded,
+                        'type' => 'daily_checkin',
+                        'description' => $bonus > 0 ? 'ყოველდღიური შესვლა · ' . $nextStreak . '-დღიანი სერია · ბონუსი +' . $bonus : 'ყოველდღიური შესვლა MotoHub-ში',
+                        'action_key' => $todayKey,
+                        'metadata' => ['streak' => $nextStreak, 'bonus_points' => $bonus],
+                    ]);
+                }
+                $streak = $nextStreak;
+            }
+
+            return [
+                'checked_in' => true,
+                'already_checked_in' => $alreadyCheckedIn,
+                'streak' => $streak,
+                'points_awarded' => $awarded,
+                'bonus_points' => $bonus,
+                'daily_points' => $this->setting('daily_checkin_points', 10),
+                'weekly_bonus_points' => $this->setting('weekly_streak_bonus_points', 50),
+            ];
+        });
+    }
+
     public function onRegistration(User $user, ?string $referralCode): void
     {
         $this->ensureReferralCode($user);
