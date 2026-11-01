@@ -1065,7 +1065,41 @@
         }
         @media(max-width:390px){.contact-row{grid-template-columns:1fr}.specs{grid-template-columns:1fr 1fr}.listing-meta{gap:6px}.meta-chip{font-size:10px}}
 
-</style>
+
+
+/* MotoHub — განცხადების დეტალების UX დახვეწა */
+.listing-heading { display:flex; flex-direction:column; gap:10px; }
+.listing-meta { flex-wrap:wrap; }
+.detail-grid,.lower-grid { align-items:start; }
+.gallery-thumbnails { scrollbar-width:thin; scrollbar-color:#37618e #0a1727; }
+.gallery-thumb { transition:opacity .18s,border-color .18s,transform .18s; }
+.gallery-thumb:focus-visible,.gallery-arrow:focus-visible,
+.call-button:focus-visible,.outline-button:focus-visible {
+    outline:2px solid #70b7ff; outline-offset:3px;
+}
+.info-panel,.description-panel,.seller-panel,.additional-panel { min-width:0; }
+.spec-value,.additional-value { overflow-wrap:anywhere; }
+.description { overflow-wrap:anywhere; }
+@media(max-width:600px) {
+    .listing-heading { gap:8px; }
+    .listing-meta { gap:6px; }
+    .detail-grid { margin-bottom:18px; }
+    .main-photo { width:100%; object-fit:contain; background:#081321; }
+    .gallery-thumbnails { scroll-snap-type:x mandatory; }
+    .gallery-thumb { scroll-snap-align:start; }
+    .info-panel { border-radius:14px; }
+    .contact-row { display:grid; grid-template-columns:1fr; }
+    .contact-row>* { width:100%; }
+    .phone-number { display:block; text-align:center; padding:9px; }
+    .additional-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:360px) {
+    .specs,.additional-grid { grid-template-columns:1fr; }
+    .spec:nth-child(even) { border-left:0; padding-left:2px; }
+    .section-tabs { gap:14px; }
+}
+
+    </style>
 </head>
 
 <body>
