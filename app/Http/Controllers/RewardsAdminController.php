@@ -9,6 +9,7 @@ use App\Models\StoreOrder;
 use App\Models\User;
 use App\Services\RewardsService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -156,7 +157,11 @@ class RewardsAdminController extends Controller
         $periodStart = $data['period_type'] === 'month' ? now()->startOfMonth()->toDateString() : now()->startOfWeek()->toDateString();
         $board = $rewards->leaderboard($request->user(), $data['period_type']);
         $winner = collect($board['entries'])->firstWhere('rank', (int) $data['rank']);
-        abort_unless($winner && (int) $winner['user_id'] === (int) $data['winner_user_id'], 422, 'არჩეული მომხმარებელი ამ პერიოდის ამ ადგილზე არ არის.');
+        if (!$winner || (int) $winner['user_id'] !== (int) $data['winner_user_id']) {
+            throw ValidationException::withMessages([
+                'winner_user_id' => 'არჩეული მომხმარებელი ამ პერიოდის ამ ადგილზე არ არის.',
+            ]);
+        }
 
         DB::transaction(function () use ($request, $data, $periodStart, $winner) {
             $prize = RewardPrize::create([
