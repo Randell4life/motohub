@@ -25,6 +25,10 @@ class RewardsApiController extends Controller
             'daily_checkin' => $dailyCheckIn,
             'membership_tier' => $rewards->membershipTier($user),
             'achievements' => $rewards->achievementBadges($user),
+            'leaderboards' => [
+                'week' => $rewards->leaderboard($user, 'week'),
+                'month' => $rewards->leaderboard($user, 'month'),
+            ],
             'referral_code' => $code,
             'referral_url' => url('/invite/' . $code),
             'referrals_count' => User::where('referred_by_user_id', $user->id)->count(),
