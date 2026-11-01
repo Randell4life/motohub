@@ -34,7 +34,7 @@
     </div>
     <section style="margin-top:26px;padding:22px;border:1px solid #29415e;border-radius:16px;background:#0d1827">
         <h2>როგორ დააგროვო ქულები</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:14px">
-            @foreach([['რეგისტრაცია','100'],['პირველი პოსტი','150'],['მეგობრის მოწვევა','100'],['მოწვეული მეგობრის პირველი პოსტი','150']] as [$label,$points])
+            @foreach([['რეგისტრაცია','100'],['პირველი პოსტი','150'],['პირველი მოტოციკლის განცხადება','150'],['მეგობრის მოწვევა','100'],['მოწვეული მეგობრის პირველი პოსტი','150']] as [$label,$points])
             <div style="padding:14px;border:1px solid #29415e;border-radius:11px;background:#091421"><strong>{{ $label }}</strong><div style="margin-top:8px;color:#69b7ff;font-size:22px;font-weight:900">+{{ $points }} ქულა</div></div>
             @endforeach
         </div>
