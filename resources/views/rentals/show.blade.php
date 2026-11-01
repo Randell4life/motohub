@@ -539,6 +539,39 @@
                 transition-duration: .01ms !important;
             }
         }
+    
+
+/* MotoHub rental details and booking — mobile refinement */
+.rental-booking-form :where(input,textarea,button):focus-visible,
+.gallery-thumb:focus-visible{outline:2px solid var(--blue-light);outline-offset:3px}
+.rental-booking-form input,.rental-booking-form textarea{min-height:46px}
+.rental-booking-form textarea{min-height:100px}
+.layout{align-items:start}
+.panel{min-width:0}
+.gallery-thumb{scroll-snap-align:start}
+@media(max-width:760px){
+ .container{width:calc(100% - 26px)}
+ nav{min-height:68px}
+ .nav-links{gap:7px}
+ .layout{grid-template-columns:minmax(0,1fr);gap:15px}
+ .gallery-panel{min-width:0}
+ .main-image-wrap{aspect-ratio:4/3;min-height:210px}
+ .main-image-wrap img{width:100%;height:100%;object-fit:contain}
+ .gallery-thumbs{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:9px;padding-bottom:5px}
+ .gallery-thumb{flex:0 0 76px}
+ .booking-panel{position:static}
+ .booking-panel form{gap:10px}
+ .booking-panel input,.booking-panel textarea{width:100%;min-height:46px}
+ .estimate{padding:15px}
+ .btn.full{width:100%;min-height:50px}
+}
+@media(max-width:420px){
+ .nav-links .btn{padding:9px 11px;font-size:12px}
+ .main-image-wrap{min-height:185px}
+ .gallery-thumb{flex-basis:66px}
+ .booking-panel{padding:15px}
+}
+
     </style>
 </head>
 <body>

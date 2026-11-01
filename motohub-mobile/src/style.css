@@ -1417,3 +1417,48 @@ button:disabled,[aria-disabled="true"]{opacity:.55;cursor:not-allowed}
  .part-detail-page .part-detail-heading{align-items:flex-start}
  .part-detail-page .part-detail-id{flex-shrink:0}
 }
+
+
+/* MotoHub rental experience — mobile app */
+.rental-mobile-filter,.rental-checkout-page{min-width:0}
+.rental-mobile-filter input,.rental-mobile-filter select,
+.rental-checkout-form input,.rental-checkout-form textarea{min-height:46px;border-radius:10px}
+.rental-mobile-filter .filter-panel-head{align-items:flex-start}
+.rental-mobile-grid{align-items:start}
+.catalog-page .item-card .rental-card-meta{display:grid;gap:6px;margin-top:10px;color:#9fb2cc;font-size:11px}
+.catalog-page .item-card [data-action="book-rental"]{margin-top:auto}
+.rental-checkout-layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,.85fr);gap:14px;align-items:start}
+.rental-checkout-main,.rental-checkout-summary{min-width:0}
+.rental-checkout-bike{display:flex;gap:12px;align-items:center;min-width:0;padding:12px;border:1px solid #294563;border-radius:14px;background:linear-gradient(145deg,#132840,#0b1725)}
+.rental-checkout-bike img{width:104px;height:88px;flex:0 0 104px;object-fit:cover;border-radius:10px}
+.rental-checkout-bike-info{min-width:0}
+.rental-checkout-bike-info h2{font-size:15px;overflow-wrap:anywhere}
+.rental-checkout-bike-info p{font-size:11px;color:#9fb2cc}
+.rental-checkout-bike-info>strong{color:#70b7ff;font-size:17px}
+.rental-checkout-form,.rental-checkout-summary{margin-top:13px;padding:15px;border:1px solid #294563;border-radius:14px;background:linear-gradient(145deg,#102137,#0a1523)}
+.rental-checkout-form label{display:grid;gap:7px;margin:11px 0;color:#c6d8ee;font-size:12px;font-weight:800}
+.rental-checkout-form input,.rental-checkout-form textarea{width:100%;padding:12px;border:1px solid #304b6b;background:#071321;color:#f4f8ff}
+.rental-date-grid,.rental-contact-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.rental-step-heading{display:flex;align-items:center;gap:10px;margin:17px 0 8px}
+.rental-step-heading>span{display:grid;place-items:center;width:32px;height:32px;flex:0 0 32px;border-radius:9px;background:#1677ff20;color:#70b7ff;font-weight:900}
+.rental-step-heading h2{font-size:14px}
+.rental-step-heading p{font-size:10px;color:#9fb2cc}
+.rental-duration-hint,.rental-booking-disclaimer,.rental-summary-security{padding:11px;border:1px solid #294563;border-radius:10px;background:#091827;color:#a9bdd5;font-size:11px;line-height:1.7}
+.rental-summary-row,.rental-summary-total{display:flex;justify-content:space-between;gap:12px;padding:11px 0;color:#b5c7dc;font-size:12px}
+.rental-summary-total{align-items:center;border-top:1px solid #294563;color:#f4f8ff}
+.rental-summary-total strong{color:#70b7ff;font-size:21px}
+.rental-checkout-summary{position:sticky;top:12px}
+.rental-checkout-form :where(input,textarea,button):focus-visible{outline:2px solid #70b7ff;outline-offset:2px}
+@media(max-width:680px){
+ .rental-checkout-layout{grid-template-columns:minmax(0,1fr)}
+ .rental-checkout-summary{position:static;order:-1}
+ .rental-date-grid,.rental-contact-grid{grid-template-columns:1fr}
+ .rental-checkout-bike img{width:88px;height:78px;flex-basis:88px}
+ .rental-checkout-form,.rental-checkout-summary{padding:13px}
+ .rental-checkout-page .page-title{font-size:clamp(29px,8vw,42px)}
+}
+@media(max-width:360px){
+ .rental-checkout-bike{align-items:flex-start;flex-direction:column}
+ .rental-checkout-bike img{width:100%;height:150px}
+ .rental-mobile-grid{grid-template-columns:1fr}
+}
