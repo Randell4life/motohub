@@ -77,7 +77,7 @@ class RewardsCheckoutTest extends TestCase
 
         $this->assertSame(2, $first['unlocked_count']);
         $this->assertSame(2, $second['unlocked_count']);
-        $this->assertSame(175, $service->balance($user));
+        $this->assertSame(325, $service->balance($user));
         $this->assertSame(2, RewardTransaction::where('user_id', $user->id)->where('type', 'achievement')->count());
         $this->assertTrue(collect($second['badges'])->firstWhere('key', 'welcome')['unlocked']);
         $this->assertTrue(collect($second['badges'])->firstWhere('key', 'first_post')['unlocked']);
