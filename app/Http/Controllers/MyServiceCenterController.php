@@ -264,7 +264,7 @@ public function profile(): RedirectResponse|View
 
         DB::transaction(function () use ($booking, $data) {
             $booking->update(['status' => $data['status']]);
-            if (in_array($data['status'], ['declined', 'cancelled'], true)) app(\\App\\Services\\RewardsCheckout::class)->refundServiceBooking($booking);
+            if (in_array($data['status'], ['declined', 'cancelled'], true)) app(\App\Services\RewardsCheckout::class)->refundServiceBooking($booking);
         });
 
         return back()->with('success', 'ჯავშნის სტატუსი განახლდა.');
