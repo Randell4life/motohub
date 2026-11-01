@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\RewardRedemption;
+use App\Models\RewardPrize;
 use App\Models\RewardTransaction;
 use App\Models\User;
 use App\Services\RewardsService;
