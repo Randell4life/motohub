@@ -71,6 +71,21 @@ class ServiceCenter extends Model
         $required = ['services'=>'start','bookings'=>'start','work_orders'=>'pro','team'=>'pro','finance'=>'pro','inventory'=>'business','inventory_usage'=>'business','financial_reports'=>'business','advanced_reports'=>'premium','priority_support'=>'premium'][$feature] ?? 'premium';
         return ($rank[$this->subscription_plan ?? 'start'] ?? 0) >= $rank[$required];
     }
+
+    public function technicianLimit(): ?int
+    {
+        return match ($this->subscription_plan ?? 'start') {
+            'pro' => 5, 'business' => 15, default => null,
+        };
+    }
+
+    public function bayLimit(): ?int
+    {
+        return match ($this->subscription_plan ?? 'start') {
+            'pro' => 3, 'business' => 10, default => null,
+        };
+    }
+
     public function featureAccess(): array
     {
         return collect(['services','bookings','work_orders','team','finance','inventory','inventory_usage','financial_reports','advanced_reports','priority_support'])->mapWithKeys(fn (string $feature) => [$feature=>$this->canUseFeature($feature)])->all();
