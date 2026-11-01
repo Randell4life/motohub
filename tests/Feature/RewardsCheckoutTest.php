@@ -64,6 +64,24 @@ class RewardsCheckoutTest extends TestCase
         $this->assertSame(10, $tier['progress_percent']);
     }
 
+    public function test_achievement_badges_unlock_and_award_bonus_points_only_once(): void
+    {
+        $user = User::factory()->create();
+        RewardTransaction::create(['user_id' => $user->id, 'points' => 100, 'type' => 'signup', 'description' => 'signup', 'action_key' => 'signup:' . $user->id]);
+        RewardTransaction::create(['user_id' => $user->id, 'points' => 150, 'type' => 'activity', 'description' => 'post', 'action_key' => 'first-community-post:' . $user->id]);
+
+        $service = app(\\App\\Services\\RewardsService::class);
+        $first = $service->achievementBadges($user);
+        $second = $service->achievementBadges($user);
+
+        $this->assertSame(2, $first['unlocked_count']);
+        $this->assertSame(2, $second['unlocked_count']);
+        $this->assertSame(175, $service->balance($user));
+        $this->assertSame(2, RewardTransaction::where('user_id', $user->id)->where('type', 'achievement')->count());
+        $this->assertTrue(collect($second['badges'])->firstWhere('key', 'welcome')['unlocked']);
+        $this->assertTrue(collect($second['badges'])->firstWhere('key', 'first_post')['unlocked']);
+    }
+
     public function test_points_discount_is_capped_at_thirty_percent(): void
     {
         $user = User::factory()->create();

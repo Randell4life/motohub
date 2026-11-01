@@ -18,12 +18,13 @@ class RewardsController extends Controller
         $code = $rewards->ensureReferralCode($user);
         $dailyCheckIn = $rewards->dailyCheckIn($user);
         $membershipTier = $rewards->membershipTier($user);
+        $achievements = $rewards->achievementBadges($user);
         $balance = $rewards->balance($user);
         $transactions = RewardTransaction::where('user_id', $user->id)->latest()->limit(30)->get();
         $redemptions = RewardRedemption::where('user_id', $user->id)->latest()->limit(15)->get();
         $referrals = User::where('referred_by_user_id', $user->id)->withCount('communityPosts')->latest()->limit(20)->get(['id', 'name', 'created_at']);
 
-        return view('rewards.index', compact('user', 'code', 'balance', 'transactions', 'redemptions', 'referrals', 'dailyCheckIn', 'membershipTier'));
+        return view('rewards.index', compact('user', 'code', 'balance', 'transactions', 'redemptions', 'referrals', 'dailyCheckIn', 'membershipTier', 'achievements'));
     }
 
     public function redeem(Request $request, RewardsService $rewards)
