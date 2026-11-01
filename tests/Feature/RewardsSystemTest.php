@@ -137,6 +137,22 @@ class RewardsSystemTest extends TestCase
         $this->assertDatabaseHas('reward_transactions', ['user_id' => $user->id, 'points' => 400, 'type' => 'refund', 'action_key' => 'reward-catalog-refund:' . $order->id]);
     }
 
+    public function test_shipped_gift_order_cannot_be_rejected_or_refunded(): void
+    {
+        $admin = User::factory()->create();
+        $admin->forceFill(['is_admin' => true])->save();
+        $user = User::factory()->create();
+        $item = RewardCatalogItem::create(['title' => 'Helmet', 'slug' => 'shipped-helmet', 'points_cost' => 800, 'stock' => 0, 'is_active' => true]);
+        $order = RewardCatalogOrder::create(['user_id' => $user->id, 'item_id' => $item->id, 'item_title' => 'Helmet', 'points_spent' => 800, 'status' => 'shipped']);
+        RewardTransaction::create(['user_id' => $user->id, 'points' => -800, 'type' => 'reward_catalog', 'description' => 'claimed', 'action_key' => 'reward-catalog-order:' . $order->id]);
+
+        $this->actingAs($admin)->patch(route('admin.rewards.catalog.orders.update', $order), ['status' => 'rejected'])->assertStatus(422);
+
+        $this->assertSame(0, $item->fresh()->stock);
+        $this->assertDatabaseMissing('reward_transactions', ['action_key' => 'reward-catalog-refund:' . $order->id]);
+        $this->assertSame('shipped', $order->fresh()->status);
+    }
+
     public function test_invalid_referral_code_does_not_prevent_signup_award(): void
     {
         $service = app(RewardsService::class);
