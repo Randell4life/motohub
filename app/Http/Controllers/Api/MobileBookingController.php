@@ -121,12 +121,15 @@ class MobileBookingController extends Controller
                 }
             }
 
-            $discount = app(\App\Services\RewardsCheckout::class)->apply($request->user(), (float) $service->price, (int) ($data['points'] ?? 0), 'service-booking:' . \Illuminate\Support\Str::uuid(), 'სერვისის ჯავშნის ფასდაკლება', ['service_center_id' => $serviceCenter->id]);\n            return ServiceBooking::create([
+            $discount = app(\App\Services\RewardsCheckout::class)->apply($request->user(), (float) $service->price, (int) ($data['points'] ?? 0), 'service-booking:' . \Illuminate\Support\Str::uuid(), 'სერვისის ჯავშნის ფასდაკლება', ['service_center_id' => $serviceCenter->id]);
+            return ServiceBooking::create([
                 'service_center_id' => $serviceCenter->id,
                 'service_center_service_id' => $service->id,
                 'user_id' => $request->user()->id,
                 'service_name' => $service->name,
-                'price_at_booking' => $discount['total'],\n                'points_used' => $discount['points'],\n                'points_discount' => $discount['discount'],
+                'price_at_booking' => $discount['total'],
+                'points_used' => $discount['points'],
+                'points_discount' => $discount['discount'],
                 'duration_minutes' => $service->duration_minutes,
                 'customer_name' => $data['customer_name'],
                 'customer_phone' => $data['customer_phone'],
