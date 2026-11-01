@@ -135,7 +135,9 @@ class ServiceCentersTable
                             'subscription_status' => $data['subscription_status'],
                             'subscription_price' => $plan['price'],
                             'subscription_started_at' => $data['subscription_status'] === 'active' ? now() : $record->subscription_started_at,
-                            'subscription_ends_at' => $data['subscription_status'] === 'active' && $plan['price'] > 0 ? now()->addMonth() : null,
+                            'subscription_ends_at' => $data['subscription_status'] === 'active' && $plan['price'] > 0
+                                ? (($record->subscription_ends_at && $record->subscription_ends_at->isFuture()) ? $record->subscription_ends_at->copy()->addMonth() : now()->addMonth())
+                                : null,
                             'subscription_requested_plan' => null,
                             'subscription_request_note' => null,
                             'subscription_requested_at' => null,
