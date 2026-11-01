@@ -134,6 +134,61 @@ class RewardsService
         });
     }
 
+    /** Evaluate one-time achievements from trusted Rewards ledger events. */
+    public function achievementBadges(User $user): array
+    {
+        $has = fn (string $key) => RewardTransaction::where('user_id', $user->id)->where('action_key', $key)->exists();
+        $referrals = RewardTransaction::where('user_id', $user->id)->where('action_key', 'like', 'referral-signup-referrer:%')->count();
+
+        $streak = 0;
+        $date = now()->startOfDay();
+        for ($i = 0; $i < 7; $i++) {
+            if (!$has('daily-checkin:' . $user->id . ':' . $date->toDateString())) break;
+            $streak++;
+            $date->subDay();
+        }
+        if ($streak === 0 && !$has('daily-checkin:' . $user->id . ':' . now()->toDateString())) {
+            $date = now()->subDay()->startOfDay();
+            for ($i = 0; $i < 7; $i++) {
+                if (!$has('daily-checkin:' . $user->id . ':' . $date->toDateString())) break;
+                $streak++;
+                $date->subDay();
+            }
+        }
+
+        $definitions = [
+            ['key' => 'welcome', 'title' => 'პირველი ნაბიჯი', 'description' => 'შექმენი MotoHub ანგარიში', 'icon' => '🏁', 'progress' => $has('signup:' . $user->id) ? 1 : 0, 'target' => 1, 'points' => $this->setting('badge_welcome_points', 25)],
+            ['key' => 'first_post', 'title' => 'ხმის ამოღება', 'description' => 'გამოაქვეყნე პირველი საზოგადოებრივი პოსტი', 'icon' => '💬', 'progress' => $has('first-community-post:' . $user->id) ? 1 : 0, 'target' => 1, 'points' => $this->setting('badge_first_post_points', 50)],
+            ['key' => 'first_listing', 'title' => 'მოტო მარკეტერი', 'description' => 'განათავსე პირველი მოტოციკლის განცხადება', 'icon' => '🏍️', 'progress' => $has('first-motorcycle-listing:' . $user->id) ? 1 : 0, 'target' => 1, 'points' => $this->setting('badge_first_listing_points', 50)],
+            ['key' => 'invite_one', 'title' => 'მეგობრების გამაერთიანებელი', 'description' => 'მოიწვიე ერთი მეგობარი, რომელიც დარეგისტრირდება', 'icon' => '🤝', 'progress' => min(1, $referrals), 'target' => 1, 'points' => $this->setting('badge_invite_points', 75)],
+            ['key' => 'streak_seven', 'title' => 'შვიდდღიანი მრბოლელი', 'description' => 'შედი MotoHub-ში ზედიზედ 7 დღე', 'icon' => '🔥', 'progress' => min(7, $streak), 'target' => 7, 'points' => $this->setting('badge_streak_points', 100)],
+        ];
+
+        foreach ($definitions as &$badge) {
+            $badge['unlocked'] = $badge['progress'] >= $badge['target'];
+            $badge['rewarded'] = false;
+            if ($badge['unlocked']) {
+                $badge['rewarded'] = $this->award(
+                    $user,
+                    $badge['points'],
+                    'achievement',
+                    'მიღწევა: ' . $badge['title'],
+                    'achievement-badge:' . $user->id . ':' . $badge['key'],
+                    ['badge' => $badge['key']]
+                );
+                $badge['rewarded'] = $badge['rewarded'] || $has('achievement-badge:' . $user->id . ':' . $badge['key']);
+            }
+            $badge['progress_percent'] = (int) min(100, floor(($badge['progress'] / max(1, $badge['target'])) * 100));
+        }
+        unset($badge);
+
+        return [
+            'unlocked_count' => count(array_filter($definitions, fn ($badge) => $badge['unlocked'])),
+            'total_count' => count($definitions),
+            'badges' => $definitions,
+        ];
+    }
+
     public function onRegistration(User $user, ?string $referralCode): void
     {
         $this->ensureReferralCode($user);
