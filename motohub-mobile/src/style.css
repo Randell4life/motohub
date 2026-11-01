@@ -1290,3 +1290,50 @@ body{background:radial-gradient(ellipse at 50% -8%,#1b3152 0,transparent 42%),li
 /* Rewards gift shop */
 .rewards-gift-shop{border:1px solid #31577b!important;background:radial-gradient(ellipse at 95% 0,#1b568955,transparent 45%),linear-gradient(135deg,#142b43,#091421)!important}.rewards-gift-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}.rewards-gift-card{min-width:0;padding:10px;border:1px solid #31577b;border-radius:13px;background:#081421;display:flex;flex-direction:column;gap:8px}.rewards-gift-card img,.rewards-gift-placeholder{width:100%;height:105px;object-fit:cover;border-radius:9px}.rewards-gift-placeholder{display:grid;place-items:center;background:linear-gradient(135deg,#173653,#0b1726);font-size:35px}.rewards-gift-card>strong{font-size:14px}.rewards-gift-card>small{min-height:30px;color:#91a8c2;font-size:11px}.rewards-gift-card .rewards-way{margin:0;padding:8px 0}.rewards-gift-card .primary-btn{font-size:12px;padding:10px}.rewards-gift-card button:disabled{opacity:.45}.rewards-catalog-orders{border-color:#31577b!important}
 @media(max-width:380px){.rewards-gift-grid{grid-template-columns:1fr}.rewards-gift-card img,.rewards-gift-placeholder{height:145px}}
+
+/* Rewards visual refresh — mobile app */
+.rewards-page{padding:18px 14px 42px!important}
+.rewards-page>.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid #31577b;border-radius:99px;background:#0d1c2d;color:#86c7ff;letter-spacing:1.7px}
+.rewards-page>.page-title{margin:14px 0 8px;font-size:clamp(29px,8vw,39px);line-height:1.08;letter-spacing:-1.2px;font-weight:950}
+.rewards-page>.intro{max-width:560px;color:#a8bad0;line-height:1.7}
+.rewards-wallet{position:relative;overflow:hidden;min-height:156px;justify-content:center;padding:24px!important;border-radius:20px!important;border-color:#376b9c!important;background:radial-gradient(ellipse at 88% 0,#2874b4aa 0,transparent 50%),linear-gradient(135deg,#163858,#091624)!important;box-shadow:0 18px 42px #0005!important}
+.rewards-wallet:after{content:'MH';position:absolute;right:16px;bottom:-26px;font-size:104px;font-weight:1000;letter-spacing:-10px;color:#ffffff08;pointer-events:none}
+.rewards-wallet strong{font-size:clamp(34px,9vw,43px)!important;letter-spacing:-1.8px}
+.rewards-wallet span{font-size:11px!important}
+.rewards-membership,.rewards-achievements,.rewards-leaderboards,.rewards-user-prizes,.rewards-daily-streak,.rewards-invite,.rewards-earn,.rewards-gift-shop,.rewards-catalog-orders{position:relative;overflow:hidden;padding:18px!important;border-radius:17px!important;background:linear-gradient(145deg,#112238,#0a1523)!important;box-shadow:0 12px 30px #0002}
+.rewards-page .profile-kicker{display:inline-block;margin-bottom:3px;color:#7fc2ff;font-size:9px;font-weight:950;letter-spacing:1.7px}
+.rewards-page h2{font-size:19px;font-weight:900;letter-spacing:-.4px}
+.rewards-tier-track{height:9px!important;background:#263b53!important}
+.rewards-tier-track span{background:linear-gradient(90deg,#1677ff,#55c0ff)!important;box-shadow:0 0 14px #1677ff70}
+.rewards-tier-list small{padding:7px 10px!important;background:#091624}
+.rewards-tier-list small.active{box-shadow:0 0 0 2px #1677ff20}
+.rewards-achievement-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+.rewards-achievement{padding:13px!important;border-radius:13px!important;background:linear-gradient(145deg,#0c1a2b,#081321)!important}
+.rewards-achievement.unlocked{border-color:#397eb4!important;background:linear-gradient(145deg,#123352,#0a1b2d)!important}
+.rewards-achievement-icon{display:grid;place-items:center;width:38px;height:38px;border:1px solid #31577b;border-radius:11px;background:#102a43;font-size:21px}
+.rewards-board{padding:14px!important;border-radius:13px!important;background:#081522!important}
+.rewards-board>strong{font-size:13px}
+.rewards-way{font-size:11px!important;line-height:1.5}
+.rewards-way b{font-size:11px}
+.rewards-code{border-style:dashed!important;background:linear-gradient(110deg,#081522,#102944)!important;letter-spacing:2.5px}
+.rewards-gift-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:11px!important}
+.rewards-gift-card{padding:10px!important;border-radius:15px!important;background:linear-gradient(145deg,#102238,#081421)!important;box-shadow:0 10px 24px #0003}
+.rewards-gift-card img,.rewards-gift-placeholder{height:125px!important;border-radius:11px!important;background:#132b43}
+.rewards-gift-card>strong{font-size:13px;line-height:1.4}
+.rewards-gift-card>small{min-height:34px;line-height:1.5}
+.rewards-gift-card .primary-btn{min-height:40px;border-radius:10px;font-size:11px}
+.rewards-catalog-orders,.rewards-page .account-panel{border-color:#294563}
+.rewards-page .form-stack{gap:12px}
+.rewards-page .form-stack label{display:grid;gap:6px;color:#c4d5e9;font-size:11px;font-weight:800}
+.rewards-page .form-stack input,.rewards-page .form-stack select,.rewards-page .form-stack textarea{width:100%;border:1px solid #304b6b;border-radius:10px;background:#071321;color:#f4f8ff;padding:12px}
+.rewards-page .form-stack input:focus,.rewards-page .form-stack select:focus,.rewards-page .form-stack textarea:focus{outline:2px solid #267ee9;outline-offset:1px}
+.admin-page .admin-count{border:1px solid #294563;border-radius:13px;background:linear-gradient(145deg,#12263d,#0a1624);box-shadow:0 10px 25px #0002}
+.admin-page .admin-section{border:1px solid #294563;border-radius:16px;background:linear-gradient(145deg,#102137,#0a1523);padding:16px;box-shadow:0 12px 28px #0002}
+.admin-page .rewards-admin-prizes{border-color:#37658e;background:radial-gradient(ellipse at 95% 0,#1a568555,transparent 48%),linear-gradient(145deg,#132b44,#091522)}
+.admin-page .admin-item{border:1px solid #294563;border-radius:12px;background:#081624;padding:13px}
+.admin-page .admin-item strong{color:#f2f7ff}
+.admin-page .admin-actions{gap:8px;flex-wrap:wrap}
+.admin-page .admin-actions button{min-height:38px;border:1px solid #31577b;border-radius:9px;background:#112943;color:#cce5ff;padding:9px 12px;font-weight:800}
+.admin-page .admin-actions button:active{transform:scale(.98)}
+@media(max-width:390px){.rewards-achievement-grid,.rewards-gift-grid{grid-template-columns:1fr!important}.rewards-gift-card img,.rewards-gift-placeholder{height:155px!important}.rewards-achievement>small{min-height:0}}
+@media(prefers-reduced-motion:reduce){.rewards-page *,.admin-page *{transition:none!important}}
