@@ -64,7 +64,7 @@ class ServiceCentersTable
                 TextColumn::make('subscription_status')
                     ->label('გამოწერის სტატუსი')
                     ->badge()
-                    ->formatStateUsing(fn ($state): string => match ($state) {
+                    ->formatStateUsing(fn ($state, ServiceCenter $record): string => match ($record->effectiveSubscriptionStatus()) {
                         'active' => 'აქტიური',
                         'pending_payment' => 'გადახდის მოლოდინში',
                         'past_due' => 'გადახდა ვადაგადაცილებულია',
@@ -106,7 +106,7 @@ class ServiceCentersTable
                     ->icon('heroicon-o-credit-card')
                     ->color('info')
                     ->fillForm(fn (ServiceCenter $record): array => [
-                        'subscription_plan' => $record->subscription_plan ?: 'start',
+                        'subscription_plan' => $record->subscription_requested_plan ?: ($record->subscription_plan ?: 'start'),
                         'subscription_status' => $record->subscription_status ?: 'active',
                         'subscription_requested_plan' => $record->subscription_requested_plan,
                         'subscription_request_note' => $record->subscription_request_note,
