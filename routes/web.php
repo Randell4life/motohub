@@ -10,6 +10,7 @@ use App\Http\Controllers\MotorcyclePassportController;
 use App\Http\Controllers\MotorcycleAccountController;
 use App\Http\Controllers\MotorcycleCatalogController;
 use App\Http\Controllers\PartController;
+use App\Http\Controllers\StoreCheckoutController;
 use App\Http\Controllers\PartRequestController;
 use App\Http\Controllers\RentalController;
 use App\Http\Controllers\Workshop1BookingController;
@@ -329,6 +330,8 @@ Route::middleware('guest')->group(function () {
 
 Route::get('/parts', [PartController::class, 'index'])
     ->name('parts.index');
+
+Route::post('/store/checkout', [StoreCheckoutController::class, 'store'])->middleware(['auth', 'throttle:5,1'])->name('store.checkout');
 
 Route::get('/parts/{source}/{id}', [PartController::class, 'show'])
     ->whereIn('source', ['store', 'marketplace'])

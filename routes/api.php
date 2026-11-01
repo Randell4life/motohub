@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\MobileAdminController;
 use App\Http\Controllers\Api\MobilePassportController;
 use App\Http\Controllers\Api\MobileExtendedController;
 use App\Http\Controllers\Api\RewardsApiController;
+use App\Http\Controllers\StoreCheckoutController;
 use App\Http\Controllers\PartRequestController;
 use App\Http\Middleware\AuthenticateMobileToken;
 use Illuminate\Support\Facades\Route;
@@ -88,6 +89,8 @@ Route::prefix('mobile')->group(function () {
         Route::delete('/workshop/customers/{customer}/motorcycles/{motorcycle}/service-records/{record}', [MobileExtendedController::class, 'deleteWorkshopServiceRecord'])->whereNumber('customer')->whereNumber('motorcycle')->whereNumber('record');
         Route::get('/me', [MobileAccountController::class, 'show']);
         Route::get('/rewards', [RewardsApiController::class, 'show']);
+        Route::post('/store/checkout', [StoreCheckoutController::class, 'store'])->middleware('throttle:5,1');
+        Route::get('/store/orders', [StoreCheckoutController::class, 'index']);
         Route::post('/rewards/redeem', [RewardsApiController::class, 'redeem'])->middleware('throttle:5,1');
         Route::get('/admin/rewards', [RewardsApiController::class, 'adminIndex']);
         Route::patch('/admin/rewards/{redemption}', [RewardsApiController::class, 'adminUpdate'])->whereNumber('redemption');

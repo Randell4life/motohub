@@ -11,6 +11,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use App\Services\RewardsCheckout;
+use Illuminate\Support\Str;
 
 class MobileBookingController extends Controller
 {
@@ -84,6 +86,7 @@ class MobileBookingController extends Controller
             'customer_phone' => ['required', 'string', 'max:40', 'regex:/^(?=.*\d)[0-9+\-\s()]+$/'],
             'motorcycle' => ['nullable', 'string', 'max:180'],
             'notes' => ['nullable', 'string', 'max:1500'],
+            'points' => ['nullable', 'integer', 'min:0', 'max:1000000'],
         ]);
 
         $service = $serviceCenter->services()->where('is_active', true)->findOrFail($data['service_id']);
@@ -118,12 +121,15 @@ class MobileBookingController extends Controller
                 }
             }
 
+            $discount = app(\App\Services\RewardsCheckout::class)->apply($request->user(), (float) $service->price, (int) ($data['points'] ?? 0), 'service-booking:' . \Illuminate\Support\Str::uuid(), 'სერვისის ჯავშნის ფასდაკლება', ['service_center_id' => $serviceCenter->id]);
             return ServiceBooking::create([
                 'service_center_id' => $serviceCenter->id,
                 'service_center_service_id' => $service->id,
                 'user_id' => $request->user()->id,
                 'service_name' => $service->name,
-                'price_at_booking' => $service->price,
+                'price_at_booking' => $discount['total'],
+                'points_used' => $discount['points'],
+                'points_discount' => $discount['discount'],
                 'duration_minutes' => $service->duration_minutes,
                 'customer_name' => $data['customer_name'],
                 'customer_phone' => $data['customer_phone'],
@@ -139,7 +145,7 @@ class MobileBookingController extends Controller
             'booking' => [
                 'id' => $booking->id, 'service_name' => $booking->service_name,
                 'scheduled_at' => $booking->scheduled_at?->toIso8601String(),
-                'status' => $booking->status, 'price' => $booking->price_at_booking,
+                'status' => $booking->status, 'price' => $booking->price_at_booking, 'points_used' => $booking->points_used, 'points_discount' => $booking->points_discount,
             ],
         ], 201);
     }

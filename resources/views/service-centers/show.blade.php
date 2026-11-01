@@ -56,6 +56,7 @@
                     <div class="field"><label for="customer_phone">ტელეფონი</label><input id="customer_phone" name="customer_phone" value="{{ old('customer_phone') }}" required maxlength="40" placeholder="5XX XX XX XX"></div>
                     <div class="field"><label for="motorcycle">მოტოციკლის მარკა და მოდელი</label><input id="motorcycle" name="motorcycle" value="{{ old('motorcycle') }}" maxlength="180" placeholder="მაგ. Yamaha MT-07"></div>
                     <div class="field"><label for="notes">დამატებითი ინფორმაცია</label><textarea id="notes" name="notes" maxlength="1500" placeholder="აღწერე პრობლემა ან დამატებითი მოთხოვნა">{{ old('notes') }}</textarea></div>
+                    <div class="field"><label for="points">Rewards ქულები (მაქსიმუმ 30%)</label><input id="points" name="points" type="number" min="0" max="1000000" value="{{ old('points', 0) }}"><small class="muted">ფასის მაქსიმუმ 30% დაფარვა შეგიძლია ქულებით.</small></div>
                     <button class="btn" type="submit">ჯავშნის მოთხოვნის გაგზავნა →</button>
                 </form>
             @else

@@ -18,6 +18,20 @@
 </div>
 <div class="seller"><strong>გამყიდველი: {{ $sellerName }}</strong>@if($sellerPhone)<p class="muted">ტელეფონი: {{ $sellerPhone }}</p><a class="btn" href="tel:{{ preg_replace('/[^0-9+]/','',$sellerPhone) }}">დარეკვა გამყიდველთან</a>@else<p class="muted">საკონტაქტო ნომერი მითითებული არ არის. დაუკავშირდი პლატფორმის მეშვეობით ან მოითხოვე დამატებითი ინფორმაცია.</p>@endif</div>
 @auth
+@if($item['source']==='store')
+<form method="POST" action="{{ route('store.checkout') }}" style="margin-top:18px;padding:16px;background:#101b2c;border:1px solid #2c4262;border-radius:10px">
+@csrf
+<input type="hidden" name="part_id" value="{{ $item['id'] }}">
+<strong>შეკვეთა MotoHub-ის მაღაზიიდან</strong>
+<p class="muted">ქულებით შეგიძლია დაფარო შეკვეთის ღირებულების მაქსიმუმ 30%.</p>
+<label class="muted">რაოდენობა <input type="number" name="quantity" min="1" max="20" value="1" required style="display:block;width:100%;padding:10px;margin-top:5px"></label>
+<label class="muted">გამოიყენე ქულები <input type="number" name="points" min="0" value="0" style="display:block;width:100%;padding:10px;margin-top:5px"></label>
+<label class="muted">სახელი და გვარი <input name="customer_name" value="{{ auth()->user()->name }}" required style="display:block;width:100%;padding:10px;margin-top:5px"></label>
+<label class="muted">ტელეფონი <input name="phone" value="{{ auth()->user()->phone }}" required style="display:block;width:100%;padding:10px;margin-top:5px"></label>
+<label class="muted">მიწოდების მისამართი <textarea name="address" required style="display:block;width:100%;padding:10px;margin-top:5px"></textarea></label>
+<button class="btn" type="submit">შეკვეთის გაფორმება</button>
+</form>
+@endif
 <form method="POST" action="{{ route('favorites.parts.toggle',[$item['source'],$item['id']]) }}" style="margin-top:16px">@csrf<button class="btn" type="submit">♡ ფავორიტებში შენახვა</button></form>
 @else
 <a class="btn" href="{{ route('login') }}">შესვლა ფავორიტებში შესანახად</a>
