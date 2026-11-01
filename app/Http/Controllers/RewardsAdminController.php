@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\RewardRedemption;
+use App\Models\RewardPrize;
 use App\Models\RewardTransaction;
 use App\Models\StoreOrder;
 use App\Models\User;
@@ -36,6 +37,9 @@ class RewardsAdminController extends Controller
             ->withQueryString();
 
         $settings = DB::table('reward_settings')->pluck('value', 'key');
+        $prizes = RewardPrize::with('winner:id,name,email', 'admin:id,name')->latest('period_start')->latest('rank')->limit(60)->get();
+        $weeklyCandidates = app(RewardsService::class)->leaderboard($request->user(), 'week')['entries'];
+        $monthlyCandidates = app(RewardsService::class)->leaderboard($request->user(), 'month')['entries'];
         $prizes = RewardPrize::with('winner:id,name,email', 'admin:id,name')->latest('period_start')->latest('rank')->limit(60)->get();
         $totals = [
             'issued' => (int) DB::table('reward_transactions')->where('points', '>', 0)->sum('points'),
