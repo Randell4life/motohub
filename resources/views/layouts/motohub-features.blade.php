@@ -19,7 +19,7 @@
 <a href="{{ route('parts.index') }}">ნაწილები</a>
 <a href="{{ route('clubs.index') }}">მოტოკლუბები</a>
 <a href="{{ route('community.index') }}">Community</a>
-@auth<a href="{{ route('favorites.index') }}">ფავორიტები</a><a href="{{ route('account.index') }}">კაბინეტი</a>@else<a href="{{ route('login') }}">შესვლა</a>@endauth
+@auth<a href="{{ route('favorites.index') }}">ფავორიტები</a><a href="{{ route('rewards.index') }}">Rewards</a><a href="{{ route('account.index') }}">კაბინეტი</a>@else<a href="{{ route('login') }}">შესვლა</a>@endauth
 </nav>
 </div></header>
 <main class="wrap main">
