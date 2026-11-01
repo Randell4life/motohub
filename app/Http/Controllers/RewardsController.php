@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\RewardRedemption;
 use App\Models\RewardTransaction;
+use App\Models\User;
 use App\Services\RewardsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +18,7 @@ class RewardsController extends Controller
         $code = $rewards->ensureReferralCode($user);
         $balance = $rewards->balance($user);
         $transactions = RewardTransaction::where('user_id', $user->id)->latest()->limit(30)->get();
-        $referrals = $user->where('referred_by_user_id', $user->id)->withCount('communityPosts')->latest()->limit(20)->get(['id', 'name', 'created_at']);
+        $referrals = User::where('referred_by_user_id', $user->id)->withCount('communityPosts')->latest()->limit(20)->get(['id', 'name', 'created_at']);
 
         return view('rewards.index', compact('user', 'code', 'balance', 'transactions', 'referrals'));
     }
