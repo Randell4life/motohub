@@ -148,7 +148,8 @@ class RewardsAdminController extends Controller
         $allowed = [
             'points_per_gel', 'minimum_redemption_points', 'signup_points',
             'first_post_points', 'first_listing_points', 'referral_signup_points',
-            'referral_first_post_points',
+            'referral_first_post_points', 'daily_checkin_points',
+            'weekly_streak_bonus_points',
         ];
 
         foreach ($data['settings'] as $key => $value) {

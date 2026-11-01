@@ -17,10 +17,12 @@ class RewardsApiController extends Controller
     {
         $user = $request->user();
         $code = $rewards->ensureReferralCode($user);
+        $dailyCheckIn = $rewards->dailyCheckIn($user);
         return response()->json([
             'balance' => $rewards->balance($user),
             'points_per_gel' => $rewards->setting('points_per_gel', 100),
             'minimum_redemption_points' => $rewards->setting('minimum_redemption_points', 500),
+            'daily_checkin' => $dailyCheckIn,
             'referral_code' => $code,
             'referral_url' => url('/invite/' . $code),
             'referrals_count' => User::where('referred_by_user_id', $user->id)->count(),
@@ -101,7 +103,7 @@ class RewardsApiController extends Controller
         abort_unless((bool) $request->user()->is_admin, 403);
         $data = $request->validate(['settings' => ['required', 'array'], 'settings.*' => ['required', 'integer', 'min:0', 'max:1000000']]);
         foreach ($data['settings'] as $key => $value) {
-            if (!in_array($key, ['points_per_gel','minimum_redemption_points','signup_points','first_post_points','referral_signup_points','referral_first_post_points','first_listing_points'], true)) continue;
+            if (!in_array($key, ['points_per_gel','minimum_redemption_points','signup_points','first_post_points','referral_signup_points','referral_first_post_points','first_listing_points','daily_checkin_points','weekly_streak_bonus_points'], true)) continue;
             DB::table('reward_settings')->updateOrInsert(['key' => $key], ['value' => (string) $value, 'updated_at' => now(), 'created_at' => now()]);
         }
         return response()->json(['message' => 'Rewards-ის წესები განახლდა.']);

@@ -23,6 +23,30 @@ class RewardsCheckoutTest extends TestCase
         );
     }
 
+    public function test_daily_checkin_awards_once_per_day_and_weekly_streak_bonus(): void
+    {
+        $user = User::factory()->create();
+        DB::table('reward_settings')->updateOrInsert(['key' => 'daily_checkin_points'], ['value' => '10', 'created_at' => now(), 'updated_at' => now()]);
+        DB::table('reward_settings')->updateOrInsert(['key' => 'weekly_streak_bonus_points'], ['value' => '50', 'created_at' => now(), 'updated_at' => now()]);
+
+        $service = app(\App\Services\RewardsService::class);
+        $first = $service->dailyCheckIn($user);
+        $again = $service->dailyCheckIn($user);
+        $this->assertSame(10, $first['points_awarded']);
+        $this->assertFalse($first['already_checked_in']);
+        $this->assertSame(0, $again['points_awarded']);
+        $this->assertTrue($again['already_checked_in']);
+        $this->assertSame(10, $service->balance($user));
+
+        for ($day = 1; $day <= 6; $day++) {
+            \Illuminate\Support\Carbon::setTestNow(now()->addDay());
+            $service->dailyCheckIn($user);
+        }
+        $this->assertSame(7, $service->dailyCheckIn($user)['streak']);
+        $this->assertSame(120, $service->balance($user));
+        \Illuminate\Support\Carbon::setTestNow();
+    }
+
     public function test_points_discount_is_capped_at_thirty_percent(): void
     {
         $user = User::factory()->create();
