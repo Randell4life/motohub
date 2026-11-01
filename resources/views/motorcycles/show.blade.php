@@ -9,13 +9,13 @@
     <meta property="og:type" content="product">
     <meta property="og:site_name" content="MotoHub">
     <meta property="og:title" content="{{ $motorcycle->title }} | MotoHub">
-    <meta property="og:description" content="{{ IlluminateSupportStr::limit(strip_tags($motorcycle->description ?? $motorcycle->title), 155) }}">
+    <meta property="og:description" content="{{ \Illuminate\Support\Str::limit(strip_tags($motorcycle->description ?? $motorcycle->title), 155) }}">
     <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:image" content="{{ $motorcycle->image_path ? IlluminateSupportFacades\Storage::url($motorcycle->image_path) : 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=1200&q=85' }}">
+    <meta property="og:image" content="{{ $motorcycle->image_path ? \Illuminate\Support\Facades\Storage::url($motorcycle->image_path) : 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=1200&q=85' }}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ $motorcycle->title }} | MotoHub">
-    <meta name="twitter:description" content="{{ IlluminateSupportStr::limit(strip_tags($motorcycle->description ?? $motorcycle->title), 155) }}">
-    <meta name="twitter:image" content="{{ $motorcycle->image_path ? IlluminateSupportFacades\Storage::url($motorcycle->image_path) : 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=1200&q=85' }}">
+    <meta name="twitter:description" content="{{ \Illuminate\Support\Str::limit(strip_tags($motorcycle->description ?? $motorcycle->title), 155) }}">
+    <meta name="twitter:image" content="{{ $motorcycle->image_path ? \Illuminate\Support\Facades\Storage::url($motorcycle->image_path) : 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=1200&q=85' }}">
     @php
         $motorcycleStructuredData = [
             '@context' => 'https://schema.org',
