@@ -35,7 +35,8 @@ class RewardsAdminController extends Controller
             ->paginate(20, ['*'], 'orders_page')
             ->withQueryString();
 
-        $settings = DB::table('reward_settings')->pluck('value', 'key');\n        $prizes = RewardPrize::with('winner:id,name,email', 'admin:id,name')->latest('period_start')->latest('rank')->limit(60)->get();
+        $settings = DB::table('reward_settings')->pluck('value', 'key');
+        $prizes = RewardPrize::with('winner:id,name,email', 'admin:id,name')->latest('period_start')->latest('rank')->limit(60)->get();
         $totals = [
             'issued' => (int) DB::table('reward_transactions')->where('points', '>', 0)->sum('points'),
             'redeemed' => (int) DB::table('reward_transactions')->where('type', 'redemption')->sum(DB::raw('ABS(points)')),
