@@ -23,7 +23,7 @@
     <input name="title" value="{{ $item->title }}" required style="min-width:0;padding:8px;background:#081421;color:white;border:1px solid #31577b;border-radius:7px">
     <input name="points_cost" type="number" min="1" value="{{ $item->points_cost }}" required style="width:100%;padding:8px;background:#081421;color:white;border:1px solid #31577b;border-radius:7px">
     <input name="stock" type="number" min="0" value="{{ $item->stock }}" required style="width:100%;padding:8px;background:#081421;color:white;border:1px solid #31577b;border-radius:7px">
-    <input type="hidden" name="description" value="{{ $item->description }}"><input type="hidden" name="image_url" value="{{ $item->image_url }}"><input type="hidden" name="sort_order" value="{{ $item->sort_order }}"><input type="hidden" name="is_active" value="{{ $item->is_active?1:0 }}">
+    <input type="hidden" name="description" value="{{ $item->description }}"><input type="hidden" name="image_url" value="{{ $item->image_url }}"><input type="hidden" name="sort_order" value="{{ $item->sort_order }}"><select name="is_active" style="padding:8px;background:#081421;color:white;border:1px solid #31577b;border-radius:7px"><option value="1" @selected($item->is_active)>აქტიური</option><option value="0" @selected(!$item->is_active)>დამალული</option></select>
     <button style="padding:8px 11px;border:0;border-radius:7px;background:#1677ff;color:white">შენახვა</button>
    </form>
   </article>
