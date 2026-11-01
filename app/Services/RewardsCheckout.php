@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\RewardTransaction;
+use App\Models\ServiceBooking;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
