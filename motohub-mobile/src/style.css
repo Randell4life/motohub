@@ -1374,3 +1374,45 @@ button:disabled,[aria-disabled="true"]{opacity:.55;cursor:not-allowed}
  .catalog-page .catalog-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
  .catalog-page .item-card .item-image { min-height:170px; }
 }
+
+
+/* MotoHub — motorcycle detail screen refinement */
+.premium-bike-detail { max-width:1120px; margin-inline:auto; }
+.premium-bike-detail .detail-breadcrumb { flex-wrap:wrap; }
+.premium-bike-detail .detail-title-row>div:first-child { min-width:0; }
+.premium-bike-detail .detail-gallery-card,
+.premium-bike-detail .detail-buy-card,
+.premium-bike-detail .detail-spec-section,
+.premium-bike-detail .detail-description-section { box-shadow:0 14px 32px #0003; }
+.premium-bike-detail .detail-gallery-stage { min-height:220px; }
+.premium-bike-detail .detail-gallery-stage>img { object-fit:contain; }
+.premium-bike-detail .detail-thumbnails { scrollbar-width:thin; scrollbar-color:#37618e #0a1727; }
+.premium-bike-detail .detail-contact-actions>* { width:100%; }
+.premium-bike-detail .detail-spec { min-height:68px; }
+.premium-bike-detail .detail-description-section p { overflow-wrap:anywhere; line-height:1.85; }
+.premium-bike-detail .detail-utility-card { min-width:0; }
+.premium-bike-detail .detail-icon-btn:focus-visible,
+.premium-bike-detail .detail-gallery-arrow:focus-visible,
+.premium-bike-detail .detail-thumbnails button:focus-visible,
+.premium-bike-detail .detail-utility-card:focus-visible {
+ outline:2px solid #70b7ff;outline-offset:3px;
+}
+@media(max-width:700px) {
+ .premium-bike-detail { padding-top:6px; }
+ .premium-bike-detail .detail-breadcrumb { margin-bottom:14px; }
+ .premium-bike-detail .detail-title-row { flex-direction:column; gap:12px; }
+ .premium-bike-detail .detail-top-actions { align-self:flex-end; margin-top:-4px; }
+ .premium-bike-detail .premium-detail-grid { grid-template-columns:minmax(0,1fr); gap:11px; }
+ .premium-bike-detail .detail-buy-card { position:static; }
+ .premium-bike-detail .detail-gallery-stage { min-height:190px; aspect-ratio:4/3; }
+ .premium-bike-detail .detail-gallery-stage>img { max-height:420px; }
+ .premium-bike-detail .detail-spec-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .premium-bike-detail .detail-utility-grid { grid-template-columns:1fr; }
+ .premium-bike-detail .detail-utility-card { min-height:76px; }
+ .premium-bike-detail .detail-back-btn { width:100%; }
+}
+@media(max-width:380px) {
+ .premium-bike-detail .detail-spec-grid { grid-template-columns:1fr; }
+ .premium-bike-detail .detail-section-heading { align-items:flex-start; flex-direction:column; }
+ .premium-bike-detail .detail-price { font-size:28px; }
+}
