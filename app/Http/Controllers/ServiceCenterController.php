@@ -41,7 +41,7 @@ class ServiceCenterController extends Controller
 
     public function show(ServiceCenter $serviceCenter)
     {
-        abort_unless($serviceCenter->is_active && $serviceCenter->approval_status === 'approved', 404);
+        abort_unless($serviceCenter->is_active && $serviceCenter->approval_status === 'approved' && $serviceCenter->canUseFeature('bookings'), 404);
 
         $serviceCenter->load([
             'services' => fn ($query) => $query->where('is_active', true)->orderBy('name'),

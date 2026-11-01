@@ -28,6 +28,32 @@
 @if(session('success'))<div class="ops-section" style="color:#5ce0ad">{{ session('success') }}</div>@endif
 @if($errors->any())<div class="ops-section" style="color:#ff9aa9">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
 
+
+<section class="ops-section">
+ <h3>გამოწერის მართვა</h3>
+ <div class="ops-grid">
+  <div class="ops-card"><small>მიმდინარე პაკეტი</small><strong>{{ strtoupper($center->subscription_plan ?? 'START') }}</strong></div>
+  <div class="ops-card"><small>სტატუსი</small><strong>{{ match($center->effectiveSubscriptionStatus()) { 'active' => 'აქტიური', 'pending_payment' => 'გადახდის მოლოდინში', 'past_due' => 'ვადაგადაცილებული', 'expired' => 'ვადაგასული', 'cancelled' => 'გაუქმებული', default => $center->effectiveSubscriptionStatus() } }}</strong></div>
+  <div class="ops-card"><small>ღირებულება</small><strong>{{ number_format((float)$center->subscription_price, 2) }} ₾ / თვე</strong></div>
+  <div class="ops-card"><small>ვადის დასრულება</small><strong style="font-size:16px">{{ $center->subscription_ends_at?->format('d.m.Y') ?? 'უვადო / START' }}</strong></div>
+ </div>
+ @if($center->subscription_requested_plan)
+  <p class="ops-muted">მოთხოვნილია {{ strtoupper($center->subscription_requested_plan) }} პაკეტი · {{ $center->subscription_requested_at?->format('d.m.Y H:i') }}. {{ $center->subscription_request_note }}</p>
+ @endif
+ <form method="POST" action="{{ route('my-service-center.subscription.request') }}" class="ops-form">
+  @csrf
+  <select name="subscription_plan" required>
+   @foreach(\App\Models\ServiceCenter::subscriptionPlans() as $key => $plan)
+    <option value="{{ $key }}" @selected(($center->subscription_requested_plan ?: $center->subscription_plan) === $key)>{{ $plan['name'] }} — {{ $plan['price'] }} ₾ / თვე</option>
+   @endforeach
+  </select>
+  <input name="subscription_request_note" maxlength="500" placeholder="შენიშვნა (არასავალდებულო)">
+  <button>პაკეტის მოთხოვნა</button>
+ </form>
+ <p class="ops-muted">ფასიანი პაკეტის მოთხოვნის შემდეგ MotoHub-ის გუნდი დაგიკავშირდება გადახდის ინსტრუქციისთვის. პაკეტი გააქტიურდება ადმინისტრატორის მიერ გადახდის დადასტურების შემდეგ. ავტომატური საბანკო გადახდა ჯერ არ არის ჩართული.</p>
+ <div class="ops-muted">ხელმისაწვდომი ფუნქციები: {{ collect($features)->filter()->keys()->map(fn($x) => str_replace('_',' ', $x))->join(' · ') ?: 'მხოლოდ საბაზისო ფუნქციები' }}</div>
+</section>
+
 <div class="ops-grid">
  <div class="ops-card"><small>აქტიური შეკვეთები</small><strong>{{ $stats['open'] }}</strong></div>
  <div class="ops-card"><small>შეკეთების პროცესში</small><strong>{{ $stats['repair'] }}</strong></div>

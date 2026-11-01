@@ -15,7 +15,7 @@ class ServiceBookingController extends Controller
 {
     public function store(Request $request, ServiceCenter $serviceCenter): RedirectResponse
     {
-        abort_unless($serviceCenter->is_active && $serviceCenter->approval_status === 'approved', 404);
+        abort_unless($serviceCenter->is_active && $serviceCenter->approval_status === 'approved' && $serviceCenter->canUseFeature('bookings'), 404);
 
         $data = $request->validate([
             'service_id' => ['required', 'integer'],

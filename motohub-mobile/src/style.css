@@ -1269,3 +1269,5 @@ body{background:radial-gradient(ellipse at 50% -8%,#1b3152 0,transparent 42%),li
 .sc-reg-footnote{margin:0;color:#8198b2;font-size:8px;line-height:1.7;text-align:center}
 @media(min-width:620px){.sc-reg-page{max-width:760px;margin:0 auto}.sc-reg-hero{padding:25px}.sc-reg-form{padding:20px}.sc-reg-mark{font-size:50px}}
 @media(max-width:390px){.sc-reg-hero{padding:17px 13px}.sc-reg-mark{font-size:30px}.sc-reg-hero h1{font-size:26px}.sc-reg-fields{grid-template-columns:1fr}.sc-reg-full{grid-column:auto}.sc-reg-plans{grid-template-columns:1fr}.sc-reg-benefits{gap:4px}.sc-reg-benefits span{font-size:6px}}
+
+.sc-subscription-manage{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}.sc-subscription-manage .sc-empty{grid-column:1/-1;font-size:12px;line-height:1.6}@media(max-width:680px){.sc-subscription-manage{grid-template-columns:1fr}}

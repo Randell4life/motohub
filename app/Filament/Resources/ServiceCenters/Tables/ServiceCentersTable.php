@@ -4,6 +4,8 @@ namespace App\Filament\Resources\ServiceCenters\Tables;
 
 use App\Models\ServiceCenter;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -50,10 +52,19 @@ class ServiceCentersTable
                     ->label('ფასი / თვე')
                     ->money('GEL')
                     ->sortable(),
+                TextColumn::make('subscription_requested_plan')
+                    ->label('მოთხოვნილი პაკეტი')
+                    ->badge()
+                    ->placeholder('—')
+                    ->formatStateUsing(fn ($state): string => $state ? strtoupper((string) $state) : '—'),
+                TextColumn::make('subscription_requested_at')
+                    ->label('მოთხოვნის თარიღი')
+                    ->dateTime('d.m.Y H:i')
+                    ->placeholder('—'),
                 TextColumn::make('subscription_status')
                     ->label('გამოწერის სტატუსი')
                     ->badge()
-                    ->formatStateUsing(fn ($state): string => match ($state) {
+                    ->formatStateUsing(fn ($state, ServiceCenter $record): string => match ($record->effectiveSubscriptionStatus()) {
                         'active' => 'აქტიური',
                         'pending_payment' => 'გადახდის მოლოდინში',
                         'past_due' => 'გადახდა ვადაგადაცილებულია',
@@ -95,14 +106,17 @@ class ServiceCentersTable
                     ->icon('heroicon-o-credit-card')
                     ->color('info')
                     ->fillForm(fn (ServiceCenter $record): array => [
-                        'subscription_plan' => $record->subscription_plan ?: 'start',
+                        'subscription_plan' => $record->subscription_requested_plan ?: ($record->subscription_plan ?: 'start'),
                         'subscription_status' => $record->subscription_status ?: 'active',
+                        'subscription_requested_plan' => $record->subscription_requested_plan,
+                        'subscription_request_note' => $record->subscription_request_note,
                     ])
                     ->form([
                         Select::make('subscription_plan')
                             ->label('პაკეტი')
                             ->options(collect(ServiceCenter::subscriptionPlans())->mapWithKeys(fn ($plan, $key) => [$key => $plan['name'] . ' — ' . $plan['price'] . ' ₾ / თვე'])->all())
                             ->required(),
+                        Textarea::make('subscription_request_note')->label('მოთხოვნის შენიშვნა')->disabled()->dehydrated(false),
                         Select::make('subscription_status')
                             ->label('სტატუსი')
                             ->options([
@@ -121,7 +135,12 @@ class ServiceCentersTable
                             'subscription_status' => $data['subscription_status'],
                             'subscription_price' => $plan['price'],
                             'subscription_started_at' => $data['subscription_status'] === 'active' ? now() : $record->subscription_started_at,
-                            'subscription_ends_at' => $data['subscription_status'] === 'active' && $plan['price'] > 0 ? now()->addMonth() : null,
+                            'subscription_ends_at' => $data['subscription_status'] === 'active' && $plan['price'] > 0
+                                ? (($record->subscription_ends_at && $record->subscription_ends_at->isFuture()) ? $record->subscription_ends_at->copy()->addMonth() : now()->addMonth())
+                                : null,
+                            'subscription_requested_plan' => null,
+                            'subscription_request_note' => null,
+                            'subscription_requested_at' => null,
                         ]);
                         Notification::make()->title('გამოწერა განახლდა')->success()->send();
                     }),

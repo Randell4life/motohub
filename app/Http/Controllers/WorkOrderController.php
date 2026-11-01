@@ -16,6 +16,7 @@ public function index()
         'owner_id',
         auth()->id()
     )->firstOrFail();
+    abort_unless($center->canUseFeature('work_orders'), 403, $center->featureLockedMessage('work_orders'));
 
     $workOrders = WorkOrder::where(
         'service_center_id',
@@ -46,6 +47,7 @@ public function index()
             'owner_id',
             auth()->id()
         )->firstOrFail();
+    abort_unless($center->canUseFeature('work_orders'), 403, $center->featureLockedMessage('work_orders'));
 
         $validated = $request->validate([
             'service_booking_id' => [
@@ -156,6 +158,7 @@ public function updateStatus(Request $request, WorkOrder $workOrder)
         'owner_id',
         auth()->id()
     )->firstOrFail();
+    abort_unless($center->canUseFeature('work_orders'), 403, $center->featureLockedMessage('work_orders'));
 
     // შეკვეთა აუცილებლად ამ სახელოსნოს უნდა ეკუთვნოდეს.
     abort_unless(
@@ -200,6 +203,7 @@ public function show(WorkOrder $workOrder)
         'owner_id',
         auth()->id()
     )->firstOrFail();
+    abort_unless($center->canUseFeature('work_orders'), 403, $center->featureLockedMessage('work_orders'));
 
     // სხვა სახელოსნოს შეკვეთის ნახვა დაუშვებელია.
     abort_unless(
@@ -235,6 +239,7 @@ public function edit(WorkOrder $workOrder)
         'owner_id',
         auth()->id()
     )->firstOrFail();
+    abort_unless($center->canUseFeature('work_orders'), 403, $center->featureLockedMessage('work_orders'));
 
     abort_unless(
         $workOrder->service_center_id === $center->id,
@@ -258,6 +263,7 @@ public function update(Request $request, WorkOrder $workOrder)
         'owner_id',
         auth()->id()
     )->firstOrFail();
+    abort_unless($center->canUseFeature('work_orders'), 403, $center->featureLockedMessage('work_orders'));
 
     abort_unless(
         $workOrder->service_center_id === $center->id,

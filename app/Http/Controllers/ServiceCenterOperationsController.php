@@ -24,6 +24,7 @@ class ServiceCenterOperationsController extends Controller
     public function index(Request $request)
     {
         $center = $this->center();
+        $features = $center->featureAccess();
         $from = $request->date('from')?->startOfDay() ?? now()->startOfWeek();
         $to = $request->date('to')?->endOfDay() ?? now()->endOfWeek();
 
@@ -70,13 +71,16 @@ class ServiceCenterOperationsController extends Controller
 
         return view('my-service-center.operations', compact(
             'center', 'orders', 'calendar', 'technicians', 'bays', 'inventory',
-            'lowStock', 'stats', 'payments', 'from', 'to'
+            'lowStock', 'stats', 'payments', 'from', 'to', 'features'
         ));
     }
 
     public function storeTechnician(Request $request)
     {
         $center = $this->center();
+        abort_unless($center->canUseFeature('team'), 403, $center->featureLockedMessage('team'));
+        $limit = $center->technicianLimit();
+        abort_if($limit !== null && $center->technicians()->count() >= $limit, 422, 'შენი პაკეტის ლიმიტია '.$limit.' ხელოსანი. პაკეტის გასაზრდელად გადადი გამოწერის მართვაში.');
         $data = $request->validate([
             'name' => ['required','string','max:160'],
             'phone' => ['nullable','string','max:40'],
@@ -89,6 +93,9 @@ class ServiceCenterOperationsController extends Controller
     public function storeBay(Request $request)
     {
         $center = $this->center();
+        abort_unless($center->canUseFeature('team'), 403, $center->featureLockedMessage('team'));
+        $limit = $center->bayLimit();
+        abort_if($limit !== null && $center->bays()->count() >= $limit, 422, 'შენი პაკეტის ლიმიტია '.$limit.' სამუშაო ბოქსი. პაკეტის გასაზრდელად გადადი გამოწერის მართვაში.');
         $data = $request->validate(['name'=>['required','string','max:100'],'description'=>['nullable','string','max:255']]);
         $center->bays()->create($data);
         return back()->with('success', 'სამუშაო ბოქსი დაემატა.');
@@ -97,6 +104,7 @@ class ServiceCenterOperationsController extends Controller
     public function storeInventory(Request $request)
     {
         $center = $this->center();
+        abort_unless($center->canUseFeature('inventory'), 403, $center->featureLockedMessage('inventory'));
         $data = $request->validate([
             'sku'=>['nullable','string','max:80'],'name'=>['required','string','max:180'],
             'brand'=>['nullable','string','max:120'],'category'=>['nullable','string','max:120'],
@@ -120,6 +128,7 @@ class ServiceCenterOperationsController extends Controller
     public function assign(Request $request, WorkOrder $workOrder)
     {
         $center = $this->center();
+        abort_unless($center->canUseFeature('work_orders'), 403, $center->featureLockedMessage('work_orders'));
         abort_unless($workOrder->service_center_id === $center->id, 404);
         $data = $request->validate([
             'assigned_technician_id'=>['nullable','integer', 'exists:service_center_technicians,id'],
@@ -137,6 +146,7 @@ class ServiceCenterOperationsController extends Controller
     public function addPart(Request $request, WorkOrder $workOrder)
     {
         $center = $this->center();
+        abort_unless($center->canUseFeature('inventory'), 403, $center->featureLockedMessage('inventory'));
         abort_unless($workOrder->service_center_id === $center->id, 404);
         $data = $request->validate(['inventory_item_id'=>['required','integer'],'quantity'=>['required','integer','min:1']]);
         DB::transaction(function () use ($center, $workOrder, $data) {
@@ -163,6 +173,7 @@ class ServiceCenterOperationsController extends Controller
     public function payment(Request $request, WorkOrder $workOrder)
     {
         $center = $this->center();
+        abort_unless($center->canUseFeature('finance'), 403, $center->featureLockedMessage('finance'));
         abort_unless($workOrder->service_center_id === $center->id, 404);
         $data = $request->validate([
             'amount'=>['required','numeric','gt:0'],'method'=>['required','in:cash,card,transfer,other'],
@@ -187,6 +198,7 @@ class ServiceCenterOperationsController extends Controller
     public function notify(Request $request, WorkOrder $workOrder)
     {
         $center = $this->center();
+        abort_unless($center->canUseFeature('work_orders'), 403, $center->featureLockedMessage('work_orders'));
         abort_unless($workOrder->service_center_id === $center->id, 404);
         $data = $request->validate(['message'=>['required','string','max:2000']]);
         $booking = $workOrder->serviceBooking;

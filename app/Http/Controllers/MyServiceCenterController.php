@@ -41,7 +41,9 @@ class MyServiceCenterController extends Controller
             'completed' => $center->bookings()->where('status', 'completed')->count(),
         ];
 
-        return view('my-service-center.dashboard', compact('center', 'bookingStats'));
+        $features = $center->featureAccess();
+
+        return view('my-service-center.dashboard', compact('center', 'bookingStats', 'features'));
     }
 
     
@@ -116,7 +118,7 @@ public function profile(): RedirectResponse|View
         $plan = ServiceCenter::subscriptionPlans()[$data['subscription_plan']];
         $data['subscription_price'] = $plan['price'];
         $data['subscription_status'] = $plan['price'] > 0 ? 'pending_payment' : 'active';
-        $data['subscription_started_at'] = now();
+        $data['subscription_started_at'] = $plan['price'] > 0 ? null : now();
         $data['subscription_ends_at'] = null;
 
         DB::transaction(function () use ($data) {
@@ -154,6 +156,7 @@ public function profile(): RedirectResponse|View
     public function storeService(Request $request): RedirectResponse
     {
         $center = $this->ownedCenter();
+        abort_unless($center->canUseFeature('services'), 403, $center->featureLockedMessage('services'));
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:160'],
@@ -212,6 +215,8 @@ public function profile(): RedirectResponse|View
     public function updateHours(Request $request): RedirectResponse
     {
         $center = $this->ownedCenter();
+        abort_unless($center->canUseFeature('services'), 403, $center->featureLockedMessage('services'));
+        abort_unless($center->canUseFeature('services'), 403, $center->featureLockedMessage('services'));
 
         $data = $request->validate([
             'hours' => ['required', 'array'],
@@ -260,6 +265,40 @@ public function profile(): RedirectResponse|View
         $booking->update(['status' => $data['status']]);
 
         return back()->with('success', 'ჯავშნის სტატუსი განახლდა.');
+    }
+
+    public function requestSubscriptionChange(Request $request): RedirectResponse
+    {
+        $center = $this->ownedCenter();
+        $data = $request->validate([
+            'subscription_plan' => ['required', Rule::in(array_keys(ServiceCenter::subscriptionPlans()))],
+            'subscription_request_note' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $plan = ServiceCenter::subscriptionPlans()[$data['subscription_plan']];
+
+        if ($data['subscription_plan'] === 'start') {
+            $center->update([
+                'subscription_plan' => 'start',
+                'subscription_status' => 'active',
+                'subscription_price' => 0,
+                'subscription_started_at' => now(),
+                'subscription_ends_at' => null,
+                'subscription_requested_plan' => null,
+                'subscription_request_note' => null,
+                'subscription_requested_at' => null,
+            ]);
+
+            return back()->with('success', 'START პაკეტი გააქტიურდა.');
+        }
+
+        $center->update([
+            'subscription_requested_plan' => $data['subscription_plan'],
+            'subscription_request_note' => $data['subscription_request_note'] ?? null,
+            'subscription_requested_at' => now(),
+        ]);
+
+        return back()->with('success', 'პაკეტის მოთხოვნა გაიგზავნა. MotoHub-ის გუნდი დაგიკავშირდება გადახდის დეტალებისა და აქტივაციის დასადასტურებლად.');
     }
 
     private function ownedCenter(): ServiceCenter
