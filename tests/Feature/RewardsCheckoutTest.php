@@ -47,6 +47,23 @@ class RewardsCheckoutTest extends TestCase
         \Illuminate\Support\Carbon::setTestNow();
     }
 
+    public function test_membership_tier_uses_lifetime_earned_points_not_current_balance(): void
+    {
+        $user = User::factory()->create();
+        DB::table('reward_settings')->updateOrInsert(['key' => 'silver_tier_points'], ['value' => '1000', 'created_at' => now(), 'updated_at' => now()]);
+        DB::table('reward_settings')->updateOrInsert(['key' => 'gold_tier_points'], ['value' => '5000', 'created_at' => now(), 'updated_at' => now()]);
+        DB::table('reward_settings')->updateOrInsert(['key' => 'platinum_tier_points'], ['value' => '15000', 'created_at' => now(), 'updated_at' => now()]);
+
+        RewardTransaction::create(['user_id' => $user->id, 'points' => 6000, 'type' => 'test', 'description' => 'earned', 'action_key' => 'tier-earned:' . $user->id]);
+        RewardTransaction::create(['user_id' => $user->id, 'points' => -5500, 'type' => 'test', 'description' => 'spent', 'action_key' => 'tier-spent:' . $user->id]);
+
+        $tier = app(\\App\\Services\\RewardsService::class)->membershipTier($user);
+        $this->assertSame('gold', $tier['key']);
+        $this->assertSame(6000, $tier['lifetime_earned']);
+        $this->assertSame(9000, $tier['points_to_next']);
+        $this->assertSame(10, $tier['progress_percent']);
+    }
+
     public function test_points_discount_is_capped_at_thirty_percent(): void
     {
         $user = User::factory()->create();
