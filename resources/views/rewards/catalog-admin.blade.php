@@ -35,7 +35,19 @@
   <article style="padding:14px 0;border-top:1px solid #ffffff17;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px">
    <div><strong>#{{ $order->id }} · {{ $order->item_title }}</strong><small style="display:block;color:#91a8c2">{{ $order->user?->name }} · {{ $order->user?->email }} · {{ number_format($order->points_spent) }} ქულა · {{ $order->created_at->format('d.m.Y H:i') }}</small><small style="display:block;color:#b6c9df">მიმღები: {{ $order->customer_name }} · {{ $order->phone }} · {{ $order->address }}</small>@if($order->admin_note)<small style="color:#91a8c2">{{ $order->admin_note }}</small>@endif</div>
    <form method="POST" action="{{ route('admin.rewards.catalog.orders.update',$order) }}" style="display:grid;gap:6px;min-width:160px">@csrf @method('PATCH')
-    <select name="status" style="padding:8px;background:#081421;color:white;border:1px solid #31577b;border-radius:7px">@foreach(['approved'=>'დადასტურება','processing'=>'მზადდება','shipped'=>'გამოგზავნილია','fulfilled'=>'გაცემულია','rejected'=>'უარყოფა / ქულების დაბრუნება','cancelled'=>'გაუქმება / დაბრუნება'] as $key=>$label)<option value="{{ $key }}" @selected($order->status===$key)>{{ $label }}</option>@endforeach</select>
+    @php
+        $availableStatuses = match($order->status) {
+            'pending' => ['approved'=>'დადასტურება','processing'=>'მზადდება','rejected'=>'უარყოფა / ქულების დაბრუნება','cancelled'=>'გაუქმება / დაბრუნება'],
+            'approved' => ['processing'=>'მზადდება','shipped'=>'გამოგზავნილია','fulfilled'=>'გაცემულია','rejected'=>'უარყოფა / ქულების დაბრუნება','cancelled'=>'გაუქმება / დაბრუნება'],
+            'processing' => ['shipped'=>'გამოგზავნილია','fulfilled'=>'გაცემულია','rejected'=>'უარყოფა / ქულების დაბრუნება','cancelled'=>'გაუქმება / დაბრუნება'],
+            'shipped' => ['fulfilled'=>'გაცემულია'],
+            default => [],
+        };
+    @endphp
+    <select name="status" style="padding:8px;background:#081421;color:white;border:1px solid #31577b;border-radius:7px">
+        @if(!$availableStatuses)<option value="{{ $order->status }}" selected>დასრულებული / უცვლელი</option>@endif
+        @foreach($availableStatuses as $key=>$label)<option value="{{ $key }}">{{ $label }}</option>@endforeach
+    </select>
     <input name="admin_note" value="{{ $order->admin_note }}" placeholder="შენიშვნა" style="padding:8px;background:#081421;color:white;border:1px solid #31577b;border-radius:7px">
     <button style="padding:9px;border:0;border-radius:7px;background:#1677ff;color:white">სტატუსის განახლება</button>
    </form>
