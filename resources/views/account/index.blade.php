@@ -1193,6 +1193,11 @@
                 ჩემი პროფილი
             </a>
 
+            <a href="{{ route('rewards.index') }}">
+                <span class="nav-icon">✦</span>
+                MotoHub Rewards
+            </a>
+
             <a href="{{ route('part-requests.create') }}">
                 <span class="nav-icon">⚙</span>
                 ნაწილების მოთხოვნა
