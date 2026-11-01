@@ -1,6 +1,6 @@
 @extends('layouts.motohub-features')
 @section('content')
-<main class="container" style="max-width:1120px;padding:38px 18px 70px;color:#f4f8ff">
+<main class="container mh-rewards mh-rewards-shop" style="max-width:1120px;padding:38px 18px 70px;color:#f4f8ff">
  <section style="padding:25px;border:1px solid #31577b;border-radius:18px;background:radial-gradient(ellipse at 90% 0,#1b568955,transparent 45%),linear-gradient(135deg,#142b43,#091421)">
   <small style="color:#80c5ff;font-weight:900;letter-spacing:2px">MOTOHUB / REWARDS SHOP</small><h1 style="font-size:clamp(30px,5vw,42px);margin:9px 0">ქულების <span style="color:#72baff">საჩუქრების მაღაზია.</span></h1>
   <p style="color:#a8bdd4">გაცვალე დაგროვებული ქულები სპეციალურ საჩუქრებსა და პარტნიორულ შეთავაზებებში.</p>
