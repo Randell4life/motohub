@@ -300,6 +300,31 @@
             .search .btn { width: 100%; }
             .result-head { align-items: start; flex-direction: column; }
         }
+    
+
+/* MotoHub parts marketplace — responsive refinement */
+@media(max-width:720px){
+ .filters{border-radius:14px;box-shadow:0 12px 30px #0004}
+ .filters form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}
+ .filters form .field:first-child,.filters form .actions{grid-column:1/-1}
+ .filters form .field{min-width:0}
+ .filters input,.filters select{min-height:46px;border-radius:9px}
+ .layout{gap:15px}
+ .grid{align-items:stretch}
+ .card{display:flex;flex-direction:column;min-width:0}
+ .card .body{display:flex;flex:1;flex-direction:column}
+ .card .bottom{margin-top:auto}
+ .photo{aspect-ratio:16/10;height:auto;min-height:130px}
+ .result-head{align-items:flex-start}
+}
+@media(max-width:430px){
+ .filters form{grid-template-columns:1fr}
+ .filters form .field:first-child,.filters form .actions{grid-column:auto}
+ .grid{grid-template-columns:1fr}
+ .photo{aspect-ratio:16/9;min-height:180px}
+ .wrap{width:min(100% - 24px,1280px)}
+}
+
     </style>
 </head>
 
