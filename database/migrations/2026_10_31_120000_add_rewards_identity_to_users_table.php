@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration {
     public function up(): void
@@ -49,6 +50,7 @@ return new class extends Migration {
             ['key' => 'minimum_redemption_points', 'value' => '500', 'created_at' => now(), 'updated_at' => now()],
             ['key' => 'signup_points', 'value' => '100', 'created_at' => now(), 'updated_at' => now()],
             ['key' => 'first_post_points', 'value' => '150', 'created_at' => now(), 'updated_at' => now()],
+            ['key' => 'first_listing_points', 'value' => '150', 'created_at' => now(), 'updated_at' => now()],
             ['key' => 'referral_signup_points', 'value' => '100', 'created_at' => now(), 'updated_at' => now()],
             ['key' => 'referral_first_post_points', 'value' => '150', 'created_at' => now(), 'updated_at' => now()],
         ]);
