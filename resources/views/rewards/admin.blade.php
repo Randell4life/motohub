@@ -63,8 +63,8 @@
  </section>
  <section style="padding:20px;border:1px solid #29415e;border-radius:14px;background:#0d1827"><h2>ქულების წესები</h2>
  <form method="POST" action="{{ route('admin.rewards.settings') }}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">@csrf
- @foreach(['points_per_gel'=>'ქულა 1 ₾-ზე','minimum_redemption_points'=>'მინ. გამოყენება','signup_points'=>'რეგისტრაცია','first_post_points'=>'პირველი პოსტი','first_listing_points'=>'პირველი მოტოს განცხადება','referral_signup_points'=>'მეგობრის რეგისტრაცია','referral_first_post_points'=>'მეგობრის პირველი პოსტი','daily_checkin_points'=>'ყოველდღიური შესვლა','weekly_streak_bonus_points'=>'7-დღიანი სერიის ბონუსი'] as $key=>$label)
- <label style="display:grid;gap:6px;color:#a9bfd6;font-size:13px">{{ $label }}<input type="number" min="0" max="1000000" name="settings[{{ $key }}]" value="{{ $settings[$key] ?? 0 }}" style="padding:10px;border:1px solid #294766;border-radius:8px;background:#081421;color:white"></label>
+ @foreach(['points_per_gel'=>'ქულა 1 ₾-ზე','minimum_redemption_points'=>'მინ. გამოყენება','signup_points'=>'რეგისტრაცია','first_post_points'=>'პირველი პოსტი','first_listing_points'=>'პირველი მოტოს განცხადება','referral_signup_points'=>'მეგობრის რეგისტრაცია','referral_first_post_points'=>'მეგობრის პირველი პოსტი','daily_checkin_points'=>'ყოველდღიური შესვლა','weekly_streak_bonus_points'=>'7-დღიანი სერიის ბონუსი','silver_tier_points'=>'Silver-ის ზღვარი','gold_tier_points'=>'Gold-ის ზღვარი','platinum_tier_points'=>'Platinum-ის ზღვარი'] as $key=>$label)
+ <label style="display:grid;gap:6px;color:#a9bfd6;font-size:13px">{{ $label }}<input type="number" min="0" max="1000000" name="settings[{{ $key }}]" value="{{ $settings[$key] ?? ( ['silver_tier_points' => 1000, 'gold_tier_points' => 5000, 'platinum_tier_points' => 15000][$key] ?? 0 ) }}" style="padding:10px;border:1px solid #294766;border-radius:8px;background:#081421;color:white"></label>
  @endforeach
  <button style="padding:12px;border:0;border-radius:8px;background:#1677ff;color:white;font-weight:800">წესების შენახვა</button></form></section>
 </main>
