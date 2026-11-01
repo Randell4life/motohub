@@ -45,6 +45,42 @@ class RewardsService
         });
     }
 
+    /** Return the user's permanent membership tier based on lifetime positive points earned. */
+    public function membershipTier(User $user): array
+    {
+        $earned = (int) RewardTransaction::where('user_id', $user->id)->where('points', '>', 0)->sum('points');
+        $tiers = [
+            ['key' => 'bronze', 'name' => 'Bronze', 'name_ka' => 'ბრინჯაო', 'threshold' => 0, 'next_setting' => 'silver_tier_points'],
+            ['key' => 'silver', 'name' => 'Silver', 'name_ka' => 'ვერცხლი', 'threshold' => $this->setting('silver_tier_points', 1000), 'next_setting' => 'gold_tier_points'],
+            ['key' => 'gold', 'name' => 'Gold', 'name_ka' => 'ოქრო', 'threshold' => $this->setting('gold_tier_points', 5000), 'next_setting' => 'platinum_tier_points'],
+            ['key' => 'platinum', 'name' => 'Platinum', 'name_ka' => 'პლატინა', 'threshold' => $this->setting('platinum_tier_points', 15000), 'next_setting' => null],
+        ];
+        $tiers[2]['threshold'] = max($tiers[1]['threshold'] + 1, $tiers[2]['threshold']);
+        $tiers[3]['threshold'] = max($tiers[2]['threshold'] + 1, $tiers[3]['threshold']);
+
+        $currentIndex = 0;
+        foreach ($tiers as $index => $tier) {
+            if ($earned >= $tier['threshold']) $currentIndex = $index;
+        }
+        $current = $tiers[$currentIndex];
+        $next = $tiers[$currentIndex + 1] ?? null;
+        $floor = $current['threshold'];
+        $ceiling = $next['threshold'] ?? $floor;
+        $progress = $next ? (int) min(100, floor((($earned - $floor) / max(1, $ceiling - $floor)) * 100)) : 100;
+
+        return [
+            'key' => $current['key'],
+            'name' => $current['name'],
+            'name_ka' => $current['name_ka'],
+            'lifetime_earned' => $earned,
+            'threshold' => $current['threshold'],
+            'next_tier' => $next ? ['key' => $next['key'], 'name' => $next['name'], 'name_ka' => $next['name_ka'], 'threshold' => $next['threshold']] : null,
+            'points_to_next' => $next ? max(0, $next['threshold'] - $earned) : 0,
+            'progress_percent' => $progress,
+            'tiers' => array_map(fn ($tier) => ['key' => $tier['key'], 'name' => $tier['name'], 'name_ka' => $tier['name_ka'], 'threshold' => $tier['threshold']], $tiers),
+        ];
+    }
+
     /** Award one check-in per day and a bonus every seventh consecutive day. */
     public function dailyCheckIn(User $user): array
     {
