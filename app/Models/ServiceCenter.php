@@ -32,25 +32,25 @@ class ServiceCenter extends Model
                 'name' => 'START',
                 'price' => 0,
                 'description' => 'დასაწყებად საჭირო ძირითადი შესაძლებლობები.',
-                'features' => ['სახელოსნოს პროფილი და კატალოგი', 'მომსახურებების დამატება', 'ონლაინ ჯავშნების მიღება'],
+                'features' => ['ბიზნესპროფილი და მომსახურებების კატალოგი', 'სამუშაო საათები', 'ონლაინ ჯავშნების მიღება'],
             ],
             'pro' => [
                 'name' => 'PRO',
                 'price' => 49,
                 'description' => 'ყოველდღიური სამუშაო პროცესის სამართავად.',
-                'features' => ['START-ის ყველა ფუნქცია', 'სამუშაო შეკვეთები', 'ხელოსნები და სამუშაო ბოქსები', 'კლიენტებისა და გადახდების აღრიცხვა'],
+                'features' => ['START-ის ყველა ფუნქცია', 'სამუშაო შეკვეთები', '5-მდე ხელოსანი და 3 ბოქსი', 'კლიენტებისა და გადახდების აღრიცხვა'],
             ],
             'business' => [
                 'name' => 'BUSINESS',
                 'price' => 99,
                 'description' => 'სრული სახელოსნოს ოპერაციებისა და საწყობისთვის.',
-                'features' => ['PRO-ის ყველა ფუნქცია', 'საწყობისა და ნაწილების ჩამოწერა', 'მარაგის კონტროლი', 'ფინანსური მიმოხილვა'],
+                'features' => ['PRO-ის ყველა ფუნქცია', 'საწყობისა და ნაწილების ჩამოწერა', 'მარაგის კონტროლი', 'ფინანსური მიმოხილვა', '15-მდე ხელოსანი და 10 ბოქსი'],
             ],
             'premium' => [
                 'name' => 'PREMIUM',
                 'price' => 149,
-                'description' => 'მზარდი და მრავალფილიალიანი ბიზნესისთვის.',
-                'features' => ['BUSINESS-ის ყველა ფუნქცია', 'რამდენიმე ფილიალის მართვა', 'გაფართოებული ანგარიშები', 'პრიორიტეტული მხარდაჭერა'],
+                'description' => 'მაღალი დატვირთვის მქონე სერვისცენტრებისთვის.',
+                'features' => ['BUSINESS-ის ყველა ფუნქცია', 'გუნდისა და ბოქსების შეუზღუდავი რაოდენობა', 'გაფართოებული ანგარიშები', 'პრიორიტეტული მხარდაჭერა'],
             ],
         ];
     }
@@ -108,8 +108,7 @@ class ServiceCenter extends Model
 
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where('is_active', true)
-            ->where('approval_status', 'approved');
+        return $query->where('is_active', true)->where('approval_status', 'approved')->where('subscription_status', 'active')->where(fn ($sub) => $sub->whereNull('subscription_ends_at')->orWhere('subscription_ends_at', '>', now()));
     }
     public function technicians(): HasMany
     {
