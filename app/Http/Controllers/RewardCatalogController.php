@@ -199,7 +199,14 @@ class RewardCatalogController extends Controller
         $data = $request->validate(['status' => ['required', 'in:approved,processing,shipped,fulfilled,rejected,cancelled'], 'admin_note' => ['nullable', 'string', 'max:1000']]);
         DB::transaction(function () use ($order, $data) {
             $locked = RewardCatalogOrder::whereKey($order->id)->lockForUpdate()->firstOrFail();
-            if (in_array($locked->status, ['rejected', 'cancelled', 'fulfilled'], true)) abort(422, 'შეკვეთა უკვე დასრულებულია.');
+            $allowedTransitions = match ($locked->status) {
+                'pending' => ['approved', 'rejected', 'cancelled'],
+                'approved' => ['processing', 'shipped', 'fulfilled', 'rejected', 'cancelled'],
+                'processing' => ['shipped', 'fulfilled', 'rejected', 'cancelled'],
+                'shipped' => ['fulfilled'],
+                default => [],
+            };
+            abort_unless(in_array($data['status'], $allowedTransitions, true), 422, 'შეკვეთის ეს სტატუსის ცვლილება დაუშვებელია.');
             if (in_array($data['status'], ['rejected', 'cancelled'], true)) {
                 $key = 'reward-catalog-refund:' . $locked->id;
                 if (!RewardTransaction::where('action_key', $key)->exists()) {
