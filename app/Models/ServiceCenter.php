@@ -13,6 +13,7 @@ class ServiceCenter extends Model
         'owner_id', 'name', 'slug', 'description', 'phone', 'email',
         'city', 'address', 'is_verified', 'is_active', 'approval_status',
         'subscription_plan', 'subscription_status', 'subscription_price', 'subscription_started_at', 'subscription_ends_at',
+        'subscription_requested_plan', 'subscription_request_note', 'subscription_requested_at',
     ];
 
     protected $casts = [
@@ -21,6 +22,7 @@ class ServiceCenter extends Model
         'subscription_price' => 'decimal:2',
         'subscription_started_at' => 'datetime',
         'subscription_ends_at' => 'datetime',
+        'subscription_requested_at' => 'datetime',
     ];
 
     public static function subscriptionPlans(): array
@@ -51,6 +53,32 @@ class ServiceCenter extends Model
                 'features' => ['BUSINESS-ის ყველა ფუნქცია', 'რამდენიმე ფილიალის მართვა', 'გაფართოებული ანგარიშები', 'პრიორიტეტული მხარდაჭერა'],
             ],
         ];
+    }
+
+
+    public function subscriptionIsActive(): bool
+    {
+        return ($this->subscription_status ?? 'active') === 'active' && (! $this->subscription_ends_at || $this->subscription_ends_at->isFuture());
+    }
+    public function effectiveSubscriptionStatus(): string
+    {
+        return ($this->subscription_status ?? 'active') === 'active' && $this->subscription_ends_at && $this->subscription_ends_at->isPast() ? 'expired' : ($this->subscription_status ?? 'active');
+    }
+    public function canUseFeature(string $feature): bool
+    {
+        if (! $this->subscriptionIsActive()) return false;
+        $rank = ['start'=>0,'pro'=>1,'business'=>2,'premium'=>3];
+        $required = ['services'=>'start','bookings'=>'start','work_orders'=>'pro','team'=>'pro','finance'=>'pro','inventory'=>'business','inventory_usage'=>'business','financial_reports'=>'business','advanced_reports'=>'premium','priority_support'=>'premium'][$feature] ?? 'premium';
+        return ($rank[$this->subscription_plan ?? 'start'] ?? 0) >= $rank[$required];
+    }
+    public function featureAccess(): array
+    {
+        return collect(['services','bookings','work_orders','team','finance','inventory','inventory_usage','financial_reports','advanced_reports','priority_support'])->mapWithKeys(fn (string $feature) => [$feature=>$this->canUseFeature($feature)])->all();
+    }
+    public function featureLockedMessage(string $feature): string
+    {
+        $required = match ($feature) {'work_orders','team','finance'=>'PRO','inventory','inventory_usage','financial_reports'=>'BUSINESS',default=>'PREMIUM'};
+        return ! $this->subscriptionIsActive() ? 'გამოწერა აქტიური არ არის. ფასიანი ფუნქციების გასააქტიურებლად განაახლე გამოწერა.' : $required.' პაკეტი საჭიროა ამ ფუნქციის გამოსაყენებლად.';
     }
 
     public function owner(): BelongsTo
