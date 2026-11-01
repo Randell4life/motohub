@@ -387,7 +387,14 @@
             <form method="POST" action="{{ route('register.store') }}">
                 @csrf
 
-                <input type="hidden" name="referral_code" value="{{ old('referral_code', session('referral_code')) }}">
+                    <div class="field">
+                        <label for="referral_code">რეფერალური კოდი <span class="optional">(არასავალდებულო)</span></label>
+                        <input id="referral_code" name="referral_code" type="text" value="{{ old('referral_code', $referralCode ?? session('referral_code')) }}" maxlength="20" minlength="4" autocomplete="off" placeholder="შეიყვანე მეგობრის მოწვევის კოდი" style="text-transform:uppercase" aria-describedby="referral-code-help referral-code-error">
+                        <small id="referral-code-help" style="display:block;margin-top:7px;color:#9298a6;font-size:11px">თუ მეგობარმა მოგიწვია, ჩაწერე მისი კოდი — ორივე მიიღებთ ქულებს.</small>
+                        @error('referral_code')
+                            <div class="error" id="referral-code-error">{{ $message }}</div>
+                        @enderror
+                    </div>
                 <div class="form-grid">
                     <div class="field">
                         <label for="name">სახელი და გვარი</label>
