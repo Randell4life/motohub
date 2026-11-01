@@ -6,6 +6,7 @@
  </div>
  @if(session('success'))<p style="padding:12px;color:#9ce6c9">{{ session('success') }}</p>@endif
  @if($errors->any())<div style="padding:12px;margin:12px 0;border:1px solid #9b4545;border-radius:9px;color:#ffb5b5">{{ $errors->first() }}</div>@endif
+ <a href="{{ route('admin.rewards.catalog') }}" style="display:block;margin-top:15px;padding:15px 18px;border:1px solid #3978ad;border-radius:12px;background:#102b46;color:#eaf5ff;text-decoration:none"><strong>🎁 საჩუქრების კატალოგისა და შეკვეთების მართვა ↗</strong><small style="display:block;color:#9bb2cc;margin-top:4px">დაამატე პროდუქტები, მართე მარაგი და დაამუშავე მომხმარებლების მოთხოვნები.</small></a>
  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:16px 0">
  @foreach([['გაცემული ქულები',$totals['issued']],['გამოყენებული ქულები',$totals['redeemed']],['მაღაზიაში დახარჯული',$totals['store_used']],['მოლოდინის მოთხოვნები',$totals['pending']]] as [$label,$value])
  <div style="padding:17px;border:1px solid #29415e;border-radius:12px;background:#0d1827"><small style="color:#91a8c2">{{ $label }}</small><div style="font-size:25px;font-weight:900;color:#72baff">{{ number_format($value) }}</div></div>

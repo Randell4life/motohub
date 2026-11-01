@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RewardsController;
 use App\Http\Controllers\RewardsAdminController;
+use App\Http\Controllers\RewardCatalogController;
 use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\MotoAssistantController;
@@ -54,6 +55,13 @@ Route::get('/invite/{code}', function (Request $request, string $code) {
 Route::middleware('auth')->group(function () {
     Route::get('/rewards', [RewardsController::class, 'index'])->name('rewards.index');
     Route::post('/rewards/redeem', [RewardsController::class, 'redeem'])->middleware('throttle:5,1')->name('rewards.redeem');
+    Route::get('/rewards/catalog', [RewardCatalogController::class, 'index'])->name('rewards.catalog');
+    Route::post('/rewards/catalog/{item}/redeem', [RewardCatalogController::class, 'redeem'])->middleware('throttle:5,1')->name('rewards.catalog.redeem');
+    Route::get('/admin/rewards/catalog', [RewardCatalogController::class, 'adminIndex'])->name('admin.rewards.catalog');
+    Route::post('/admin/rewards/catalog', [RewardCatalogController::class, 'storeItem'])->name('admin.rewards.catalog.store');
+    Route::patch('/admin/rewards/catalog/{item}', [RewardCatalogController::class, 'updateItem'])->name('admin.rewards.catalog.update');
+    Route::delete('/admin/rewards/catalog/{item}', [RewardCatalogController::class, 'deleteItem'])->name('admin.rewards.catalog.delete');
+    Route::patch('/admin/rewards/catalog/orders/{order}', [RewardCatalogController::class, 'updateOrder'])->name('admin.rewards.catalog.orders.update');
     Route::get('/admin/rewards', [RewardsAdminController::class, 'index'])->name('admin.rewards.index');
     Route::patch('/admin/rewards/{redemption}', [RewardsAdminController::class, 'update'])->name('admin.rewards.update');
     Route::post('/admin/rewards/users/{user}/adjust', [RewardsAdminController::class, 'adjust'])->middleware('throttle:30,1')->name('admin.rewards.adjust');

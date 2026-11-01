@@ -12,6 +12,7 @@
             <small style="color:#9bb3ce">100 ქულა = 1 ₾ · კურსი შეიძლება შეიცვალოს</small>
         </div>
     </section>
+    <a href="{{ route('rewards.catalog') }}" style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px;padding:19px 22px;border:1px solid #3978ad;border-radius:16px;background:linear-gradient(110deg,#12375b,#0b1727);color:#eaf5ff;text-decoration:none"><span><small style="display:block;color:#80c5ff;letter-spacing:2px;font-weight:900">REWARDS SHOP</small><strong style="font-size:20px">🎁 ქულების საჩუქრების მაღაზია</strong><small style="display:block;color:#9bb2cc">გაცვალე ქულები რეალურ საჩუქრებში</small></span><strong style="color:#80c5ff">კატალოგი ↗</strong></a>
     <section style="margin-top:16px;padding:22px;border:1px solid #31577b;border-radius:18px;background:radial-gradient(ellipse at 95% 0,#1b568955,transparent 45%),linear-gradient(135deg,#142b43,#091421)">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><span style="color:#80c5ff;font-size:11px;font-weight:900;letter-spacing:2px">MOTOHUB CHAMPIONS</span><h2 style="margin:7px 0">შენი მოგებული პრიზები</h2><p style="margin:0;color:#9bb2cc">ლიდერბორდის გამარჯვებულებისთვის მინიჭებული ჯილდოები.</p></div><span style="font-size:32px">🏆</span></div>
         @forelse($prizes as $prize)

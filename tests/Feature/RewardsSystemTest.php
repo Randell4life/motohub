@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\RewardCatalogItem;
+use App\Models\RewardCatalogOrder;
 use App\Models\RewardTransaction;
 use App\Models\User;
 use App\Services\RewardsService;
@@ -92,6 +94,63 @@ class RewardsSystemTest extends TestCase
         $tier = $service->membershipTier($user);
 
         $this->assertSame(100, $tier['lifetime_earned']);
+    }
+
+    public function test_member_can_redeem_a_gift_and_stock_and_points_are_updated_atomically(): void
+    {
+        $user = User::factory()->create();
+        RewardTransaction::create(['user_id' => $user->id, 'points' => 1200, 'type' => 'activity', 'description' => 'earned', 'action_key' => 'gift-shop-earned']);
+        $item = RewardCatalogItem::create(['title' => 'MotoHub Gloves', 'slug' => 'motohub-gloves', 'points_cost' => 500, 'stock' => 2, 'is_active' => true]);
+
+        $response = $this->actingAs($user)->post(route('rewards.catalog.redeem', $item), ['customer_name' => $user->name, 'phone' => '555123456', 'address' => 'თბილისი, საქართველო']);
+
+        $response->assertRedirect();
+        $this->assertSame(1, $item->fresh()->stock);
+        $this->assertSame(700, app(RewardsService::class)->balance($user));
+        $this->assertDatabaseHas('reward_catalog_orders', ['user_id' => $user->id, 'item_id' => $item->id, 'points_spent' => 500, 'status' => 'pending']);
+        $this->assertDatabaseHas('reward_transactions', ['user_id' => $user->id, 'points' => -500, 'type' => 'reward_catalog']);
+    }
+
+    public function test_member_cannot_redeem_gift_without_enough_points_or_stock(): void
+    {
+        $user = User::factory()->create();
+        RewardTransaction::create(['user_id' => $user->id, 'points' => 100, 'type' => 'activity', 'description' => 'earned', 'action_key' => 'gift-shop-low-balance']);
+        $item = RewardCatalogItem::create(['title' => 'Helmet', 'slug' => 'helmet-gift', 'points_cost' => 500, 'stock' => 1, 'is_active' => true]);
+
+        $this->actingAs($user)->from(route('rewards.catalog'))->post(route('rewards.catalog.redeem', $item), ['customer_name' => $user->name, 'phone' => '555123456', 'address' => 'თბილისი'])->assertSessionHasErrors();
+        $this->assertSame(1, $item->fresh()->stock);
+        $this->assertDatabaseCount('reward_catalog_orders', 0);
+    }
+
+    public function test_rejected_gift_order_refunds_points_and_restores_stock_once(): void
+    {
+        $admin = User::factory()->create();
+        $admin->forceFill(['is_admin' => true])->save();
+        $user = User::factory()->create();
+        $item = RewardCatalogItem::create(['title' => 'Oil', 'slug' => 'oil-gift', 'points_cost' => 400, 'stock' => 0, 'is_active' => true]);
+        $order = RewardCatalogOrder::create(['user_id' => $user->id, 'item_id' => $item->id, 'item_title' => 'Oil', 'customer_name' => $user->name, 'phone' => '555123456', 'address' => 'თბილისი', 'points_spent' => 400, 'status' => 'pending']);
+        RewardTransaction::create(['user_id' => $user->id, 'points' => -400, 'type' => 'reward_catalog', 'description' => 'claimed', 'action_key' => 'reward-catalog-order:' . $order->id]);
+
+        $this->actingAs($admin)->patch(route('admin.rewards.catalog.orders.update', $order), ['status' => 'rejected']);
+        $this->assertSame(1, $item->fresh()->stock);
+        $this->assertSame(0, app(RewardsService::class)->balance($user));
+        $this->assertDatabaseHas('reward_transactions', ['user_id' => $user->id, 'points' => 400, 'type' => 'refund', 'action_key' => 'reward-catalog-refund:' . $order->id]);
+    }
+
+    public function test_shipped_gift_order_cannot_be_rejected_or_refunded(): void
+    {
+        $admin = User::factory()->create();
+        $admin->forceFill(['is_admin' => true])->save();
+        $user = User::factory()->create();
+        $item = RewardCatalogItem::create(['title' => 'Helmet', 'slug' => 'shipped-helmet', 'points_cost' => 800, 'stock' => 0, 'is_active' => true]);
+        $order = RewardCatalogOrder::create(['user_id' => $user->id, 'item_id' => $item->id, 'item_title' => 'Helmet', 'customer_name' => $user->name, 'phone' => '555123456', 'address' => 'თბილისი', 'points_spent' => 800, 'status' => 'shipped']);
+        RewardTransaction::create(['user_id' => $user->id, 'points' => -800, 'type' => 'reward_catalog', 'description' => 'claimed', 'action_key' => 'reward-catalog-order:' . $order->id]);
+
+        $this->actingAs($admin)->patch(route('admin.rewards.catalog.orders.update', $order), ['status' => 'rejected'])->assertStatus(422);
+
+        $this->assertSame(0, $item->fresh()->stock);
+        $this->assertDatabaseMissing('reward_transactions', ['action_key' => 'reward-catalog-refund:' . $order->id]);
+        $this->assertSame('shipped', $order->fresh()->status);
     }
 
     public function test_invalid_referral_code_does_not_prevent_signup_award(): void
