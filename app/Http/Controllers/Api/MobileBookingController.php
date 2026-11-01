@@ -11,6 +11,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use App\Services\RewardsCheckout;
+use Illuminate\Support\Str;
 
 class MobileBookingController extends Controller
 {
@@ -83,7 +85,8 @@ class MobileBookingController extends Controller
             'customer_name' => ['required', 'string', 'max:160'],
             'customer_phone' => ['required', 'string', 'max:40', 'regex:/^(?=.*\d)[0-9+\-\s()]+$/'],
             'motorcycle' => ['nullable', 'string', 'max:180'],
-            'notes' => ['nullable', 'string', 'max:1500'],\n            'points' => ['nullable', 'integer', 'min:0', 'max:1000000'],
+            'notes' => ['nullable', 'string', 'max:1500'],
+            'points' => ['nullable', 'integer', 'min:0', 'max:1000000'],
         ]);
 
         $service = $serviceCenter->services()->where('is_active', true)->findOrFail($data['service_id']);
@@ -118,7 +121,7 @@ class MobileBookingController extends Controller
                 }
             }
 
-            $discount = app(RewardsCheckout::class)->apply($request->user(), (float) $service->price, (int) ($data['points'] ?? 0), 'service-booking:' . Str::uuid(), 'სერვისის ჯავშნის ფასდაკლება', ['service_center_id' => $serviceCenter->id]);\n            return ServiceBooking::create([
+            $discount = app(\App\Services\RewardsCheckout::class)->apply($request->user(), (float) $service->price, (int) ($data['points'] ?? 0), 'service-booking:' . \Illuminate\Support\Str::uuid(), 'სერვისის ჯავშნის ფასდაკლება', ['service_center_id' => $serviceCenter->id]);\n            return ServiceBooking::create([
                 'service_center_id' => $serviceCenter->id,
                 'service_center_service_id' => $service->id,
                 'user_id' => $request->user()->id,
