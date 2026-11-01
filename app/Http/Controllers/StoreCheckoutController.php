@@ -33,7 +33,7 @@ class StoreCheckoutController extends Controller
             $maxDiscount = round($subtotal * 0.30, 2);
             $maxPoints = (int) floor($maxDiscount * $rate);
             $points = min((int) ($data['points'] ?? 0), $maxPoints);
-            $points = (int) (floor($points / $rate) * $rate);
+            $points = min($points, $maxPoints);
             if ($points > 0) {
                 $lockedUser = \App\Models\User::whereKey($user->id)->lockForUpdate()->firstOrFail();
                 if ($points > $rewards->balance($lockedUser)) throw ValidationException::withMessages(['points' => 'ქულების ბალანსი არასაკმარისია.']);
