@@ -12,6 +12,7 @@ use App\Models\PartListing;
 use App\Models\TransportOffer;
 use App\Models\TransportRequest;
 use App\Models\User;
+use App\Services\RewardsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -153,7 +154,7 @@ class MobileExtendedController extends Controller
         return response()->json($posts);
     }
 
-    public function storePost(Request $request)
+    public function storePost(Request $request, RewardsService $rewards)
     {
         $data = $request->validate(['body' => ['required', 'string', 'min:2', 'max:3000'], 'motorcycle_id' => ['nullable', 'integer', 'exists:motorcycles,id'], 'image' => ['nullable','image','mimes:jpg,jpeg,png,webp','max:5120']]);
         if (!empty($data['motorcycle_id'])) {
@@ -161,6 +162,7 @@ class MobileExtendedController extends Controller
         }
         $imagePath = $request->file('image')?->store('community/posts','public');
         $post = CommunityPost::create(['user_id' => $request->user()->id, 'motorcycle_id' => $data['motorcycle_id'] ?? null, 'body' => trim($data['body']), 'image_path' => $imagePath]);
+        $rewards->onFirstCommunityPost($request->user(), (int) $post->id);
         return response()->json(['message' => 'პოსტი გამოქვეყნდა.', 'post' => $post->load('user:id,name,avatar_path')], 201);
     }
 

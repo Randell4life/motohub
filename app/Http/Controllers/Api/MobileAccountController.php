@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Motorcycle;
 use App\Models\RentalBooking;
 use App\Models\ServiceBooking;
+use App\Services\RewardsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -85,7 +86,7 @@ class MobileAccountController extends Controller
     }
 
 
-    public function storeListing(Request $request)
+    public function storeListing(Request $request, RewardsService $rewards)
     {
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
@@ -130,6 +131,8 @@ class MobileAccountController extends Controller
             'is_featured' => false,
             'published_at' => null,
         ]);
+
+        $rewards->onFirstMotorcycleListing($request->user(), (int) $motorcycle->id);
 
         return response()->json([
             'message' => 'განცხადება შეიქმნა და გამოქვეყნებამდე შემოწმებას დაელოდება.',

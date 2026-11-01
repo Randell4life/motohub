@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CommunityPost;
 use App\Models\Motorcycle;
+use App\Services\RewardsService;
 use App\Notifications\CommunityActivityNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -31,7 +32,7 @@ class CommunityController extends Controller
         return view('community.index', compact('posts', 'myMotorcycles', 'notifications', 'unreadNotifications'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, RewardsService $rewards): RedirectResponse
     {
         $validated = $request->validate([
             'body' => ['required', 'string', 'min:2', 'max:3000'],
@@ -46,13 +47,14 @@ class CommunityController extends Controller
         }
 
         $imagePath = $request->file('image')?->store('community/posts', 'public');
-        CommunityPost::create([
+        $post = CommunityPost::create([
             'user_id' => $request->user()->id,
             'motorcycle_id' => $motorcycleId,
             'body' => trim($validated['body']),
             'image_path' => $imagePath,
         ]);
 
+        $rewards->onFirstCommunityPost($request->user(), (int) $post->id);
         return redirect()->route('community.index')->with('success', 'პოსტი წარმატებით გამოქვეყნდა.');
     }
 

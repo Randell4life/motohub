@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\RewardsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
@@ -20,10 +21,11 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function register(Request $request)
+    public function register(Request $request, RewardsService $rewards)
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:users,name'],
+            'referral_code' => ['nullable', 'string', 'max:20'],
             'email' => [
                 'required',
                 'string',
@@ -51,6 +53,8 @@ class AuthController extends Controller
             'password' => $validated['password'],
         ]);
 
+        $rewards->onRegistration($user, $validated['referral_code'] ?? $request->session()->get('referral_code'));
+        $request->session()->forget('referral_code');
         Auth::login($user);
 
         $request->session()->regenerate();
