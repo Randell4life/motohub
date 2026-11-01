@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RewardsController;
+use App\Http\Controllers\RewardsAdminController;
 use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\MotoAssistantController;
@@ -52,6 +53,9 @@ Route::get('/invite/{code}', function (string $code, Request $request) {
 Route::middleware('auth')->group(function () {
     Route::get('/rewards', [RewardsController::class, 'index'])->name('rewards.index');
     Route::post('/rewards/redeem', [RewardsController::class, 'redeem'])->middleware('throttle:5,1')->name('rewards.redeem');
+    Route::get('/admin/rewards', [RewardsAdminController::class, 'index'])->name('admin.rewards.index');
+    Route::patch('/admin/rewards/{redemption}', [RewardsAdminController::class, 'update'])->name('admin.rewards.update');
+    Route::post('/admin/rewards/settings', [RewardsAdminController::class, 'settings'])->name('admin.rewards.settings');
 });
 
 Route::get('/', function (Request $request) {
