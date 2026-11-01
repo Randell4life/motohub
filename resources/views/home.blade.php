@@ -7,6 +7,7 @@
 <title>MotoHub — შენი მოტოსამყარო</title>
 <meta name="description" content="მოტოციკლები, ნაწილები, სერვისები და მოტო საზოგადოება — ყველაფერი ერთ სივრცეში.">
 <link rel="preconnect" href="https://images.unsplash.com">
+<link rel="preload" as="image" href="https://hqgwubzpqihzqdlabmok.supabase.co/storage/v1/object/public/seo-images/montana-motorcycle-safety-foundation/featured-35956d49-816f-4aa6-b00b-cb78408528f6.webp" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fira+GO:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
