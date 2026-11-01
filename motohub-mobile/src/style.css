@@ -1347,3 +1347,30 @@ img{max-width:100%}
 button:disabled,[aria-disabled="true"]{opacity:.55;cursor:not-allowed}
 @media(max-width:600px){input,select,textarea{font-size:16px!important}#app{padding-bottom:calc(100px + env(safe-area-inset-bottom))}.bottom-nav{padding-bottom:max(10px,env(safe-area-inset-bottom))}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+
+/* MotoHub motorcycle catalogue — card and detail polish */
+.catalog-page .bike-filter-panel { position:relative; }
+.catalog-page .bike-filter-panel .filter-panel-head { align-items:flex-start; }
+.catalog-page .bike-filter-grid label { line-height:1.5; }
+.catalog-page .bike-filter-grid input,
+.catalog-page .bike-filter-grid select { min-height:46px; border-radius:10px; }
+.catalog-page .catalog-grid { align-items:stretch; }
+.catalog-page .item-card { display:flex; flex-direction:column; min-height:100%; transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease; }
+.catalog-page .item-card:focus-within { border-color:#438fe8; box-shadow:0 0 0 2px #1677ff20; }
+.catalog-page .item-card .item-image { aspect-ratio: 16 / 10; height:auto; min-height:132px; }
+.catalog-page .item-card-content { display:flex; flex:1; flex-direction:column; }
+.catalog-page .item-card .item-bottom { margin-top:auto; padding-top:12px; }
+.premium-bike-detail .detail-gallery-stage img { max-width:100%; }
+@media(max-width:380px) {
+ .bike-filter-grid { grid-template-columns:1fr; }
+ .catalog-page .catalog-grid { grid-template-columns:1fr; }
+ .catalog-page .item-card .item-image { aspect-ratio:16/9; }
+ .bike-filter-panel { padding:14px; }
+ .filter-panel-head { align-items:flex-start; }
+ .filter-clear { flex-shrink:0; }
+}
+@media(min-width:600px) {
+ .catalog-page .catalog-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .catalog-page .item-card .item-image { min-height:170px; }
+}
