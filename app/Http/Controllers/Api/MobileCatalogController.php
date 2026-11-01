@@ -70,13 +70,35 @@ class MobileCatalogController extends Controller
     public function workshops(Request $request)
     {
         $items = \Illuminate\Support\Facades\DB::table('partners')
-            ->where('type','workshop')->where('application_status','approved')->where('is_active',true)
-            ->when($request->filled('q'),fn($q)=>$q->where(function($sub)use($request){$term='%'.trim($request->query('q')).'%';$sub->where('name','like',$term)->orWhere('address','like',$term)->orWhere('description','like',$term);}))
-            ->orderBy('name')->paginate(min(max((int)$request->query('per_page',12),1),50));
-        $items->getCollection()->transform(function($item){
-            $item->services=\Illuminate\Support\Facades\DB::table('services')->where('partner_id',$item->id)->where('is_active',true)->orderBy('title')->get(['id','title','category','description','price']);
+            ->select(['id', 'name', 'address', 'phone', 'description'])
+            ->where('type', 'workshop')
+            ->where('application_status', 'approved')
+            ->where('is_active', true)
+            ->when($request->filled('q'), function ($query) use ($request) {
+                $term = '%' . trim((string) $request->query('q')) . '%';
+                $query->where(function ($filter) use ($term) {
+                    $filter->where('name', 'like', $term)
+                        ->orWhere('address', 'like', $term)
+                        ->orWhere('description', 'like', $term);
+                });
+            })
+            ->orderBy('name')
+            ->paginate(min(max((int) $request->query('per_page', 12), 1), 50));
+
+        $partnerIds = $items->getCollection()->pluck('id');
+        $servicesByPartner = \Illuminate\Support\Facades\DB::table('services')
+            ->whereIn('partner_id', $partnerIds)
+            ->where('is_active', true)
+            ->orderBy('title')
+            ->get(['id', 'partner_id', 'title', 'category', 'description', 'price'])
+            ->groupBy('partner_id');
+
+        $items->getCollection()->transform(function ($item) use ($servicesByPartner) {
+            $item->services = $servicesByPartner->get($item->id, collect())->values();
+
             return $item;
         });
+
         return response()->json($items);
     }
 
