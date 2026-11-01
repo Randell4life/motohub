@@ -58,7 +58,7 @@ class RewardsCheckoutTest extends TestCase
         RewardTransaction::create(['user_id' => $user->id, 'points' => 6000, 'type' => 'test', 'description' => 'earned', 'action_key' => 'tier-earned:' . $user->id]);
         RewardTransaction::create(['user_id' => $user->id, 'points' => -5500, 'type' => 'test', 'description' => 'spent', 'action_key' => 'tier-spent:' . $user->id]);
 
-        $tier = app(\\App\\Services\\RewardsService::class)->membershipTier($user);
+        $tier = app(\App\\Services\\RewardsService::class)->membershipTier($user);
         $this->assertSame('gold', $tier['key']);
         $this->assertSame(6000, $tier['lifetime_earned']);
         $this->assertSame(9000, $tier['points_to_next']);
@@ -71,7 +71,7 @@ class RewardsCheckoutTest extends TestCase
         RewardTransaction::create(['user_id' => $user->id, 'points' => 100, 'type' => 'signup', 'description' => 'signup', 'action_key' => 'signup:' . $user->id]);
         RewardTransaction::create(['user_id' => $user->id, 'points' => 150, 'type' => 'activity', 'description' => 'post', 'action_key' => 'first-community-post:' . $user->id]);
 
-        $service = app(\\App\\Services\\RewardsService::class);
+        $service = app(\App\\Services\\RewardsService::class);
         $first = $service->achievementBadges($user);
         $second = $service->achievementBadges($user);
 
@@ -162,7 +162,7 @@ class RewardsCheckoutTest extends TestCase
         RewardTransaction::create(['user_id' => $second->id, 'points' => 150, 'type' => 'test', 'description' => 'weekly', 'action_key' => 'leaderboard-second:' . $second->id]);
         RewardTransaction::create(['user_id' => $first->id, 'points' => -100, 'type' => 'test', 'description' => 'spent', 'action_key' => 'leaderboard-spent:' . $first->id]);
 
-        $service = app(\\App\\Services\\RewardsService::class);
+        $service = app(\App\\Services\\RewardsService::class);
         $weekly = $service->leaderboard($first, 'week');
         $monthly = $service->leaderboard($first, 'month');
 
