@@ -69,7 +69,7 @@ class RewardsAdminController extends Controller
             ->groupBy('user_id')
             ->pluck('balance', 'user_id');
 
-        return view('rewards.admin', compact('redemptions', 'storeOrders', 'settings', 'totals', 'users', 'balances', 'prizes'));
+        return view('rewards.admin', compact('redemptions', 'storeOrders', 'settings', 'totals', 'users', 'balances', 'prizes', 'weeklyCandidates', 'monthlyCandidates'));
     }
 
     public function update(Request $request, RewardRedemption $redemption)
