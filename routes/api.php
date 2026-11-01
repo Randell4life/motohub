@@ -60,6 +60,7 @@ Route::prefix('mobile')->group(function () {
         Route::patch('/transport/partner/requests/{transportRequest}/status', [MobileExtendedController::class, 'updateTransportOrderStatus'])->whereNumber('transportRequest');
         Route::post('/moto-assistant/diagnose', [MobileExtendedController::class, 'diagnose'])->middleware('throttle:10,1');
         Route::get('/service-center/dashboard', [MobileExtendedController::class, 'serviceCenterDashboard']);
+        Route::post('/service-center/subscription', [MobileExtendedController::class, 'requestServiceCenterSubscription'])->middleware('throttle:5,1');
         Route::post('/service-center/register', [MobileExtendedController::class, 'registerServiceCenter'])->middleware('throttle:3,1');
         Route::patch('/service-center/profile', [MobileExtendedController::class, 'updateCenterProfile']);
         Route::post('/service-center/services', [MobileExtendedController::class, 'storeCenterService']);
