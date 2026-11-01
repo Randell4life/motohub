@@ -45,7 +45,7 @@ use App\Models\Part;
 */
 
 
-Route::get('/invite/{code}', function (string $code, Request $request) {
+Route::get('/invite/{code}', function (Request $request, string $code) {
     $request->session()->put('referral_code', strtoupper($code));
     return redirect()->route('register');
 })->where('code', '[A-Za-z0-9]{4,20}')->name('referral.invite');
