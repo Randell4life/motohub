@@ -25,7 +25,8 @@
 <strong>შეკვეთა MotoHub-ის მაღაზიიდან</strong>
 <p class="muted">ქულებით შეგიძლია დაფარო შეკვეთის ღირებულების მაქსიმუმ 30%.</p>
 <label class="muted">რაოდენობა <input type="number" name="quantity" min="1" max="20" value="1" required style="display:block;width:100%;padding:10px;margin-top:5px"></label>
-<label class="muted">გამოიყენე ქულები <input type="number" name="points" min="0" value="0" style="display:block;width:100%;padding:10px;margin-top:5px"></label>
+<p class="muted" style="margin:8px 0">შენი ბალანსი: <strong style="color:#72baff">{{ number_format($rewardsBalance) }} ქულა</strong>. მაქსიმალური გამოყენება ამ შეკვეთაზე: <strong style="color:#72baff">{{ number_format(min($rewardsBalance, $maxCheckoutPoints)) }} ქულა</strong> (ღირებულების მაქს. 30%). 100 ქულა = {{ number_format(100 / $pointsPerGel, 2) }} ₾.</p>
+<label class="muted">გამოიყენე ქულები <input type="number" name="points" min="0" max="{{ min($rewardsBalance, $maxCheckoutPoints) }}" value="0" style="display:block;width:100%;padding:10px;margin-top:5px"></label>
 <label class="muted">სახელი და გვარი <input name="customer_name" value="{{ auth()->user()->name }}" required style="display:block;width:100%;padding:10px;margin-top:5px"></label>
 <label class="muted">ტელეფონი <input name="phone" value="{{ auth()->user()->phone }}" required style="display:block;width:100%;padding:10px;margin-top:5px"></label>
 <label class="muted">მიწოდების მისამართი <textarea name="address" required style="display:block;width:100%;padding:10px;margin-top:5px"></textarea></label>
