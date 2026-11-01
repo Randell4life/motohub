@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RewardsController;
 use App\Http\Controllers\RewardsAdminController;
+use App\Http\Controllers\RewardCatalogController;
 use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\MotoAssistantController;
