@@ -13,12 +13,14 @@ class ServiceBooking extends Model
 
     protected $fillable = [
         'service_center_id', 'service_center_service_id', 'user_id', 'service_name',
-        'price_at_booking', 'duration_minutes', 'customer_name', 'customer_phone',
+        'price_at_booking', 'duration_minutes', 'customer_name', 'customer_phone', 'points_used', 'points_discount',
         'motorcycle', 'scheduled_at', 'notes', 'status',
     ];
 
     protected $casts = [
         'price_at_booking' => 'decimal:2',
+        'points_used' => 'integer',
+        'points_discount' => 'decimal:2',
         'duration_minutes' => 'integer',
         'scheduled_at' => 'datetime',
     ];
