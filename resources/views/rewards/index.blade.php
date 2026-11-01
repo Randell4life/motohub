@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.motohub-features')
 
 @section('content')
 <main class="container" style="max-width:1100px;padding:42px 18px 70px;color:#f4f8ff">
