@@ -149,8 +149,17 @@ class RewardsAdminController extends Controller
             'points_per_gel', 'minimum_redemption_points', 'signup_points',
             'first_post_points', 'first_listing_points', 'referral_signup_points',
             'referral_first_post_points', 'daily_checkin_points',
-            'weekly_streak_bonus_points',
+            'weekly_streak_bonus_points', 'silver_tier_points',
+            'gold_tier_points', 'platinum_tier_points',
         ];
+
+        $current = DB::table('reward_settings')->pluck('value', 'key');
+        $silver = (int) ($data['settings']['silver_tier_points'] ?? $current['silver_tier_points'] ?? 1000);
+        $gold = (int) ($data['settings']['gold_tier_points'] ?? $current['gold_tier_points'] ?? 5000);
+        $platinum = (int) ($data['settings']['platinum_tier_points'] ?? $current['platinum_tier_points'] ?? 15000);
+        if ($silver < 1 || $gold <= $silver || $platinum <= $gold) {
+            return back()->withErrors(['settings' => 'დონეების ზღვარი უნდა იზრდებოდეს: Silver < Gold < Platinum.'])->withInput();
+        }
 
         foreach ($data['settings'] as $key => $value) {
             if (!in_array($key, $allowed, true)) {
