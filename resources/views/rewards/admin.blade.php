@@ -11,6 +11,23 @@
  <div style="padding:17px;border:1px solid #29415e;border-radius:12px;background:#0d1827"><small style="color:#91a8c2">{{ $label }}</small><div style="font-size:25px;font-weight:900;color:#72baff">{{ number_format($value) }}</div></div>
  @endforeach
  </div>
+ <section class="reward-prize-admin" style="padding:22px;border:1px solid #31577b;border-radius:18px;background:linear-gradient(135deg,#142d49,#0a1422);margin:16px 0;box-shadow:0 16px 40px #0003">
+  <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><div><small style="color:#80c5ff;letter-spacing:2px;font-weight:900">MOTOHUB CHAMPIONS</small><h2 style="margin:6px 0">სეზონის პრიზები</h2><p style="margin:0;color:#9bb2cc">დააჯილდოვე კვირისა და თვის ლიდერები — პრიზი ერთხელ გაიცემა თითოეულ პერიოდსა და ადგილზე.</p></div><span style="font-size:34px">🏆</span></div>
+  <form method="POST" action="{{ route('admin.rewards.prizes.award') }}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin-top:18px;align-items:end">@csrf
+   <label style="display:grid;gap:6px;color:#b6cbe0;font-size:13px">პერიოდი<select name="period_type" required style="padding:11px;border:1px solid #31577b;border-radius:9px;background:#081421;color:white"><option value="week">კვირის რეიტინგი</option><option value="month">თვის რეიტინგი</option></select></label>
+   <label style="display:grid;gap:6px;color:#b6cbe0;font-size:13px">ადგილი<select name="rank" required style="padding:11px;border:1px solid #31577b;border-radius:9px;background:#081421;color:white">@for($rank=1;$rank<=10;$rank++)<option value="{{ $rank }}">#{{ $rank }}</option>@endfor</select></label>
+   <label style="display:grid;gap:6px;color:#b6cbe0;font-size:13px">გამარჯვებული<select name="winner_user_id" required style="padding:11px;border:1px solid #31577b;border-radius:9px;background:#081421;color:white"><option value="">აირჩიე მომხმარებელი</option><optgroup label="კვირის რეიტინგი">@foreach($weeklyCandidates as $candidate)<option value="{{ $candidate['user_id'] }}">{{ $candidate['name'] }} · #{{ $candidate['rank'] }} · {{ number_format($candidate['points']) }} ქ.</option>@endforeach</optgroup><optgroup label="თვის რეიტინგი">@foreach($monthlyCandidates as $candidate)<option value="{{ $candidate['user_id'] }}">{{ $candidate['name'] }} · #{{ $candidate['rank'] }} · {{ number_format($candidate['points']) }} ქ.</option>@endforeach</optgroup></select><small style="color:#829bb5">სერვერი გადაამოწმებს არჩეულ პერიოდსა და ადგილს.</small></label>
+   <label style="display:grid;gap:6px;color:#b6cbe0;font-size:13px">პრიზის სახელი<input name="title" required maxlength="120" placeholder="მაგ. კვირის ჩემპიონი" style="padding:11px;border:1px solid #31577b;border-radius:9px;background:#081421;color:white"></label>
+   <label style="display:grid;gap:6px;color:#b6cbe0;font-size:13px">ბონუს ქულები<input name="points_awarded" type="number" min="0" max="1000000" value="0" style="padding:11px;border:1px solid #31577b;border-radius:9px;background:#081421;color:white"></label>
+   <label style="display:grid;gap:6px;color:#b6cbe0;font-size:13px">დამატებითი ინფორმაცია<input name="description" maxlength="1000" placeholder="პრიზის აღწერა" style="padding:11px;border:1px solid #31577b;border-radius:9px;background:#081421;color:white"></label>
+   <button style="padding:12px;border:0;border-radius:9px;background:linear-gradient(100deg,#1677ff,#42a5ff);color:white;font-weight:900;cursor:pointer">🏆 პრიზის მინიჭება</button>
+  </form>
+  <div style="margin-top:20px"><h3 style="margin-bottom:10px">გაცემული პრიზები</h3>
+   @forelse($prizes as $prize)
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-top:1px solid #ffffff18;flex-wrap:wrap"><div><strong>🏅 {{ $prize->title }}</strong><small style="display:block;color:#9bb2cc">{{ $prize->winner?->name ?? 'მომხმარებელი წაშლილია' }} · {{ $prize->period_type === 'week' ? 'კვირის' : 'თვის' }} · #{{ $prize->rank }} · {{ $prize->period_start->format('d.m.Y') }}</small><small style="color:#829bb5">{{ $prize->description }}</small></div><strong style="color:#80c5ff">{{ number_format($prize->points_awarded) }} ქულა</strong></div>
+   @empty <p style="color:#91a8c2">პრიზები ჯერ არ გაცემულა.</p> @endforelse
+  </div>
+ </section>
  <section style="padding:20px;border:1px solid #29415e;border-radius:14px;background:#0d1827;margin:15px 0"><h2>მომხმარებლისთვის ქულების დამატება / ჩამოკლება</h2>
   <p style="color:#91a8c2">მოძებნე მომხმარებელი სახელით, ელფოსტით ან ID-ით. ყველა ცვლილება ჩაიწერება ქულების ისტორიაში.</p>
   <form method="GET" action="{{ route('admin.rewards.index') }}" style="display:flex;gap:9px;flex-wrap:wrap;margin:14px 0">

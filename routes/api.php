@@ -94,6 +94,7 @@ Route::prefix('mobile')->group(function () {
         Route::post('/rewards/redeem', [RewardsApiController::class, 'redeem'])->middleware('throttle:5,1');
         Route::get('/admin/rewards', [RewardsApiController::class, 'adminIndex']);
         Route::patch('/admin/rewards/{redemption}', [RewardsApiController::class, 'adminUpdate'])->whereNumber('redemption');
+        Route::post('/admin/rewards/prizes', [RewardsApiController::class, 'adminAwardPrize'])->middleware('throttle:20,1');
         Route::patch('/admin/rewards/settings', [RewardsApiController::class, 'adminSettings']);
         Route::get('/admin/dashboard', [MobileAdminController::class, 'dashboard']);
         Route::patch('/admin/{type}/{id}/status', [MobileAdminController::class, 'updateStatus'])->whereIn('type', ['motorcycles', 'part-requests', 'rental-bookings', 'service-bookings', 'service-centers'])->whereNumber('id')->middleware('throttle:30,1');

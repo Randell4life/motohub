@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\RewardRedemption;
+use App\Models\RewardPrize;
 use App\Models\RewardTransaction;
 use App\Models\User;
 use App\Services\RewardsService;
@@ -34,6 +35,7 @@ class RewardsApiController extends Controller
             'referrals_count' => User::where('referred_by_user_id', $user->id)->count(),
             'transactions' => RewardTransaction::where('user_id', $user->id)->latest()->limit(30)->get(),
             'redemptions' => RewardRedemption::where('user_id', $user->id)->latest()->limit(15)->get(),
+            'prizes' => RewardPrize::with('winner:id,name')->where('winner_user_id', $user->id)->latest('awarded_at')->limit(10)->get(),
             'ways_to_earn' => [
                 ['title' => 'რეგისტრაცია', 'points' => $rewards->setting('signup_points', 100)],
                 ['title' => 'პირველი პოსტი', 'points' => $rewards->setting('first_post_points', 150)],
@@ -82,7 +84,47 @@ class RewardsApiController extends Controller
         return response()->json([
             'redemptions' => RewardRedemption::with('user:id,name,email')->latest()->limit(100)->get(),
             'settings' => DB::table('reward_settings')->pluck('value', 'key'),
+            'prizes' => RewardPrize::with('winner:id,name')->latest('period_start')->latest('rank')->limit(50)->get(),
+            'leaderboards' => [
+                'week' => app(RewardsService::class)->leaderboard($request->user(), 'week'),
+                'month' => app(RewardsService::class)->leaderboard($request->user(), 'month'),
+            ],
         ]);
+    }
+
+    public function adminAwardPrize(Request $request, RewardsService $rewards)
+    {
+        abort_unless((bool) $request->user()->is_admin, 403);
+        $data = $request->validate([
+            'period_type' => ['required', 'in:week,month'],
+            'rank' => ['required', 'integer', 'between:1,10'],
+            'title' => ['required', 'string', 'max:120'],
+            'description' => ['nullable', 'string', 'max:1000'],
+            'points_awarded' => ['nullable', 'integer', 'min:0', 'max:1000000'],
+        ]);
+        $board = $rewards->leaderboard($request->user(), $data['period_type']);
+        $winner = collect($board['entries'])->firstWhere('rank', (int) $data['rank']);
+        if (!$winner) throw ValidationException::withMessages(['rank' => 'ამ ადგილზე გამარჯვებული ჯერ არ არის.']);
+        $periodStart = $data['period_type'] === 'month' ? now()->startOfMonth()->toDateString() : now()->startOfWeek()->toDateString();
+
+        DB::transaction(function () use ($request, $data, $winner, $periodStart) {
+            $prize = RewardPrize::create([
+                'period_type' => $data['period_type'], 'period_start' => $periodStart,
+                'rank' => $data['rank'], 'winner_user_id' => $winner['user_id'],
+                'awarded_by' => $request->user()->id, 'title' => trim($data['title']),
+                'description' => $data['description'] ?? null,
+                'points_awarded' => (int) ($data['points_awarded'] ?? 0), 'awarded_at' => now(),
+            ]);
+            if ($prize->points_awarded > 0) {
+                RewardTransaction::create([
+                    'user_id' => $prize->winner_user_id, 'points' => $prize->points_awarded,
+                    'type' => 'prize', 'description' => 'Rewards პრიზი: ' . $prize->title,
+                    'action_key' => 'leaderboard-prize:' . $prize->period_type . ':' . $prize->period_start->toDateString() . ':' . $prize->rank,
+                    'metadata' => ['prize_id' => $prize->id, 'period_type' => $prize->period_type, 'rank' => $prize->rank],
+                ]);
+            }
+        });
+        return response()->json(['message' => 'პრიზი გადაეცა ' . $winner['name'] . '-ს.', 'winner' => $winner], 201);
     }
 
     public function adminUpdate(Request $request, int $redemption, RewardsService $rewards)

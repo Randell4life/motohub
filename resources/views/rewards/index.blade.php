@@ -12,6 +12,12 @@
             <small style="color:#9bb3ce">100 ქულა = 1 ₾ · კურსი შეიძლება შეიცვალოს</small>
         </div>
     </section>
+    <section style="margin-top:16px;padding:22px;border:1px solid #31577b;border-radius:18px;background:radial-gradient(ellipse at 95% 0,#1b568955,transparent 45%),linear-gradient(135deg,#142b43,#091421)">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><span style="color:#80c5ff;font-size:11px;font-weight:900;letter-spacing:2px">MOTOHUB CHAMPIONS</span><h2 style="margin:7px 0">შენი მოგებული პრიზები</h2><p style="margin:0;color:#9bb2cc">ლიდერბორდის გამარჯვებულებისთვის მინიჭებული ჯილდოები.</p></div><span style="font-size:32px">🏆</span></div>
+        @forelse($prizes as $prize)
+            <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;padding:13px 0;border-top:1px solid #ffffff18;margin-top:10px;flex-wrap:wrap"><div><strong>🏅 {{ $prize->title }}</strong><small style="display:block;color:#9bb2cc">{{ $prize->period_type === 'week' ? 'კვირის' : 'თვის' }} რეიტინგი · #{{ $prize->rank }} ადგილი · {{ $prize->period_start->format('d.m.Y') }}</small><small style="color:#91a8c2">{{ $prize->description }}</small></div><strong style="color:#80c5ff">{{ $prize->points_awarded > 0 ? '+' . number_format($prize->points_awarded) . ' ქულა' : 'პრიზი მიღებულია' }}</strong></div>
+        @empty <p style="margin-top:15px;color:#9bb2cc">ჯერ პრიზი არ მოგიგია — იბრძოლე ლიდერბორდის პირველი ადგილისთვის!</p> @endforelse
+    </section>
     <section style="margin-top:16px;padding:22px;border:1px solid #31577b;border-radius:16px;background:linear-gradient(120deg,#132b43,#0a1523)">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><span style="color:#78bdff;font-size:11px;font-weight:900;letter-spacing:1.5px">MOTOHUB MEMBERSHIP</span><h2 style="margin:7px 0">{{ $membershipTier['name'] }} <span style="color:#8dcaff">/ {{ $membershipTier['name_ka'] }}</span></h2><p style="margin:0;color:#a8bdd4">მთლიანობაში დაგროვებული: {{ number_format($membershipTier['lifetime_earned']) }} ქულა</p></div><strong style="font-size:24px;color:#7dbfff">{{ $membershipTier['progress_percent'] }}%</strong></div>
         <div style="height:9px;margin-top:18px;border-radius:99px;background:#263c52;overflow:hidden"><div style="height:100%;width:{{ $membershipTier['progress_percent'] }}%;background:linear-gradient(90deg,#1677ff,#66c4ff);border-radius:99px"></div></div>

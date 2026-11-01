@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\RewardTransaction;
+use App\Models\RewardPrize;
 use App\Models\User;
 use App\Services\RewardsCheckout;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -169,6 +170,66 @@ class RewardsCheckoutTest extends TestCase
         $this->assertSame(300, $weekly['entries'][0]['points']);
         $this->assertSame(1, $weekly['current_user']['rank']);
         $this->assertSame(1, $monthly['current_user']['rank']);
+    }
+
+    public function test_admin_can_award_a_leaderboard_prize_and_points_are_credited_once(): void
+    {
+        $admin = User::factory()->create();
+        $admin->forceFill(['is_admin' => true])->save();
+        $winner = User::factory()->create(['name' => 'Weekly Champion']);
+        RewardTransaction::create([
+            'user_id' => $winner->id,
+            'points' => 500,
+            'type' => 'test',
+            'description' => 'weekly leaderboard',
+            'action_key' => 'prize-leaderboard:' . $winner->id,
+        ]);
+
+        $response = $this->actingAs($admin)->post(route('admin.rewards.prizes.award'), [
+            'period_type' => 'week',
+            'rank' => 1,
+            'winner_user_id' => $winner->id,
+            'title' => 'კვირის ჩემპიონი',
+            'description' => 'MotoHub weekly winner',
+            'points_awarded' => 250,
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('reward_prizes', [
+            'period_type' => 'week',
+            'rank' => 1,
+            'winner_user_id' => $winner->id,
+            'title' => 'კვირის ჩემპიონი',
+            'points_awarded' => 250,
+        ]);
+        $this->assertDatabaseHas('reward_transactions', [
+            'user_id' => $winner->id,
+            'points' => 250,
+            'type' => 'prize',
+        ]);
+        $this->assertSame(750, (int) RewardTransaction::where('user_id', $winner->id)->sum('points'));
+    }
+
+    public function test_admin_cannot_award_a_prize_to_a_user_outside_selected_rank(): void
+    {
+        $admin = User::factory()->create();
+        $admin->forceFill(['is_admin' => true])->save();
+        $first = User::factory()->create();
+        $second = User::factory()->create();
+        RewardTransaction::create(['user_id' => $first->id, 'points' => 500, 'type' => 'test', 'description' => 'first', 'action_key' => 'prize-rank-first:' . $first->id]);
+        RewardTransaction::create(['user_id' => $second->id, 'points' => 200, 'type' => 'test', 'description' => 'second', 'action_key' => 'prize-rank-second:' . $second->id]);
+
+        $response = $this->actingAs($admin)->from(route('admin.rewards.index'))->post(route('admin.rewards.prizes.award'), [
+            'period_type' => 'week',
+            'rank' => 1,
+            'winner_user_id' => $second->id,
+            'title' => 'არასწორი გამარჯვებული',
+            'points_awarded' => 100,
+        ]);
+
+        $response->assertSessionHasErrors();
+        $this->assertDatabaseCount('reward_prizes', 0);
+        $this->assertDatabaseMissing('reward_transactions', ['type' => 'prize', 'user_id' => $second->id]);
     }
 
     public function test_points_discount_is_capped_at_thirty_percent(): void

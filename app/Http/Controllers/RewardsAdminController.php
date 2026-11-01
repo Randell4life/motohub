@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\RewardRedemption;
+use App\Models\RewardPrize;
 use App\Models\RewardTransaction;
 use App\Models\StoreOrder;
 use App\Models\User;
@@ -36,6 +37,9 @@ class RewardsAdminController extends Controller
             ->withQueryString();
 
         $settings = DB::table('reward_settings')->pluck('value', 'key');
+        $prizes = RewardPrize::with('winner:id,name,email', 'admin:id,name')->latest('period_start')->latest('rank')->limit(60)->get();
+        $weeklyCandidates = app(RewardsService::class)->leaderboard($request->user(), 'week')['entries'];
+        $monthlyCandidates = app(RewardsService::class)->leaderboard($request->user(), 'month')['entries'];
         $totals = [
             'issued' => (int) DB::table('reward_transactions')->where('points', '>', 0)->sum('points'),
             'redeemed' => (int) DB::table('reward_transactions')->where('type', 'redemption')->sum(DB::raw('ABS(points)')),
@@ -65,7 +69,7 @@ class RewardsAdminController extends Controller
             ->groupBy('user_id')
             ->pluck('balance', 'user_id');
 
-        return view('rewards.admin', compact('redemptions', 'storeOrders', 'settings', 'totals', 'users', 'balances'));
+        return view('rewards.admin', compact('redemptions', 'storeOrders', 'settings', 'totals', 'users', 'balances', 'prizes'));
     }
 
     public function update(Request $request, RewardRedemption $redemption)
@@ -135,6 +139,51 @@ class RewardsAdminController extends Controller
         });
 
         return back()->with('success', 'მომხმარებლის ქულების ბალანსი განახლდა.');
+    }
+
+    public function awardPrize(Request $request, RewardsService $rewards)
+    {
+        $this->authorizeAdmin($request);
+        $data = $request->validate([
+            'period_type' => ['required', 'in:week,month'],
+            'rank' => ['required', 'integer', 'between:1,10'],
+            'winner_user_id' => ['required', 'integer', 'exists:users,id'],
+            'title' => ['required', 'string', 'max:120'],
+            'description' => ['nullable', 'string', 'max:1000'],
+            'points_awarded' => ['nullable', 'integer', 'min:0', 'max:1000000'],
+        ]);
+
+        $periodStart = $data['period_type'] === 'month' ? now()->startOfMonth()->toDateString() : now()->startOfWeek()->toDateString();
+        $board = $rewards->leaderboard($request->user(), $data['period_type']);
+        $winner = collect($board['entries'])->firstWhere('rank', (int) $data['rank']);
+        abort_unless($winner && (int) $winner['user_id'] === (int) $data['winner_user_id'], 422, 'არჩეული მომხმარებელი ამ პერიოდის ამ ადგილზე არ არის.');
+
+        DB::transaction(function () use ($request, $data, $periodStart, $winner) {
+            $prize = RewardPrize::create([
+                'period_type' => $data['period_type'],
+                'period_start' => $periodStart,
+                'rank' => $data['rank'],
+                'winner_user_id' => $winner['user_id'],
+                'awarded_by' => $request->user()->id,
+                'title' => trim($data['title']),
+                'description' => $data['description'] ?? null,
+                'points_awarded' => (int) ($data['points_awarded'] ?? 0),
+                'awarded_at' => now(),
+            ]);
+
+            if ($prize->points_awarded > 0) {
+                RewardTransaction::create([
+                    'user_id' => $prize->winner_user_id,
+                    'points' => $prize->points_awarded,
+                    'type' => 'prize',
+                    'description' => 'Rewards პრიზი: ' . $prize->title,
+                    'action_key' => 'leaderboard-prize:' . $prize->period_type . ':' . $prize->period_start->toDateString() . ':' . $prize->rank,
+                    'metadata' => ['prize_id' => $prize->id, 'period_type' => $prize->period_type, 'rank' => $prize->rank],
+                ]);
+            }
+        });
+
+        return back()->with('success', 'პრიზი გადაეცა გამარჯვებულს.');
     }
 
     public function settings(Request $request, RewardsService $rewards)
