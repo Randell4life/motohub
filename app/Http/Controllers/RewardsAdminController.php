@@ -40,7 +40,6 @@ class RewardsAdminController extends Controller
         $prizes = RewardPrize::with('winner:id,name,email', 'admin:id,name')->latest('period_start')->latest('rank')->limit(60)->get();
         $weeklyCandidates = app(RewardsService::class)->leaderboard($request->user(), 'week')['entries'];
         $monthlyCandidates = app(RewardsService::class)->leaderboard($request->user(), 'month')['entries'];
-        $prizes = RewardPrize::with('winner:id,name,email', 'admin:id,name')->latest('period_start')->latest('rank')->limit(60)->get();
         $totals = [
             'issued' => (int) DB::table('reward_transactions')->where('points', '>', 0)->sum('points'),
             'redeemed' => (int) DB::table('reward_transactions')->where('type', 'redemption')->sum(DB::raw('ABS(points)')),
