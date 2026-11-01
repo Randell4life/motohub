@@ -118,7 +118,7 @@ public function profile(): RedirectResponse|View
         $plan = ServiceCenter::subscriptionPlans()[$data['subscription_plan']];
         $data['subscription_price'] = $plan['price'];
         $data['subscription_status'] = $plan['price'] > 0 ? 'pending_payment' : 'active';
-        $data['subscription_started_at'] = now();
+        $data['subscription_started_at'] = $plan['price'] > 0 ? null : now();
         $data['subscription_ends_at'] = null;
 
         DB::transaction(function () use ($data) {
@@ -156,6 +156,7 @@ public function profile(): RedirectResponse|View
     public function storeService(Request $request): RedirectResponse
     {
         $center = $this->ownedCenter();
+        abort_unless($center->canUseFeature('services'), 403, $center->featureLockedMessage('services'));
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:160'],
@@ -214,6 +215,8 @@ public function profile(): RedirectResponse|View
     public function updateHours(Request $request): RedirectResponse
     {
         $center = $this->ownedCenter();
+        abort_unless($center->canUseFeature('services'), 403, $center->featureLockedMessage('services'));
+        abort_unless($center->canUseFeature('services'), 403, $center->featureLockedMessage('services'));
 
         $data = $request->validate([
             'hours' => ['required', 'array'],
