@@ -1374,3 +1374,46 @@ button:disabled,[aria-disabled="true"]{opacity:.55;cursor:not-allowed}
  .catalog-page .catalog-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
  .catalog-page .item-card .item-image { min-height:170px; }
 }
+
+
+/* MotoHub parts marketplace — native mobile finish */
+.parts-filter-panel{position:relative}
+.parts-filter-panel .filter-panel-head{align-items:flex-start}
+.parts-filter-panel .parts-filter-grid{align-items:start}
+.parts-filter-panel input,.parts-filter-panel select{min-height:46px;border-radius:10px}
+.parts-filter-panel .parts-filter-wide{grid-column:1/-1}
+.catalog-page .catalog-shortcuts{display:flex;flex-wrap:wrap;gap:9px;margin:12px 0}
+.catalog-page .catalog-grid{align-items:stretch}
+.catalog-page .item-card{display:flex;flex-direction:column;min-width:0;min-height:100%}
+.catalog-page .item-card-content{display:flex;flex:1;flex-direction:column;min-width:0}
+.catalog-page .item-card .item-bottom{margin-top:auto;padding-top:12px}
+.catalog-page .item-card .parts-stock{display:block;margin-top:7px}
+.catalog-page .item-card .item-image{width:100%;aspect-ratio:16/10;height:auto;min-height:130px;object-fit:cover}
+.part-detail-page{padding-bottom:calc(34px + env(safe-area-inset-bottom))}
+.part-detail-page .part-detail-gallery{min-width:0}
+.part-detail-page .part-detail-gallery>img{max-width:100%;object-fit:contain}
+.part-detail-page .part-detail-description,.part-detail-page .part-detail-specs{min-width:0}
+.part-detail-page .part-detail-buy{min-width:0}
+.part-detail-page .part-contact-btn,.part-detail-page .part-favorite-btn{min-height:48px}
+.part-detail-page :where(button,a,input,select,textarea):focus-visible{outline:2px solid #70b7ff;outline-offset:3px}
+@media(max-width:680px){
+ .parts-filter-panel{padding:14px}
+ .parts-filter-panel .parts-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .parts-filter-panel .parts-filter-wide{grid-column:1/-1}
+ .catalog-page .catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .catalog-page .item-card .item-image{min-height:125px}
+ .part-detail-page .part-detail-layout{grid-template-columns:minmax(0,1fr)}
+ .part-detail-page .part-detail-buy{position:static;order:-1}
+ .part-detail-page .part-detail-gallery{min-height:190px}
+ .part-detail-page .part-detail-gallery>img{max-height:340px}
+ .part-detail-page .part-detail-spec-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:390px){
+ .parts-filter-panel .parts-filter-grid{grid-template-columns:1fr}
+ .parts-filter-panel .parts-filter-wide{grid-column:auto}
+ .catalog-page .catalog-grid{grid-template-columns:1fr}
+ .catalog-page .item-card .item-image{aspect-ratio:16/9}
+ .part-detail-page .part-detail-spec-grid{grid-template-columns:1fr}
+ .part-detail-page .part-detail-heading{align-items:flex-start}
+ .part-detail-page .part-detail-id{flex-shrink:0}
+}
