@@ -15,9 +15,6 @@ return new class extends Migration
             $table->timestamp('subscription_started_at')->nullable()->after('subscription_price');
             $table->timestamp('subscription_ends_at')->nullable()->after('subscription_started_at');
             $table->index(['subscription_plan', 'subscription_status'], 'sc_subscription_plan_status_idx');
-            $table->string('subscription_requested_plan', 20)->nullable()->after('subscription_ends_at');
-            $table->string('subscription_request_note', 500)->nullable()->after('subscription_requested_plan');
-            $table->timestamp('subscription_requested_at')->nullable()->after('subscription_request_note');
         });
     }
 
@@ -31,7 +28,6 @@ return new class extends Migration
                 'subscription_price',
                 'subscription_started_at',
                 'subscription_ends_at',
-                'subscription_requested_plan', 'subscription_request_note', 'subscription_requested_at',
             ]);
         });
     }
