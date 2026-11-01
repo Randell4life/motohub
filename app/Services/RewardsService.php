@@ -189,6 +189,39 @@ class RewardsService
         ];
     }
 
+    /** Weekly or monthly ranking based on points earned during the selected period. */
+    public function leaderboard(User $user, string $period = 'week'): array
+    {
+        $start = $period === 'month' ? now()->startOfMonth() : now()->startOfWeek();
+        $rows = DB::table('reward_transactions')
+            ->join('users', 'users.id', '=', 'reward_transactions.user_id')
+            ->where('reward_transactions.points', '>', 0)
+            ->where('reward_transactions.created_at', '>=', $start)
+            ->where('reward_transactions.created_at', '<=', now())
+            ->select('users.id', 'users.name')
+            ->selectRaw('SUM(reward_transactions.points) as points')
+            ->groupBy('users.id', 'users.name')
+            ->orderByDesc('points')
+            ->orderBy('users.name')
+            ->get();
+
+        $ranked = $rows->values()->map(fn ($row, $index) => [
+            'rank' => $index + 1,
+            'user_id' => (int) $row->id,
+            'name' => $row->name,
+            'points' => (int) $row->points,
+        ]);
+        $mine = $ranked->firstWhere('user_id', (int) $user->id);
+
+        return [
+            'period' => $period,
+            'starts_at' => $start->toDateString(),
+            'ends_at' => now()->toDateString(),
+            'entries' => $ranked->take(10)->values()->all(),
+            'current_user' => $mine,
+        ];
+    }
+
     public function onRegistration(User $user, ?string $referralCode): void
     {
         $this->ensureReferralCode($user);
