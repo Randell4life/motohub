@@ -943,6 +943,31 @@
                 animation-duration: .01ms !important;
             }
         }
+    
+
+/* MotoHub catalogue — responsive refinement */
+@media (max-width: 760px) {
+    .filters { border-radius: 14px; box-shadow: 0 12px 30px rgba(0,0,0,.2); }
+    .filters form { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0 12px; }
+    .filters form .field:first-child,
+    .filters form .featured-filter,
+    .filters form > button,
+    .filters form > .reset-button { grid-column: 1 / -1; }
+    .filters form .field { min-width: 0; }
+    .filters form .range { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    .results-header { gap: 12px; }
+    .results-header h2 { font-size: 20px; }
+    .sort { margin-top: 4px; }
+    .active-filters { line-height: 1.7; }
+}
+@media (max-width: 420px) {
+    .filters form { grid-template-columns: 1fr; }
+    .filters form .field:first-child,
+    .filters form .featured-filter,
+    .filters form > button,
+    .filters form > .reset-button { grid-column: auto; }
+}
+
     </style>
 </head>
 
