@@ -17,10 +17,12 @@ class RewardsApiController extends Controller
     {
         $user = $request->user();
         $code = $rewards->ensureReferralCode($user);
+        $dailyCheckIn = $rewards->dailyCheckIn($user);
         return response()->json([
             'balance' => $rewards->balance($user),
             'points_per_gel' => $rewards->setting('points_per_gel', 100),
             'minimum_redemption_points' => $rewards->setting('minimum_redemption_points', 500),
+            'daily_checkin' => $dailyCheckIn,
             'referral_code' => $code,
             'referral_url' => url('/invite/' . $code),
             'referrals_count' => User::where('referred_by_user_id', $user->id)->count(),
