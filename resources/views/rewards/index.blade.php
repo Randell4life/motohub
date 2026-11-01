@@ -12,6 +12,10 @@
             <small style="color:#9bb3ce">100 ქულა = 1 ₾ · კურსი შეიძლება შეიცვალოს</small>
         </div>
     </section>
+    <section style="margin-top:16px;padding:20px 22px;border:1px solid #294766;border-radius:16px;background:linear-gradient(120deg,#10243a,#0a1523);display:flex;justify-content:space-between;gap:18px;align-items:center;flex-wrap:wrap">
+        <div><span style="color:#78bdff;font-size:11px;font-weight:900;letter-spacing:1.5px">DAILY RIDER STREAK</span><h2 style="margin:7px 0">ყოველდღიური შესვლა</h2><p style="margin:0;color:#9bb2cc">დღეში ერთხელ მიიღე {{ $dailyCheckIn['daily_points'] }} ქულა. ზედიზედ 7 დღე — დამატებითი {{ $dailyCheckIn['weekly_bonus_points'] }} ქულა.</p></div>
+        <div style="text-align:right"><strong style="display:block;color:#70baff;font-size:30px">{{ $dailyCheckIn['streak'] }} დღე</strong><small style="color:#9bb2cc">მიმდინარე სერია</small><strong style="display:block;margin-top:5px;color:#70d6aa">{{ $dailyCheckIn['already_checked_in'] ? 'დღევანდელი ბონუსი მიღებულია' : '+' . number_format($dailyCheckIn['points_awarded']) . ' ქულა დაემატა დღეს' }}</strong></div>
+    </section>
     @if(session('success'))<p style="padding:12px;margin:16px 0;border:1px solid #327b64;border-radius:10px;color:#9ce6c9">{{ session('success') }}</p>@endif
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:22px">
         <section style="padding:22px;border:1px solid #29415e;border-radius:16px;background:#0d1827">
