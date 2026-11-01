@@ -1,11 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\\Http\\Controllers;
 
-use App\Models\RewardRedemption;
-use App\Services\RewardsService;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\\Models\\RewardRedemption;
+use App\\Models\\RewardTransaction;
+use App\\Models\\User;
+use App\\Services\\RewardsService;
+use Illuminate\\Http\\Request;
+use Illuminate\\Support\\Facades\\DB;
+use Illuminate\\Support\\Str;
 
 class RewardsAdminController extends Controller
 {
@@ -24,7 +27,24 @@ class RewardsAdminController extends Controller
             'redeemed' => (int) DB::table('reward_transactions')->where('type', 'redemption')->sum(DB::raw('ABS(points)')),
             'pending' => RewardRedemption::where('status', 'pending')->count(),
         ];
-        return view('rewards.admin', compact('redemptions', 'settings', 'totals'));
+
+        $usersQuery = User::query()->select(['id', 'name', 'email'])->when($request->filled('q'), function ($query) use ($request) {
+            $term = trim((string) $request->input('q'));
+            $query->where(function ($sub) use ($term) {
+                $sub->where('name', 'like', '%' . $term . '%')
+                    ->orWhere('email', 'like', '%' . $term . '%');
+                if (ctype_digit($term)) $sub->orWhere('id', (int) $term);
+            });
+        })->orderBy('name');
+
+        $users = $usersQuery->paginate(20)->withQueryString();
+        $balances = RewardTransaction::query()
+            ->whereIn('user_id', $users->getCollection()->pluck('id'))
+            ->selectRaw('user_id, SUM(points) as balance')
+            ->groupBy('user_id')
+            ->pluck('balance', 'user_id');
+
+        return view('rewards.admin', compact('redemptions', 'settings', 'totals', 'users', 'balances'));
     }
 
     public function update(Request $request, RewardRedemption $redemption)
@@ -36,15 +56,44 @@ class RewardsAdminController extends Controller
             abort_unless($item->status === 'pending', 422, 'მოთხოვნა უკვე დამუშავებულია.');
             $item->update(['status' => $data['status'], 'admin_note' => $data['admin_note'] ?? null, 'processed_at' => now()]);
             if ($data['status'] === 'rejected') {
-                DB::table('reward_transactions')->insert([
+                RewardTransaction::create([
                     'user_id' => $item->user_id, 'points' => $item->points, 'type' => 'refund',
                     'description' => 'უარყოფილი მოთხოვნის ქულების დაბრუნება #' . $item->id,
                     'action_key' => 'redemption-refund:' . $item->id,
-                    'created_at' => now(), 'updated_at' => now(),
                 ]);
             }
         });
         return back()->with('success', 'მოთხოვნა განახლდა.');
+    }
+
+    public function adjust(Request $request, User $user)
+    {
+        $this->authorizeAdmin($request);
+        $data = $request->validate([
+            'operation' => ['required', 'in:add,subtract'],
+            'points' => ['required', 'integer', 'min:1', 'max:1000000'],
+            'reason' => ['required', 'string', 'min:3', 'max:500'],
+        ]);
+
+        DB::transaction(function () use ($user, $data) {
+            $lockedUser = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $balance = (int) RewardTransaction::where('user_id', $lockedUser->id)->sum('points');
+            if ($data['operation'] === 'subtract') {
+                abort_if($data['points'] > $balance, 422, 'მომხმარებელს ამდენი ქულა არ აქვს.');
+            }
+
+            $points = $data['operation'] === 'add' ? (int) $data['points'] : -(int) $data['points'];
+            RewardTransaction::create([
+                'user_id' => $lockedUser->id,
+                'points' => $points,
+                'type' => 'admin_adjustment',
+                'description' => 'ადმინისტრატორის კორექტირება: ' . trim($data['reason']),
+                'action_key' => 'admin-adjustment:' . Str::uuid(),
+                'metadata' => ['admin_id' => $requestAdminId = auth()->id(), 'operation' => $data['operation']],
+            ]);
+        });
+
+        return back()->with('success', 'მომხმარებლის ქულების ბალანსი განახლდა.');
     }
 
     public function settings(Request $request, RewardsService $rewards)
