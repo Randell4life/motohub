@@ -385,6 +385,22 @@ class MobileExtendedController extends Controller
         return response()->json(['message' => 'ღონისძიება გამოქვეყნდა.', 'event' => DB::table('moto_events')->find($id)], 201);
     }
 
+
+    public function requestServiceCenterSubscription(Request $request)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        $data = $request->validate([
+            'subscription_plan' => ['required', Rule::in(array_keys(\App\Models\ServiceCenter::subscriptionPlans()))],
+            'subscription_request_note' => ['nullable', 'string', 'max:500'],
+        ]);
+        if ($data['subscription_plan'] === 'start') {
+            $center->update(['subscription_plan'=>'start','subscription_status'=>'active','subscription_price'=>0,'subscription_started_at'=>now(),'subscription_ends_at'=>null,'subscription_requested_plan'=>null,'subscription_request_note'=>null,'subscription_requested_at'=>null]);
+            return response()->json(['message'=>'START პაკეტი გააქტიურდა.','center'=>$center->fresh()]);
+        }
+        $center->update(['subscription_requested_plan'=>$data['subscription_plan'],'subscription_request_note'=>$data['subscription_request_note']??null,'subscription_requested_at'=>now()]);
+        return response()->json(['message'=>'პაკეტის მოთხოვნა გაიგზავნა. MotoHub-ის გუნდი დაგიკავშირდება გადახდის დეტალებისა და აქტივაციის დასადასტურებლად.','center'=>$center->fresh()]);
+    }
+
     public function serviceCenterDashboard(Request $request)
     {
         $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
@@ -393,6 +409,8 @@ class MobileExtendedController extends Controller
         return response()->json([
             'center' => $center->load(['services', 'hours']),
             'subscription_plans' => \App\Models\ServiceCenter::subscriptionPlans(),
+            'subscription_status_effective' => $center->effectiveSubscriptionStatus(),
+            'feature_access' => $center->featureAccess(),
             'bookings' => $center->bookings()->with(['service','workOrder'])->latest('scheduled_at')->limit(60)->get(),
             'orders' => $orders,
             'technicians' => $center->technicians()->orderBy('name')->get(),
@@ -405,6 +423,7 @@ class MobileExtendedController extends Controller
     public function storeTechnician(Request $request)
     {
         $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('team'), 403, $center->featureLockedMessage('team'));
         $data = $request->validate(['name' => ['required','string','max:160'], 'phone' => ['nullable','string','max:40'], 'specialty' => ['nullable','string','max:160']]);
         return response()->json(['message' => 'ხელოსანი დაემატა.', 'technician' => $center->technicians()->create($data)], 201);
     }
@@ -412,6 +431,7 @@ class MobileExtendedController extends Controller
     public function storeBay(Request $request)
     {
         $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('team'), 403, $center->featureLockedMessage('team'));
         $data = $request->validate(['name' => ['required','string','max:100'], 'description' => ['nullable','string','max:255']]);
         return response()->json(['message' => 'სამუშაო ბოქსი დაემატა.', 'bay' => $center->bays()->create($data)], 201);
     }
@@ -419,6 +439,7 @@ class MobileExtendedController extends Controller
     public function storeInventory(Request $request)
     {
         $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('inventory'), 403, $center->featureLockedMessage('inventory'));
         $data = $request->validate([
             'sku'=>['nullable','string','max:80'],'name'=>['required','string','max:180'],'brand'=>['nullable','string','max:120'],
             'category'=>['nullable','string','max:120'],'fitment'=>['nullable','string','max:255'],'quantity'=>['required','integer','min:0'],
@@ -440,6 +461,7 @@ class MobileExtendedController extends Controller
     public function assignWorkOrder(Request $request, int $workOrder)
     {
         $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('work_orders'), 403, $center->featureLockedMessage('work_orders'));
         $order = \App\Models\WorkOrder::where('service_center_id', $center->id)->findOrFail($workOrder);
         $data = $request->validate(['assigned_technician_id'=>['nullable','integer'],'service_center_bay_id'=>['nullable','integer']]);
         if (!empty($data['assigned_technician_id'])) abort_unless($center->technicians()->whereKey($data['assigned_technician_id'])->exists(), 422);
@@ -451,6 +473,7 @@ class MobileExtendedController extends Controller
     public function addWorkOrderPart(Request $request, int $workOrder)
     {
         $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('inventory'), 403, $center->featureLockedMessage('inventory'));
         $order = \App\Models\WorkOrder::where('service_center_id', $center->id)->findOrFail($workOrder);
         $data = $request->validate(['inventory_item_id'=>['required','integer'],'quantity'=>['required','integer','min:1']]);
         DB::transaction(function () use ($center, $order, $data, $request) {
@@ -470,6 +493,7 @@ class MobileExtendedController extends Controller
     public function recordWorkOrderPayment(Request $request, int $workOrder)
     {
         $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('finance'), 403, $center->featureLockedMessage('finance'));
         $order = \App\Models\WorkOrder::where('service_center_id', $center->id)->findOrFail($workOrder);
         $data = $request->validate(['amount'=>['required','numeric','gt:0'],'method'=>['required','in:cash,card,transfer,other'],'reference'=>['nullable','string','max:120'],'note'=>['nullable','string','max:2000']]);
         $payment = DB::transaction(function () use ($data, $center, $order, $request) {
@@ -509,6 +533,7 @@ class MobileExtendedController extends Controller
     public function updateWorkOrderStatus(Request $request, int $workOrder)
     {
         $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('work_orders'), 403, $center->featureLockedMessage('work_orders'));
         $order = \App\Models\WorkOrder::where('service_center_id', $center->id)->findOrFail($workOrder);
         $data = $request->validate(['status'=>['required','in:received,diagnostics,waiting_for_parts,in_repair,completed,handed_over,cancelled']]);
         $changes = ['status'=>$data['status']];
@@ -679,6 +704,7 @@ class MobileExtendedController extends Controller
     public function createServiceWorkOrder(Request $request)
     {
         $center = \App\Models\ServiceCenter::where('owner_id',$request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('work_orders'), 403, $center->featureLockedMessage('work_orders'));
         $data = $request->validate([
             'service_booking_id'=>['required','integer','exists:service_center_bookings,id'],
             'intake_odometer'=>['nullable','integer','min:0'],'intake_condition'=>['nullable','string','max:5000'],
