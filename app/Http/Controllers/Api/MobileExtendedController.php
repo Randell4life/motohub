@@ -604,6 +604,7 @@ class MobileExtendedController extends Controller
     public function updateServiceBookingStatus(Request $request, int $booking)
     {
         $center = \App\Models\ServiceCenter::where('owner_id',$request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('bookings'), 403, $center->featureLockedMessage('bookings'));
         $item = $center->bookings()->findOrFail($booking);
         $data = $request->validate(['status'=>['required','in:confirmed,declined,cancelled,completed']]);
         $item->update($data);
@@ -639,7 +640,7 @@ class MobileExtendedController extends Controller
         $plan = \App\Models\ServiceCenter::subscriptionPlans()[$data['subscription_plan']];
         $data['subscription_price'] = $plan['price'];
         $data['subscription_status'] = $plan['price'] > 0 ? 'pending_payment' : 'active';
-        $data['subscription_started_at'] = now();
+        $data['subscription_started_at'] = $plan['price'] > 0 ? null : now();
         $data['subscription_ends_at'] = null;
         $center = DB::transaction(function () use ($request,$data) {
             $base = Str::slug($data['name']) ?: 'service-center'; $slug = $base;
@@ -662,6 +663,7 @@ class MobileExtendedController extends Controller
     public function storeCenterService(Request $request)
     {
         $center = \App\Models\ServiceCenter::where('owner_id',$request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('services'), 403, $center->featureLockedMessage('services'));
         $data = $request->validate(['name'=>['required','string','max:160'],'description'=>['nullable','string','max:1500'],'price_type'=>['required','in:fixed,from,quote'],'price'=>['nullable','numeric','min:0','max:99999999'],'duration_minutes'=>['required','integer','min:5','max:1440']]);
         if($data['price_type']!=='quote' && !isset($data['price'])) throw ValidationException::withMessages(['price'=>'ფასი აუცილებელია.']);
         $service = $center->services()->create($data+['price'=>$data['price_type']==='quote'?null:$data['price'],'is_active'=>true]);
@@ -671,6 +673,7 @@ class MobileExtendedController extends Controller
     public function updateCenterService(Request $request, int $service)
     {
         $center = \App\Models\ServiceCenter::where('owner_id',$request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('services'), 403, $center->featureLockedMessage('services'));
         $item = $center->services()->findOrFail($service);
         $data = $request->validate(['name'=>['required','string','max:160'],'description'=>['nullable','string','max:1500'],'price_type'=>['required','in:fixed,from,quote'],'price'=>['nullable','numeric','min:0','max:99999999'],'duration_minutes'=>['required','integer','min:5','max:1440'],'is_active'=>['required','boolean']]);
         if($data['price_type']!=='quote' && !isset($data['price'])) throw ValidationException::withMessages(['price'=>'ფასი აუცილებელია.']);
@@ -681,6 +684,7 @@ class MobileExtendedController extends Controller
     public function updateCenterHours(Request $request)
     {
         $center = \App\Models\ServiceCenter::where('owner_id',$request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('services'), 403, $center->featureLockedMessage('services'));
         $data = $request->validate(['hours'=>['required','array'],'hours.*.is_closed'=>['required','boolean'],'hours.*.opens_at'=>['nullable','date_format:H:i'],'hours.*.closes_at'=>['nullable','date_format:H:i']]);
         foreach(range(0,6) as $day){
             $row=$data['hours'][$day]??null; if(!$row) continue;
