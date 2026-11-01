@@ -1,7 +1,7 @@
 @extends('layouts.motohub-features')
 
 @section('content')
-<main class="container" style="max-width:1100px;padding:42px 18px 70px;color:#f4f8ff">
+<main class="container mh-rewards mh-rewards-wallet" style="max-width:1100px;padding:42px 18px 70px;color:#f4f8ff">
     <section style="padding:30px;border:1px solid #294766;border-radius:22px;background:radial-gradient(ellipse at 90% 0,#1b5689 0,transparent 45%),linear-gradient(145deg,#14263d,#091421)">
         <span style="color:#82c4ff;font-size:11px;font-weight:900;letter-spacing:2px">MOTOHUB / REWARDS</span>
         <h1 style="font-size:clamp(30px,5vw,48px);font-weight:950;margin:12px 0">შენი აქტიურობა <span style="color:#62b4ff">ფასდება.</span></h1>
