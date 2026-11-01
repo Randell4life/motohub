@@ -92,7 +92,7 @@ class ServiceCenter extends Model
     }
     public function featureLockedMessage(string $feature): string
     {
-        $required = match ($feature) {'work_orders','team','finance'=>'PRO','inventory','inventory_usage','financial_reports'=>'BUSINESS',default=>'PREMIUM'};
+        $required = match ($feature) {'services','bookings'=>'START','work_orders','team','finance'=>'PRO','inventory','inventory_usage','financial_reports'=>'BUSINESS',default=>'PREMIUM'};
         return ! $this->subscriptionIsActive() ? 'გამოწერა აქტიური არ არის. ფასიანი ფუნქციების გასააქტიურებლად განაახლე გამოწერა.' : $required.' პაკეტი საჭიროა ამ ფუნქციის გამოსაყენებლად.';
     }
 
