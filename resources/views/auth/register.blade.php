@@ -387,6 +387,7 @@
             <form method="POST" action="{{ route('register.store') }}">
                 @csrf
 
+                <input type="hidden" name="referral_code" value="{{ old('referral_code', session('referral_code')) }}">
                 <div class="form-grid">
                     <div class="field">
                         <label for="name">სახელი და გვარი</label>
