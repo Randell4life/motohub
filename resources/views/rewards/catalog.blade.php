@@ -15,7 +15,11 @@
    @if($item->image_url)<img src="{{ $item->image_url }}" alt="{{ $item->title }}" style="width:100%;height:175px;object-fit:cover">@else<div style="height:125px;display:grid;place-items:center;background:linear-gradient(135deg,#142b43,#081421);font-size:42px">🎁</div>@endif
    <div style="padding:16px"><h2 style="font-size:19px;margin:0 0 8px">{{ $item->title }}</h2><p style="min-height:42px;color:#9bb2cc;font-size:13px">{{ $item->description }}</p>
     <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0"><strong style="color:#7dc1ff;font-size:21px">{{ number_format($item->points_cost) }} ქ.</strong><small style="color:#91a8c2">მარაგი: {{ $item->stock }}</small></div>
-    <form method="POST" action="{{ route('rewards.catalog.redeem',$item) }}">@csrf<button {{ $balance < $item->points_cost ? 'disabled' : '' }} style="width:100%;padding:12px;border:0;border-radius:9px;background:{{ $balance < $item->points_cost ? '#33465a' : '#1677ff' }};color:white;font-weight:900;cursor:pointer">ქულებით მიღება</button></form>
+    <form method="POST" action="{{ route('rewards.catalog.redeem',$item) }}" style="display:grid;gap:7px">@csrf
+     <input name="customer_name" required maxlength="160" value="{{ auth()->user()->name }}" placeholder="მიმღების სახელი" style="width:100%;box-sizing:border-box;padding:9px;background:#081421;color:white;border:1px solid #31577b;border-radius:7px">
+     <input name="phone" required maxlength="40" value="{{ auth()->user()->phone }}" placeholder="ტელეფონი" style="width:100%;box-sizing:border-box;padding:9px;background:#081421;color:white;border:1px solid #31577b;border-radius:7px">
+     <input name="address" required maxlength="1000" placeholder="მიწოდების მისამართი" style="width:100%;box-sizing:border-box;padding:9px;background:#081421;color:white;border:1px solid #31577b;border-radius:7px">
+     <button {{ $balance < $item->points_cost ? 'disabled' : '' }} style="width:100%;padding:12px;border:0;border-radius:9px;background:{{ $balance < $item->points_cost ? '#33465a' : '#1677ff' }};color:white;font-weight:900;cursor:pointer">ქულებით მიღება</button></form>
    </div>
   </article>
  @empty <p style="color:#9bb2cc">საჩუქრები ჯერ არ დამატებულა. მალე დაემატება ახალი შეთავაზებები.</p> @endforelse
