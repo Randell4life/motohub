@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\RewardTransaction;
+use App\Models\RewardPrize;
 use App\Models\User;
 use App\Services\RewardsCheckout;
 use Illuminate\Foundation\Testing\RefreshDatabase;
