@@ -151,6 +151,8 @@ class RewardsAdminController extends Controller
             'referral_first_post_points', 'daily_checkin_points',
             'weekly_streak_bonus_points', 'silver_tier_points',
             'gold_tier_points', 'platinum_tier_points',
+            'badge_welcome_points', 'badge_first_post_points',
+            'badge_first_listing_points', 'badge_invite_points', 'badge_streak_points',
         ];
 
         $current = DB::table('reward_settings')->pluck('value', 'key');
