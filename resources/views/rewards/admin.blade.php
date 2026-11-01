@@ -5,11 +5,35 @@
   <span style="color:#78bdff;font-size:11px;font-weight:900;letter-spacing:2px">MOTOHUB / ADMIN</span><h1 style="margin:8px 0;font-size:34px">Rewards <span style="color:#70baff">Control.</span></h1><p style="color:#9bb2cc">ქულების ეკონომიკა, მოთხოვნები და მომხმარებლების ჯილდოები.</p>
  </div>
  @if(session('success'))<p style="padding:12px;color:#9ce6c9">{{ session('success') }}</p>@endif
+ @if($errors->any())<div style="padding:12px;margin:12px 0;border:1px solid #9b4545;border-radius:9px;color:#ffb5b5">{{ $errors->first() }}</div>@endif
  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:16px 0">
  @foreach([['გაცემული ქულები',$totals['issued']],['გამოყენებული ქულები',$totals['redeemed']],['მოლოდინის მოთხოვნები',$totals['pending']]] as [$label,$value])
  <div style="padding:17px;border:1px solid #29415e;border-radius:12px;background:#0d1827"><small style="color:#91a8c2">{{ $label }}</small><div style="font-size:25px;font-weight:900;color:#72baff">{{ number_format($value) }}</div></div>
  @endforeach
  </div>
+ <section style="padding:20px;border:1px solid #29415e;border-radius:14px;background:#0d1827;margin:15px 0"><h2>მომხმარებლისთვის ქულების დამატება / ჩამოკლება</h2>
+  <p style="color:#91a8c2">მოძებნე მომხმარებელი სახელით, ელფოსტით ან ID-ით. ყველა ცვლილება ჩაიწერება ქულების ისტორიაში.</p>
+  <form method="GET" action="{{ route('admin.rewards.index') }}" style="display:flex;gap:9px;flex-wrap:wrap;margin:14px 0">
+   <input name="q" value="{{ request('q') }}" placeholder="სახელი, ელფოსტა ან მომხმარებლის ID" style="flex:1;min-width:220px;padding:11px;border:1px solid #294766;border-radius:8px;background:#081421;color:white">
+   <button style="padding:11px 18px;border:0;border-radius:8px;background:#1677ff;color:white;font-weight:800">ძიება</button>
+   @if(request('q'))<a href="{{ route('admin.rewards.index') }}" style="padding:11px;color:#8fc8ff">გასუფთავება</a>@endif
+  </form>
+  @forelse($users as $member)
+   <article style="padding:15px 0;border-top:1px solid #ffffff17;display:grid;grid-template-columns:minmax(180px,1fr) minmax(280px,1.4fr);gap:14px;align-items:center">
+    <div><strong>{{ $member->name }}</strong><small style="display:block;color:#91a8c2">{{ $member->email }} · ID #{{ $member->id }}</small><div style="margin-top:5px;color:#72baff;font-weight:900">{{ number_format((int) ($balances[$member->id] ?? 0)) }} ქულა</div></div>
+    <form method="POST" action="{{ route('admin.rewards.adjust', $member) }}" style="display:grid;grid-template-columns:110px 100px minmax(120px,1fr) auto;gap:7px">
+     @csrf
+     <select name="operation" required style="padding:9px;border:1px solid #294766;border-radius:7px;background:#081421;color:white"><option value="add">დამატება +</option><option value="subtract">ჩამოკლება −</option></select>
+     <input type="number" name="points" min="1" max="1000000" required placeholder="ქულა" style="width:100%;padding:9px;border:1px solid #294766;border-radius:7px;background:#081421;color:white">
+     <input name="reason" required minlength="3" maxlength="500" placeholder="მიზეზი (სავალდებულო)" style="min-width:0;padding:9px;border:1px solid #294766;border-radius:7px;background:#081421;color:white">
+     <button style="padding:9px 12px;border:0;border-radius:7px;background:#1677ff;color:white;font-weight:800">შენახვა</button>
+    </form>
+   </article>
+  @empty
+   <p style="color:#91a8c2">მომხმარებლები ვერ მოიძებნა. ჩაწერე საძიებო სიტყვა ან დატოვე ცარიელი სია.</p>
+  @endforelse
+  <div style="margin-top:12px">{{ $users->links() }}</div>
+ </section>
  <section style="padding:20px;border:1px solid #29415e;border-radius:14px;background:#0d1827;margin:15px 0"><h2>ქულების წესები</h2>
  <form method="POST" action="{{ route('admin.rewards.settings') }}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">@csrf
  @foreach(['points_per_gel'=>'ქულა 1 ₾-ზე','minimum_redemption_points'=>'მინ. გამოყენება','signup_points'=>'რეგისტრაცია','first_post_points'=>'პირველი პოსტი','first_listing_points'=>'პირველი მოტოს განცხადება','referral_signup_points'=>'მეგობრის რეგისტრაცია','referral_first_post_points'=>'მეგობრის პირველი პოსტი'] as $key=>$label)
