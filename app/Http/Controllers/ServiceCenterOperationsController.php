@@ -79,6 +79,8 @@ class ServiceCenterOperationsController extends Controller
     {
         $center = $this->center();
         abort_unless($center->canUseFeature('team'), 403, $center->featureLockedMessage('team'));
+        $limit = $center->technicianLimit();
+        abort_if($limit !== null && $center->technicians()->count() >= $limit, 422, 'შენი პაკეტის ლიმიტია '.$limit.' ხელოსანი. პაკეტის გასაზრდელად გადადი გამოწერის მართვაში.');
         $data = $request->validate([
             'name' => ['required','string','max:160'],
             'phone' => ['nullable','string','max:40'],
@@ -92,6 +94,8 @@ class ServiceCenterOperationsController extends Controller
     {
         $center = $this->center();
         abort_unless($center->canUseFeature('team'), 403, $center->featureLockedMessage('team'));
+        $limit = $center->bayLimit();
+        abort_if($limit !== null && $center->bays()->count() >= $limit, 422, 'შენი პაკეტის ლიმიტია '.$limit.' სამუშაო ბოქსი. პაკეტის გასაზრდელად გადადი გამოწერის მართვაში.');
         $data = $request->validate(['name'=>['required','string','max:100'],'description'=>['nullable','string','max:255']]);
         $center->bays()->create($data);
         return back()->with('success', 'სამუშაო ბოქსი დაემატა.');
