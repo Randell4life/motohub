@@ -88,6 +88,13 @@ Route::prefix('mobile')->group(function () {
         Route::put('/workshop/customers/{customer}/motorcycles/{motorcycle}/service-records/{record}', [MobileExtendedController::class, 'updateWorkshopServiceRecord'])->whereNumber('customer')->whereNumber('motorcycle')->whereNumber('record');
         Route::delete('/workshop/customers/{customer}/motorcycles/{motorcycle}/service-records/{record}', [MobileExtendedController::class, 'deleteWorkshopServiceRecord'])->whereNumber('customer')->whereNumber('motorcycle')->whereNumber('record');
         Route::get('/me', [MobileAccountController::class, 'show']);
+        Route::get('/rewards/catalog', [RewardCatalogController::class, 'mobileIndex']);
+        Route::post('/rewards/catalog/{item}/redeem', [RewardCatalogController::class, 'mobileRedeem'])->whereNumber('item')->middleware('throttle:5,1');
+        Route::get('/admin/rewards/catalog', [RewardCatalogController::class, 'mobileAdminIndex']);
+        Route::post('/admin/rewards/catalog', [RewardCatalogController::class, 'mobileAdminStore'])->middleware('throttle:20,1');
+        Route::patch('/admin/rewards/catalog/{item}', [RewardCatalogController::class, 'mobileAdminUpdate'])->whereNumber('item')->middleware('throttle:20,1');
+        Route::delete('/admin/rewards/catalog/{item}', [RewardCatalogController::class, 'mobileAdminDelete'])->whereNumber('item');
+        Route::patch('/admin/rewards/catalog/orders/{order}', [RewardCatalogController::class, 'mobileAdminOrderUpdate'])->whereNumber('order')->middleware('throttle:20,1');
         Route::get('/rewards', [RewardsApiController::class, 'show']);
         Route::post('/store/checkout', [StoreCheckoutController::class, 'store'])->middleware('throttle:5,1');
         Route::get('/store/orders', [StoreCheckoutController::class, 'index']);
