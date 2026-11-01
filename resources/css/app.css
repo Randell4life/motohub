@@ -107,3 +107,25 @@ body {
         transition: none;
     }
 }
+
+
+/* MotoHub — ხელმისაწვდომობა და თანმიმდევრული ინტერაქციები */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--mh-blue-light, #58a8ff);
+    outline-offset: 3px;
+}
+:where(button, input, select, textarea) { font: inherit; }
+:where(input, select, textarea) { color-scheme: dark; }
+:where(img) { max-width: 100%; }
+::selection { background: rgba(22, 119, 255, .32); color: #fff; }
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+}
+@media (max-width: 640px) {
+    :where(input, select, textarea) { font-size: 16px; }
+}

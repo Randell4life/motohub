@@ -1337,3 +1337,13 @@ body{background:radial-gradient(ellipse at 50% -8%,#1b3152 0,transparent 42%),li
 .admin-page .admin-actions button:active{transform:scale(.98)}
 @media(max-width:390px){.rewards-achievement-grid,.rewards-gift-grid{grid-template-columns:1fr!important}.rewards-gift-card img,.rewards-gift-placeholder{height:155px!important}.rewards-achievement>small{min-height:0}}
 @media(prefers-reduced-motion:reduce){.rewards-page *,.admin-page *{transition:none!important}}
+
+
+/* MotoHub — საერთო UX/ხელმისაწვდომობის დასრულება */
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{outline:2px solid #70b7ff;outline-offset:3px}
+:where(button,input,select,textarea){font:inherit}
+::selection{background:#1677ff55;color:#fff}
+img{max-width:100%}
+button:disabled,[aria-disabled="true"]{opacity:.55;cursor:not-allowed}
+@media(max-width:600px){input,select,textarea{font-size:16px!important}#app{padding-bottom:calc(100px + env(safe-area-inset-bottom))}.bottom-nav{padding-bottom:max(10px,env(safe-area-inset-bottom))}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
