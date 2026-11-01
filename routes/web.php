@@ -57,7 +57,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/rewards', [RewardsAdminController::class, 'index'])->name('admin.rewards.index');
     Route::patch('/admin/rewards/{redemption}', [RewardsAdminController::class, 'update'])->name('admin.rewards.update');
     Route::post('/admin/rewards/users/{user}/adjust', [RewardsAdminController::class, 'adjust'])->middleware('throttle:30,1')->name('admin.rewards.adjust');
-    Route::post('/admin/rewards/settings', [RewardsAdminController::class, 'settings'])->name('admin.rewards.settings');
+    Route::post('/admin/rewards/prizes', [RewardsAdminController::class, 'awardPrize'])->middleware('throttle:20,1')->name('admin.rewards.prizes.award');\n    Route::post('/admin/rewards/settings', [RewardsAdminController::class, 'settings'])->name('admin.rewards.settings');
 });
 
 Route::get('/', function (Request $request) {
