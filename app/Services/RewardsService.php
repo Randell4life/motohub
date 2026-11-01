@@ -51,7 +51,7 @@ class RewardsService
         $this->award($user, $this->setting('signup_points', 100), 'signup', 'MotoHub-ში რეგისტრაცია', 'signup:' . $user->id);
 
         if (!$referralCode) return;
-        $referrer = User::where('referral_code', strtoupper(trim($referralCode)))->whereKeyNot($user->id)->first();
+        $referrer = User::where('referral_code', strtoupper(trim($referralCode)))->where('id', '!=', $user->id)->first();
         if (!$referrer) return;
 
         $user->forceFill(['referred_by_user_id' => $referrer->id])->save();
