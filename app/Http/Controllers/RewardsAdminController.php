@@ -1,14 +1,14 @@
 <?php
 
-namespace App\\Http\\Controllers;
+namespace App\Http\Controllers;
 
-use App\\Models\\RewardRedemption;
-use App\\Models\\RewardTransaction;
-use App\\Models\\User;
-use App\\Services\\RewardsService;
-use Illuminate\\Http\\Request;
-use Illuminate\\Support\\Facades\\DB;
-use Illuminate\\Support\\Str;
+use App\Models\RewardRedemption;
+use App\Models\RewardTransaction;
+use App\Models\User;
+use App\Services\RewardsService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class RewardsAdminController extends Controller
 {
@@ -28,16 +28,22 @@ class RewardsAdminController extends Controller
             'pending' => RewardRedemption::where('status', 'pending')->count(),
         ];
 
-        $usersQuery = User::query()->select(['id', 'name', 'email'])->when($request->filled('q'), function ($query) use ($request) {
-            $term = trim((string) $request->input('q'));
-            $query->where(function ($sub) use ($term) {
-                $sub->where('name', 'like', '%' . $term . '%')
-                    ->orWhere('email', 'like', '%' . $term . '%');
-                if (ctype_digit($term)) $sub->orWhere('id', (int) $term);
-            });
-        })->orderBy('name');
+        $users = User::query()
+            ->select(['id', 'name', 'email'])
+            ->when($request->filled('q'), function ($query) use ($request) {
+                $term = trim((string) $request->input('q'));
+                $query->where(function ($sub) use ($term) {
+                    $sub->where('name', 'like', '%' . $term . '%')
+                        ->orWhere('email', 'like', '%' . $term . '%');
+                    if (ctype_digit($term)) {
+                        $sub->orWhere('id', (int) $term);
+                    }
+                });
+            })
+            ->orderBy('name')
+            ->paginate(20)
+            ->withQueryString();
 
-        $users = $usersQuery->paginate(20)->withQueryString();
         $balances = RewardTransaction::query()
             ->whereIn('user_id', $users->getCollection()->pluck('id'))
             ->selectRaw('user_id, SUM(points) as balance')
@@ -50,46 +56,66 @@ class RewardsAdminController extends Controller
     public function update(Request $request, RewardRedemption $redemption)
     {
         $this->authorizeAdmin($request);
-        $data = $request->validate(['status' => ['required', 'in:approved,rejected'], 'admin_note' => ['nullable', 'string', 'max:1000']]);
+        $data = $request->validate([
+            'status' => ['required', 'in:approved,rejected'],
+            'admin_note' => ['nullable', 'string', 'max:1000'],
+        ]);
+
         DB::transaction(function () use ($redemption, $data) {
             $item = RewardRedemption::lockForUpdate()->findOrFail($redemption->id);
             abort_unless($item->status === 'pending', 422, 'მოთხოვნა უკვე დამუშავებულია.');
-            $item->update(['status' => $data['status'], 'admin_note' => $data['admin_note'] ?? null, 'processed_at' => now()]);
+            $item->update([
+                'status' => $data['status'],
+                'admin_note' => $data['admin_note'] ?? null,
+                'processed_at' => now(),
+            ]);
+
             if ($data['status'] === 'rejected') {
                 RewardTransaction::create([
-                    'user_id' => $item->user_id, 'points' => $item->points, 'type' => 'refund',
+                    'user_id' => $item->user_id,
+                    'points' => $item->points,
+                    'type' => 'refund',
                     'description' => 'უარყოფილი მოთხოვნის ქულების დაბრუნება #' . $item->id,
                     'action_key' => 'redemption-refund:' . $item->id,
                 ]);
             }
         });
+
         return back()->with('success', 'მოთხოვნა განახლდა.');
     }
 
     public function adjust(Request $request, User $user)
     {
         $this->authorizeAdmin($request);
+
         $data = $request->validate([
             'operation' => ['required', 'in:add,subtract'],
             'points' => ['required', 'integer', 'min:1', 'max:1000000'],
             'reason' => ['required', 'string', 'min:3', 'max:500'],
         ]);
 
-        DB::transaction(function () use ($user, $data) {
+        DB::transaction(function () use ($request, $user, $data) {
             $lockedUser = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
             $balance = (int) RewardTransaction::where('user_id', $lockedUser->id)->sum('points');
+
             if ($data['operation'] === 'subtract') {
                 abort_if($data['points'] > $balance, 422, 'მომხმარებელს ამდენი ქულა არ აქვს.');
             }
 
-            $points = $data['operation'] === 'add' ? (int) $data['points'] : -(int) $data['points'];
+            $points = $data['operation'] === 'add'
+                ? (int) $data['points']
+                : -(int) $data['points'];
+
             RewardTransaction::create([
                 'user_id' => $lockedUser->id,
                 'points' => $points,
                 'type' => 'admin_adjustment',
                 'description' => 'ადმინისტრატორის კორექტირება: ' . trim($data['reason']),
                 'action_key' => 'admin-adjustment:' . Str::uuid(),
-                'metadata' => ['admin_id' => $requestAdminId = auth()->id(), 'operation' => $data['operation']],
+                'metadata' => [
+                    'admin_id' => $request->user()->id,
+                    'operation' => $data['operation'],
+                ],
             ]);
         });
 
@@ -99,12 +125,32 @@ class RewardsAdminController extends Controller
     public function settings(Request $request, RewardsService $rewards)
     {
         $this->authorizeAdmin($request);
-        $data = $request->validate(['settings' => ['required', 'array'], 'settings.*' => ['required', 'integer', 'min:0', 'max:1000000']]);
-        $allowed = ['points_per_gel','minimum_redemption_points','signup_points','first_post_points','first_listing_points','referral_signup_points','referral_first_post_points'];
+        $data = $request->validate([
+            'settings' => ['required', 'array'],
+            'settings.*' => ['required', 'integer', 'min:0', 'max:1000000'],
+        ]);
+
+        $allowed = [
+            'points_per_gel',
+            'minimum_redemption_points',
+            'signup_points',
+            'first_post_points',
+            'first_listing_points',
+            'referral_signup_points',
+            'referral_first_post_points',
+        ];
+
         foreach ($data['settings'] as $key => $value) {
-            if (!in_array($key, $allowed, true)) continue;
-            DB::table('reward_settings')->updateOrInsert(['key' => $key], ['value' => (string) $value, 'updated_at' => now(), 'created_at' => now()]);
+            if (!in_array($key, $allowed, true)) {
+                continue;
+            }
+
+            DB::table('reward_settings')->updateOrInsert(
+                ['key' => $key],
+                ['value' => (string) $value, 'updated_at' => now(), 'created_at' => now()]
+            );
         }
+
         return back()->with('success', 'Rewards-ის წესები განახლდა.');
     }
 }
