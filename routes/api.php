@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\MobileAdminController;
 use App\Http\Controllers\Api\MobilePassportController;
 use App\Http\Controllers\Api\MobileExtendedController;
 use App\Http\Controllers\Api\RewardsApiController;
+use App\Http\Controllers\RewardCatalogController;
 use App\Http\Controllers\StoreCheckoutController;
 use App\Http\Controllers\PartRequestController;
 use App\Http\Middleware\AuthenticateMobileToken;
