@@ -24,7 +24,12 @@ class RewardCatalogController extends Controller
 
     public function redeem(Request $request, RewardCatalogItem $item, RewardsService $rewards)
     {
-        $order = DB::transaction(function () use ($request, $item, $rewards) {
+        $delivery = $request->validate([
+            'customer_name' => ['required', 'string', 'max:160'],
+            'phone' => ['required', 'string', 'max:40'],
+            'address' => ['required', 'string', 'max:1000'],
+        ]);
+        $order = DB::transaction(function () use ($request, $item, $rewards, $delivery) {
             $user = User::whereKey($request->user()->id)->lockForUpdate()->firstOrFail();
             $product = RewardCatalogItem::whereKey($item->id)->lockForUpdate()->firstOrFail();
             abort_unless($product->is_active, 404);
@@ -40,6 +45,9 @@ class RewardCatalogController extends Controller
                 'user_id' => $user->id,
                 'item_id' => $product->id,
                 'item_title' => $product->title,
+                'customer_name' => $delivery['customer_name'],
+                'phone' => $delivery['phone'],
+                'address' => $delivery['address'],
                 'points_spent' => $product->points_cost,
                 'status' => 'pending',
             ]);
@@ -145,14 +153,19 @@ class RewardCatalogController extends Controller
 
     public function mobileRedeem(Request $request, RewardCatalogItem $item, RewardsService $rewards)
     {
-        $order = DB::transaction(function () use ($request, $item, $rewards) {
+        $delivery = $request->validate([
+            'customer_name' => ['required', 'string', 'max:160'],
+            'phone' => ['required', 'string', 'max:40'],
+            'address' => ['required', 'string', 'max:1000'],
+        ]);
+        $order = DB::transaction(function () use ($request, $item, $rewards, $delivery) {
             $user = User::whereKey($request->user()->id)->lockForUpdate()->firstOrFail();
             $product = RewardCatalogItem::whereKey($item->id)->lockForUpdate()->firstOrFail();
             abort_unless($product->is_active, 404);
             if ($product->stock < 1) throw ValidationException::withMessages(['item' => 'საჩუქარი მარაგში აღარ არის.']);
             if ($rewards->balance($user) < $product->points_cost) throw ValidationException::withMessages(['points' => 'ქულების ბალანსი არასაკმარისია.']);
             $product->decrement('stock');
-            $order = RewardCatalogOrder::create(['user_id' => $user->id, 'item_id' => $product->id, 'item_title' => $product->title, 'points_spent' => $product->points_cost, 'status' => 'pending']);
+            $order = RewardCatalogOrder::create(['user_id' => $user->id, 'item_id' => $product->id, 'item_title' => $product->title, 'customer_name' => $delivery['customer_name'], 'phone' => $delivery['phone'], 'address' => $delivery['address'], 'points_spent' => $product->points_cost, 'status' => 'pending']);
             RewardTransaction::create(['user_id' => $user->id, 'points' => -$product->points_cost, 'type' => 'reward_catalog', 'description' => 'Rewards საჩუქარი: ' . $product->title . ' (#' . $order->id . ')', 'action_key' => 'reward-catalog-order:' . $order->id, 'metadata' => ['order_id' => $order->id, 'item_id' => $product->id]]);
             return $order;
         });
