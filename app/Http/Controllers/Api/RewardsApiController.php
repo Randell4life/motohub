@@ -24,6 +24,7 @@ class RewardsApiController extends Controller
             'minimum_redemption_points' => $rewards->setting('minimum_redemption_points', 500),
             'daily_checkin' => $dailyCheckIn,
             'membership_tier' => $rewards->membershipTier($user),
+            'achievements' => $rewards->achievementBadges($user),
             'referral_code' => $code,
             'referral_url' => url('/invite/' . $code),
             'referrals_count' => User::where('referred_by_user_id', $user->id)->count(),
