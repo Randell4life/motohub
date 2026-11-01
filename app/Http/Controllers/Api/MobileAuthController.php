@@ -5,13 +5,14 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\MobileApiToken;
 use App\Models\User;
+use App\Services\RewardsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class MobileAuthController extends Controller
 {
-    public function register(Request $request)
+    public function register(Request $request, RewardsService $rewards)
     {
         $request->merge([
             'email' => mb_strtolower(trim((string) $request->input('email', ''))),
@@ -21,6 +22,7 @@ class MobileAuthController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'phone' => ['nullable', 'string', 'max:30'],
+            'referral_code' => ['nullable', 'string', 'max:20'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
@@ -37,6 +39,7 @@ class MobileAuthController extends Controller
             'phone' => $data['phone'] ?? null,
             'password' => $data['password'],
         ]);
+        $rewards->onRegistration($user, $data['referral_code'] ?? null);
         return response()->json($this->issue($user), 201);
     }
 
