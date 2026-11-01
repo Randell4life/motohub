@@ -33,6 +33,17 @@
         </section>
     </div>
     <section style="margin-top:26px;padding:22px;border:1px solid #29415e;border-radius:16px;background:#0d1827">
+        <h2>ჩემი ქულების გამოყენების მოთხოვნები</h2>
+        @forelse($redemptions as $redemption)
+            <div style="display:flex;justify-content:space-between;gap:14px;padding:13px 0;border-bottom:1px solid #ffffff12;flex-wrap:wrap">
+                <div><strong>{{ number_format($redemption->points) }} ქულა · {{ $redemption->reward_type === 'store' ? 'მაღაზია' : 'სერვისი' }}</strong><small style="display:block;color:#91a8c2">{{ $redemption->created_at->format('d.m.Y H:i') }} · {{ $redemption->notes ?: 'დამატებითი ინფორმაცია არ არის' }}</small></div>
+                <strong style="color:{{ $redemption->status === 'pending' ? '#78bdff' : ($redemption->status === 'approved' ? '#70d6aa' : '#ffbd82') }}">{{ ['pending'=>'მოლოდინში','approved'=>'დადასტურებული','rejected'=>'უარყოფილი'][$redemption->status] ?? $redemption->status }}</strong>
+            </div>
+        @empty
+            <p style="color:#91a8c2">მოთხოვნა ჯერ არ გაგიგზავნია.</p>
+        @endforelse
+    </section>
+    <section style="margin-top:26px;padding:22px;border:1px solid #29415e;border-radius:16px;background:#0d1827">
         <h2>როგორ დააგროვო ქულები</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:14px">
             @foreach([['რეგისტრაცია','100'],['პირველი პოსტი','150'],['პირველი მოტოციკლის განცხადება','150'],['მეგობრის მოწვევა','100'],['მოწვეული მეგობრის პირველი პოსტი','150']] as [$label,$points])
             <div style="padding:14px;border:1px solid #29415e;border-radius:11px;background:#091421"><strong>{{ $label }}</strong><div style="margin-top:8px;color:#69b7ff;font-size:22px;font-weight:900">+{{ $points }} ქულა</div></div>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Part;
 use App\Models\PartListing;
+use App\Services\RewardsService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -205,7 +206,7 @@ class PartController extends Controller
         ]);
     }
 
-    public function show(string $source, int $id): View
+    public function show(string $source, int $id, Request $request, RewardsService $rewards): View
     {
         abort_unless(in_array($source, ['store', 'marketplace'], true), 404);
 
@@ -267,11 +268,13 @@ class PartController extends Controller
             $sellerPhone = $p->user?->phone;
         }
 
+        $rewardsBalance = $request->user() ? $rewards->balance($request->user()) : 0;
+        $pointsPerGel = max(1, $rewards->setting('points_per_gel', 100));
+        $maxCheckoutPoints = $source === 'store' ? (int) floor(((float) $item['price'] * 0.30) * $pointsPerGel) : 0;
+
         return view('parts.show', compact(
-            'item',
-            'description',
-            'sellerName',
-            'sellerPhone'
+            'item', 'description', 'sellerName', 'sellerPhone',
+            'rewardsBalance', 'pointsPerGel', 'maxCheckoutPoints'
         ));
     }
 }

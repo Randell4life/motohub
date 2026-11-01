@@ -18,7 +18,7 @@ class StoreCheckoutController extends Controller
         $data = $request->validate([
             'part_id' => ['required','integer','exists:parts,id'],
             'quantity' => ['required','integer','min:1','max:20'],
-            'points' => ['nullable','integer','min:0'],
+            'points' => ['nullable','integer','min:0','max:1000000'],
             'customer_name' => ['required','string','max:160'],
             'phone' => ['required','string','max:40'],
             'address' => ['required','string','max:1000'],
@@ -32,11 +32,17 @@ class StoreCheckoutController extends Controller
             $rate = max(1, $rewards->setting('points_per_gel', 100));
             $maxDiscount = round($subtotal * 0.30, 2);
             $maxPoints = (int) floor($maxDiscount * $rate);
-            $points = min((int) ($data['points'] ?? 0), $maxPoints);
-            $points = min($points, $maxPoints);
+            $requestedPoints = (int) ($data['points'] ?? 0);
+            if ($requestedPoints > $maxPoints) {
+                throw ValidationException::withMessages(['points' => 'ამ შეკვეთაზე მაქსიმუმ ' . $maxPoints . ' ქულის გამოყენება შეგიძლია (ღირებულების 30%).']);
+            }
+            $points = $requestedPoints;
             if ($points > 0) {
                 $lockedUser = \App\Models\User::whereKey($user->id)->lockForUpdate()->firstOrFail();
-                if ($points > $rewards->balance($lockedUser)) throw ValidationException::withMessages(['points' => 'ქულების ბალანსი არასაკმარისია.']);
+                $availablePoints = $rewards->balance($lockedUser);
+                if ($points > $availablePoints) {
+                    throw ValidationException::withMessages(['points' => 'ბალანსი არასაკმარისია. ხელმისაწვდომია ' . $availablePoints . ' ქულა.']);
+                }
             }
             $discount = min($maxDiscount, round($points / $rate, 2));
             $order = StoreOrder::create([

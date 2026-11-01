@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\RewardRedemption;
 use App\Models\RewardTransaction;
+use App\Models\StoreOrder;
 use App\Models\User;
 use App\Services\RewardsService;
 use Illuminate\Http\Request;
@@ -20,11 +21,25 @@ class RewardsAdminController extends Controller
     public function index(Request $request)
     {
         $this->authorizeAdmin($request);
-        $redemptions = RewardRedemption::with('user:id,name,email')->latest()->paginate(30);
+
+        $redemptionsQuery = RewardRedemption::with('user:id,name,email')
+            ->when($request->filled('status') && in_array($request->input('status'), ['pending', 'approved', 'rejected'], true),
+                fn ($query) => $query->where('status', $request->input('status')))
+            ->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")
+            ->latest();
+
+        $redemptions = $redemptionsQuery->paginate(30)->withQueryString();
+        $storeOrders = StoreOrder::with('user:id,name,email', 'items:id,store_order_id,title,quantity')
+            ->where('points_used', '>', 0)
+            ->latest()
+            ->paginate(20, ['*'], 'orders_page')
+            ->withQueryString();
+
         $settings = DB::table('reward_settings')->pluck('value', 'key');
         $totals = [
             'issued' => (int) DB::table('reward_transactions')->where('points', '>', 0)->sum('points'),
             'redeemed' => (int) DB::table('reward_transactions')->where('type', 'redemption')->sum(DB::raw('ABS(points)')),
+            'store_used' => (int) StoreOrder::sum('points_used'),
             'pending' => RewardRedemption::where('status', 'pending')->count(),
         ];
 
@@ -41,7 +56,7 @@ class RewardsAdminController extends Controller
                 });
             })
             ->orderBy('name')
-            ->paginate(20)
+            ->paginate(20, ['*'], 'users_page')
             ->withQueryString();
 
         $balances = RewardTransaction::query()
@@ -50,7 +65,7 @@ class RewardsAdminController extends Controller
             ->groupBy('user_id')
             ->pluck('balance', 'user_id');
 
-        return view('rewards.admin', compact('redemptions', 'settings', 'totals', 'users', 'balances'));
+        return view('rewards.admin', compact('redemptions', 'storeOrders', 'settings', 'totals', 'users', 'balances'));
     }
 
     public function update(Request $request, RewardRedemption $redemption)
@@ -64,6 +79,7 @@ class RewardsAdminController extends Controller
         DB::transaction(function () use ($redemption, $data) {
             $item = RewardRedemption::lockForUpdate()->findOrFail($redemption->id);
             abort_unless($item->status === 'pending', 422, 'მოთხოვნა უკვე დამუშავებულია.');
+
             $item->update([
                 'status' => $data['status'],
                 'admin_note' => $data['admin_note'] ?? null,
@@ -71,13 +87,16 @@ class RewardsAdminController extends Controller
             ]);
 
             if ($data['status'] === 'rejected') {
-                RewardTransaction::create([
-                    'user_id' => $item->user_id,
-                    'points' => $item->points,
-                    'type' => 'refund',
-                    'description' => 'უარყოფილი მოთხოვნის ქულების დაბრუნება #' . $item->id,
-                    'action_key' => 'redemption-refund:' . $item->id,
-                ]);
+                $refundKey = 'redemption-refund:' . $item->id;
+                if (!RewardTransaction::where('action_key', $refundKey)->exists()) {
+                    RewardTransaction::create([
+                        'user_id' => $item->user_id,
+                        'points' => $item->points,
+                        'type' => 'refund',
+                        'description' => 'უარყოფილი მოთხოვნის ქულების დაბრუნება #' . $item->id,
+                        'action_key' => $refundKey,
+                    ]);
+                }
             }
         });
 
@@ -87,7 +106,6 @@ class RewardsAdminController extends Controller
     public function adjust(Request $request, User $user)
     {
         $this->authorizeAdmin($request);
-
         $data = $request->validate([
             'operation' => ['required', 'in:add,subtract'],
             'points' => ['required', 'integer', 'min:1', 'max:1000000'],
@@ -102,10 +120,7 @@ class RewardsAdminController extends Controller
                 abort_if($data['points'] > $balance, 422, 'მომხმარებელს ამდენი ქულა არ აქვს.');
             }
 
-            $points = $data['operation'] === 'add'
-                ? (int) $data['points']
-                : -(int) $data['points'];
-
+            $points = $data['operation'] === 'add' ? (int) $data['points'] : -(int) $data['points'];
             RewardTransaction::create([
                 'user_id' => $lockedUser->id,
                 'points' => $points,
@@ -131,12 +146,8 @@ class RewardsAdminController extends Controller
         ]);
 
         $allowed = [
-            'points_per_gel',
-            'minimum_redemption_points',
-            'signup_points',
-            'first_post_points',
-            'first_listing_points',
-            'referral_signup_points',
+            'points_per_gel', 'minimum_redemption_points', 'signup_points',
+            'first_post_points', 'first_listing_points', 'referral_signup_points',
             'referral_first_post_points',
         ];
 
