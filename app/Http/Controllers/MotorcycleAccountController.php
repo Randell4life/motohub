@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Motorcycle;
+use App\Services\RewardsService;
 use App\Models\MotorcycleImage;
 use App\Models\RentalBooking;
 use Illuminate\Http\Request;
@@ -41,7 +42,7 @@ public function index(Request $request): View
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, RewardsService $rewards)
     {
         $validated = $request->validate($this->rules());
 
@@ -59,6 +60,8 @@ public function index(Request $request): View
 
 // განცხადება ავტომატურად მიეკუთვნება შესულ მომხმარებელს.
 $motorcycle = $request->user()->motorcycles()->create($validated);
+
+$rewards->onFirstMotorcycleListing($request->user(), (int) $motorcycle->id);
 
 // დამატებითი ფოტოების შენახვა.
 foreach ($request->file('images', []) as $index => $photo) {
