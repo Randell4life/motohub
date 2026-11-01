@@ -131,6 +131,83 @@ class RewardCatalogController extends Controller
         return back()->with('success', 'საჩუქრის შეკვეთის სტატუსი განახლდა.');
     }
 
+    public function mobileIndex(Request $request, RewardsService $rewards)
+    {
+        return response()->json([
+            'balance' => $rewards->balance($request->user()),
+            'items' => RewardCatalogItem::where('is_active', true)->where('stock', '>', 0)->orderBy('sort_order')->orderBy('points_cost')->get(),
+            'orders' => RewardCatalogOrder::where('user_id', $request->user()->id)->latest()->limit(30)->get(),
+        ]);
+    }
+
+    public function mobileRedeem(Request $request, RewardCatalogItem $item, RewardsService $rewards)
+    {
+        $order = DB::transaction(function () use ($request, $item, $rewards) {
+            $user = User::whereKey($request->user()->id)->lockForUpdate()->firstOrFail();
+            $product = RewardCatalogItem::whereKey($item->id)->lockForUpdate()->firstOrFail();
+            abort_unless($product->is_active, 404);
+            if ($product->stock < 1) throw ValidationException::withMessages(['item' => 'საჩუქარი მარაგში აღარ არის.']);
+            if ($rewards->balance($user) < $product->points_cost) throw ValidationException::withMessages(['points' => 'ქულების ბალანსი არასაკმარისია.']);
+            $product->decrement('stock');
+            $order = RewardCatalogOrder::create(['user_id' => $user->id, 'item_id' => $product->id, 'item_title' => $product->title, 'points_spent' => $product->points_cost, 'status' => 'pending']);
+            RewardTransaction::create(['user_id' => $user->id, 'points' => -$product->points_cost, 'type' => 'reward_catalog', 'description' => 'Rewards საჩუქარი: ' . $product->title . ' (#' . $order->id . ')', 'action_key' => 'reward-catalog-order:' . $order->id, 'metadata' => ['order_id' => $order->id, 'item_id' => $product->id]]);
+            return $order;
+        });
+        return response()->json(['message' => 'საჩუქრის მოთხოვნა მიღებულია.', 'order' => $order, 'balance' => $rewards->balance($request->user())], 201);
+    }
+
+    public function mobileAdminIndex(Request $request)
+    {
+        $this->authorizeAdmin($request);
+        return response()->json([
+            'items' => RewardCatalogItem::withCount('orders')->orderBy('sort_order')->get(),
+            'orders' => RewardCatalogOrder::with('user:id,name,email')->latest()->limit(100)->get(),
+        ]);
+    }
+
+    public function mobileAdminStore(Request $request)
+    {
+        $this->authorizeAdmin($request);
+        $data = $this->validateItem($request);
+        $data['slug'] = Str::slug($data['title']) . '-' . Str::lower(Str::random(5));
+        $item = RewardCatalogItem::create($data);
+        return response()->json(['message' => 'საჩუქარი დაემატა.', 'item' => $item], 201);
+    }
+
+    public function mobileAdminUpdate(Request $request, RewardCatalogItem $item)
+    {
+        $this->authorizeAdmin($request);
+        $item->update($this->validateItem($request));
+        return response()->json(['message' => 'საჩუქარი განახლდა.', 'item' => $item->fresh()]);
+    }
+
+    public function mobileAdminDelete(Request $request, RewardCatalogItem $item)
+    {
+        $this->authorizeAdmin($request);
+        abort_if($item->orders()->whereIn('status', ['pending', 'approved', 'processing'])->exists(), 422, 'საჩუქარს აქტიური შეკვეთები აქვს.');
+        $item->delete();
+        return response()->json(['message' => 'საჩუქარი წაიშალა.']);
+    }
+
+    public function mobileAdminOrderUpdate(Request $request, RewardCatalogOrder $order)
+    {
+        $this->authorizeAdmin($request);
+        $data = $request->validate(['status' => ['required', 'in:approved,processing,shipped,fulfilled,rejected,cancelled'], 'admin_note' => ['nullable', 'string', 'max:1000']]);
+        DB::transaction(function () use ($order, $data) {
+            $locked = RewardCatalogOrder::whereKey($order->id)->lockForUpdate()->firstOrFail();
+            if (in_array($locked->status, ['rejected', 'cancelled', 'fulfilled'], true)) abort(422, 'შეკვეთა უკვე დასრულებულია.');
+            if (in_array($data['status'], ['rejected', 'cancelled'], true)) {
+                $key = 'reward-catalog-refund:' . $locked->id;
+                if (!RewardTransaction::where('action_key', $key)->exists()) {
+                    RewardTransaction::create(['user_id' => $locked->user_id, 'points' => $locked->points_spent, 'type' => 'refund', 'description' => 'Rewards საჩუქრის შეკვეთის დაბრუნება #' . $locked->id, 'action_key' => $key, 'metadata' => ['order_id' => $locked->id]]);
+                    if ($locked->item_id) RewardCatalogItem::whereKey($locked->item_id)->lockForUpdate()->increment('stock');
+                }
+            }
+            $locked->update(['status' => $data['status'], 'admin_note' => $data['admin_note'] ?? null, 'fulfilled_at' => $data['status'] === 'fulfilled' ? now() : null]);
+        });
+        return response()->json(['message' => 'შეკვეთის სტატუსი განახლდა.']);
+    }
+
     private function validateItem(Request $request): array
     {
         return $request->validate([
