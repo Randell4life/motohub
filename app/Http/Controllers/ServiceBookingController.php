@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use App\Services\RewardsCheckout;
 
 class ServiceBookingController extends Controller
 {
@@ -23,7 +24,8 @@ class ServiceBookingController extends Controller
             'customer_name' => ['required', 'string', 'max:160'],
             'customer_phone' => ['required', 'string', 'max:40'],
             'motorcycle' => ['nullable', 'string', 'max:180'],
-            'notes' => ['nullable', 'string', 'max:1500'],\n            'points' => ['nullable', 'integer', 'min:0', 'max:1000000'],
+            'notes' => ['nullable', 'string', 'max:1500'],
+            'points' => ['nullable', 'integer', 'min:0', 'max:1000000'],
         ]);
 
         $service = $serviceCenter->services()
@@ -76,7 +78,7 @@ class ServiceBookingController extends Controller
                 }
             }
 
-            $discount = app(RewardsCheckout::class)->apply($request->user(), (float) $service->price, (int) ($data['points'] ?? 0), 'service-booking:' . (string) \Illuminate\\Support\\Str::uuid(), 'სერვისის ჯავშნის ფასდაკლება', ['service_center_id' => $serviceCenter->id]);\n            ServiceBooking::create([
+            $discount = app(RewardsCheckout::class)->apply($request->user(), (float) $service->price, (int) ($data['points'] ?? 0), 'service-booking:' . (string) \Illuminate\Support\Str::uuid(), 'სერვისის ჯავშნის ფასდაკლება', ['service_center_id' => $serviceCenter->id]);\n            ServiceBooking::create([
                 'service_center_id' => $serviceCenter->id,
                 'service_center_service_id' => $service->id,
                 'user_id' => auth()->id(),
