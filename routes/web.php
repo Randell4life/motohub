@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\RewardsController;
 use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\MotoAssistantController;
@@ -42,6 +43,16 @@ use App\Models\Part;
 |--------------------------------------------------------------------------
 */
 
+
+Route::get('/invite/{code}', function (string $code, Request $request) {
+    $request->session()->put('referral_code', strtoupper($code));
+    return redirect()->route('register');
+})->where('code', '[A-Za-z0-9]{4,20}')->name('referral.invite');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/rewards', [RewardsController::class, 'index'])->name('rewards.index');
+    Route::post('/rewards/redeem', [RewardsController::class, 'redeem'])->middleware('throttle:5,1')->name('rewards.redeem');
+});
 
 Route::get('/', function (Request $request) {
     $motorcycles = Motorcycle::with('images')
