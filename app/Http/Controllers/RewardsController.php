@@ -16,7 +16,8 @@ class RewardsController extends Controller
     {
         $user = $request->user();
         $code = $rewards->ensureReferralCode($user);
-        $balance = $rewards->balance($user);
+        User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $balance = $rewards->balance($user);
         $transactions = RewardTransaction::where('user_id', $user->id)->latest()->limit(30)->get();
         $referrals = User::where('referred_by_user_id', $user->id)->withCount('communityPosts')->latest()->limit(20)->get(['id', 'name', 'created_at']);
 
