@@ -23,7 +23,8 @@ class RewardsController extends Controller
         $monthlyLeaderboard = $rewards->leaderboard($user, 'month');
         $balance = $rewards->balance($user);
         $transactions = RewardTransaction::where('user_id', $user->id)->latest()->limit(30)->get();
-        $redemptions = RewardRedemption::where('user_id', $user->id)->latest()->limit(15)->get();\n        $prizes = RewardPrize::where('winner_user_id', $user->id)->latest('awarded_at')->limit(10)->get();
+        $redemptions = RewardRedemption::where('user_id', $user->id)->latest()->limit(15)->get();
+        $prizes = RewardPrize::where('winner_user_id', $user->id)->latest('awarded_at')->limit(10)->get();
         $referrals = User::where('referred_by_user_id', $user->id)->withCount('communityPosts')->latest()->limit(20)->get(['id', 'name', 'created_at']);
 
         return view('rewards.index', compact('user', 'code', 'balance', 'transactions', 'redemptions', 'referrals', 'dailyCheckIn', 'membershipTier', 'achievements', 'weeklyLeaderboard', 'monthlyLeaderboard', 'prizes'));
