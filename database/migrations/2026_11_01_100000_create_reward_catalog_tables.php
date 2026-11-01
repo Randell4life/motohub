@@ -25,6 +25,9 @@ return new class extends Migration {
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('item_id')->nullable()->constrained('reward_catalog_items')->nullOnDelete();
             $table->string('item_title', 160);
+            $table->string('customer_name', 160);
+            $table->string('phone', 40);
+            $table->text('address');
             $table->unsignedInteger('points_spent');
             $table->string('status', 24)->default('pending')->index();
             $table->text('admin_note')->nullable();
