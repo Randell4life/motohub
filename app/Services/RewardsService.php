@@ -48,7 +48,7 @@ class RewardsService
     /** Return the user's permanent membership tier based on lifetime positive points earned. */
     public function membershipTier(User $user): array
     {
-        $earned = (int) RewardTransaction::where('user_id', $user->id)->where('points', '>', 0)->sum('points');
+        $earned = (int) RewardTransaction::where('user_id', $user->id)->where('points', '>', 0)->whereNotIn('type', ['refund', 'admin_adjustment'])->sum('points');
         $tiers = [
             ['key' => 'bronze', 'name' => 'Bronze', 'name_ka' => 'ბრინჯაო', 'threshold' => 0, 'next_setting' => 'silver_tier_points'],
             ['key' => 'silver', 'name' => 'Silver', 'name_ka' => 'ვერცხლი', 'threshold' => $this->setting('silver_tier_points', 1000), 'next_setting' => 'gold_tier_points'],
@@ -196,6 +196,7 @@ class RewardsService
         $rows = DB::table('reward_transactions')
             ->join('users', 'users.id', '=', 'reward_transactions.user_id')
             ->where('reward_transactions.points', '>', 0)
+            ->whereNotIn('reward_transactions.type', ['refund', 'admin_adjustment', 'prize'])
             ->where('reward_transactions.created_at', '>=', $start)
             ->where('reward_transactions.created_at', '<=', now())
             ->select('users.id', 'users.name')

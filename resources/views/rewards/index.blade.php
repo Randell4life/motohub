@@ -64,7 +64,7 @@
                 </div>
             @endforeach
         </div>
-        <small style="display:block;margin-top:12px;color:#91a8c2">რეიტინგი ითვლის მხოლოდ შესაბამის პერიოდში მიღებულ დადებით ქულებს.</small>
+        <small style="display:block;margin-top:12px;color:#91a8c2">რეიტინგში ითვლება მხოლოდ შესაბამის პერიოდში მიღებული აქტივობის ქულები — დაბრუნებული, ადმინისტრატორის მიერ ჩარიცხული და პრიზის ქულები რეიტინგს არ ცვლის.</small>
     </section>
     @if(session('success'))<p style="padding:12px;margin:16px 0;border:1px solid #327b64;border-radius:10px;color:#9ce6c9">{{ session('success') }}</p>@endif
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:22px">
