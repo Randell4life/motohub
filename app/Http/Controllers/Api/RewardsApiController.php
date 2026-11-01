@@ -29,6 +29,7 @@ class RewardsApiController extends Controller
             'ways_to_earn' => [
                 ['title' => 'რეგისტრაცია', 'points' => $rewards->setting('signup_points', 100)],
                 ['title' => 'პირველი პოსტი', 'points' => $rewards->setting('first_post_points', 150)],
+                ['title' => 'პირველი მოტოციკლის განცხადება', 'points' => $rewards->setting('first_listing_points', 150)],
                 ['title' => 'მეგობრის მოწვევა', 'points' => $rewards->setting('referral_signup_points', 100)],
                 ['title' => 'მეგობრის პირველი პოსტი', 'points' => $rewards->setting('referral_first_post_points', 150)],
             ],
@@ -99,7 +100,7 @@ class RewardsApiController extends Controller
         abort_unless((bool) $request->user()->is_admin, 403);
         $data = $request->validate(['settings' => ['required', 'array'], 'settings.*' => ['required', 'integer', 'min:0', 'max:1000000']]);
         foreach ($data['settings'] as $key => $value) {
-            if (!in_array($key, ['points_per_gel','minimum_redemption_points','signup_points','first_post_points','referral_signup_points','referral_first_post_points'], true)) continue;
+            if (!in_array($key, ['points_per_gel','minimum_redemption_points','signup_points','first_post_points','referral_signup_points','referral_first_post_points','first_listing_points'], true)) continue;
             DB::table('reward_settings')->updateOrInsert(['key' => $key], ['value' => (string) $value, 'updated_at' => now(), 'created_at' => now()]);
         }
         return response()->json(['message' => 'Rewards-ის წესები განახლდა.']);
