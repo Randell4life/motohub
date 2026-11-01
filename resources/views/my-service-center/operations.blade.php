@@ -47,10 +47,10 @@
     <option value="{{ $key }}" @selected(($center->subscription_requested_plan ?: $center->subscription_plan) === $key)>{{ $plan['name'] }} — {{ $plan['price'] }} ₾ / თვე</option>
    @endforeach
   </select>
-  <input name="subscription_request_note" maxlength="500" placeholder="შენიშვნა / გადახდის მითითება (არასავალდებულო)">
+  <input name="subscription_request_note" maxlength="500" placeholder="შენიშვნა (არასავალდებულო)">
   <button>პაკეტის მოთხოვნა</button>
  </form>
- <p class="ops-muted">ფასიანი პაკეტის მოთხოვნის შემდეგ MotoHub-ის გუნდი დაგიკავშირდება გადახდის ინსტრუქციისთვის. პაკეტი გააქტიურდება ადმინისტრატორის მიერ გადახდის დადასტურების შემდეგ. ეს ეტაპი ჯერ ავტომატურ საბანკო გადახდას არ ასრულებს.</p>
+ <p class="ops-muted">ფასიანი პაკეტის მოთხოვნის შემდეგ MotoHub-ის გუნდი დაგიკავშირდება გადახდის ინსტრუქციისთვის. პაკეტი გააქტიურდება ადმინისტრატორის მიერ გადახდის დადასტურების შემდეგ. ავტომატური საბანკო გადახდა ჯერ არ არის ჩართული.</p>
  <div class="ops-muted">ხელმისაწვდომი ფუნქციები: {{ collect($features)->filter()->keys()->map(fn($x) => str_replace('_',' ', $x))->join(' · ') ?: 'მხოლოდ საბაზისო ფუნქციები' }}</div>
 </section>
 
@@ -61,7 +61,6 @@
  <div class="ops-card"><small>გადასახდელი ნაშთი</small><strong>{{ number_format(max(0,(float)$stats['outstanding']),2) }} ₾</strong></div>
 </div>
 
-@if($features['work_orders'])
 <section class="ops-section">
  <h3>სამუშაო შეკვეთები · კანბანის სტატუსები</h3>
  <form method="GET" class="ops-form" style="margin-bottom:14px">
@@ -89,33 +88,21 @@
  </tbody></table></div>
  <div style="margin-top:14px">{{ $orders->links() }}</div>
 </section>
-@else
- <div class="ops-section"><h3>PRO პაკეტი საჭიროა</h3><p class="ops-muted">ეს განყოფილება ხელმისაწვდომია PRO პაკეტიდან. გამოწერის შეცვლა შეგიძლია ამ გვერდის ზედა ნაწილში.</p></div>
-@endif
 
-@if($features['work_orders'])
 <section class="ops-section">
  <h3>კალენდარი · {{ $from->format('d.m.Y') }} — {{ $to->format('d.m.Y') }}</h3>
  <div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>დრო</th><th>შეკვეთა</th><th>კლიენტი</th><th>ხელოსანი</th><th>ბოქსი</th></tr></thead><tbody>
  @forelse($calendar as $entry)<tr><td>{{ $entry->serviceBooking?->scheduled_at?->format('d.m.Y H:i') ?? 'დრო არაა' }}</td><td>{{ $entry->order_number }}</td><td>{{ $entry->serviceBooking?->customer_name ?? '—' }}</td><td>{{ $entry->technician?->name ?? $entry->assignedTechnician?->name ?? '—' }}</td><td>{{ $entry->bay?->name ?? '—' }}</td></tr>@empty<tr><td colspan="5" class="ops-muted">ამ კვირაში დაგეგმილი სამუშაოები არ არის.</td></tr>@endforelse
  </tbody></table></div>
 </section>
-@else
- <div class="ops-section"><h3>PRO პაკეტი საჭიროა</h3><p class="ops-muted">ეს განყოფილება ხელმისაწვდომია PRO პაკეტიდან. გამოწერის შეცვლა შეგიძლია ამ გვერდის ზედა ნაწილში.</p></div>
-@endif
 
-@if($features['team'])
 <div class="ops-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">
  <section class="ops-section"><h3>ხელოსნის დამატება</h3><form class="ops-form" method="POST" action="{{ route('my-service-center.technicians.store') }}">@csrf<input name="name" required placeholder="სახელი და გვარი"><input name="phone" placeholder="ტელეფონი"><input name="specialty" placeholder="სპეციალიზაცია"><button>დამატება</button></form>
  @foreach($technicians as $tech)<p class="ops-muted">{{ $tech->name }} · {{ $tech->specialty ?? 'სპეციალიზაცია არაა' }}</p>@endforeach</section>
  <section class="ops-section"><h3>სამუშაო ბოქსის დამატება</h3><form class="ops-form" method="POST" action="{{ route('my-service-center.bays.store') }}">@csrf<input name="name" required placeholder="მაგ. ბოქსი №1"><input name="description" placeholder="აღწერა"><button>დამატება</button></form>
  @foreach($bays as $bay)<p class="ops-muted">{{ $bay->name }}</p>@endforeach</section>
 </div>
-@else
- <div class="ops-section"><h3>PRO პაკეტი საჭიროა</h3><p class="ops-muted">ეს განყოფილება ხელმისაწვდომია PRO პაკეტიდან. გამოწერის შეცვლა შეგიძლია ამ გვერდის ზედა ნაწილში.</p></div>
-@endif
 
-@if($features['inventory'])
 <section class="ops-section">
  <h3>საწყობი @if($lowStock)<span class="ops-pill">დაბალი ნაშთი: {{ $lowStock }}</span>@endif</h3>
  <form class="ops-form" method="POST" action="{{ route('my-service-center.inventory.store') }}">@csrf
@@ -128,17 +115,10 @@
  @forelse($inventory as $item)<tr><td>{{ $item->name }}<div class="ops-muted">{{ $item->brand }}</div></td><td>{{ $item->sku ?? '—' }}</td><td>{{ $item->quantity }} @if($item->quantity <= $item->min_quantity)<span class="ops-pill">შესავსებია</span>@endif</td><td>{{ $item->min_quantity }}</td><td>{{ number_format((float)$item->cost_price,2) }} ₾</td><td>{{ number_format((float)$item->sale_price,2) }} ₾</td></tr>@empty<tr><td colspan="6" class="ops-muted">საწყობი ცარიელია.</td></tr>@endforelse
  </tbody></table></div>
 </section>
-@else
- <div class="ops-section"><h3>BUSINESS პაკეტი საჭიროა</h3><p class="ops-muted">ეს განყოფილება ხელმისაწვდომია BUSINESS პაკეტიდან. გამოწერის შეცვლა შეგიძლია ამ გვერდის ზედა ნაწილში.</p></div>
-@endif
 
-@if($features['finance'])
 <section class="ops-section">
  <h3>ბოლო გადახდები</h3><div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>თარიღი</th><th>შეკვეთა</th><th>თანხა</th><th>მეთოდი</th></tr></thead><tbody>
  @forelse($payments as $payment)<tr><td>{{ $payment->paid_at?->format('d.m.Y H:i') }}</td><td>{{ $payment->workOrder?->order_number }}</td><td>{{ number_format((float)$payment->amount,2) }} ₾</td><td>{{ $payment->method }}</td></tr>@empty<tr><td colspan="4" class="ops-muted">გადახდები ჯერ არ არის.</td></tr>@endforelse
  </tbody></table></div>
 </section>
-@else
- <div class="ops-section"><h3>PRO პაკეტი საჭიროა</h3><p class="ops-muted">ეს განყოფილება ხელმისაწვდომია PRO პაკეტიდან. გამოწერის შეცვლა შეგიძლია ამ გვერდის ზედა ნაწილში.</p></div>
-@endif
 @endsection
