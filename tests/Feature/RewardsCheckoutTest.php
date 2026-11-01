@@ -125,6 +125,34 @@ class RewardsCheckoutTest extends TestCase
         $this->assertDatabaseMissing('users', ['email' => 'unknown-referral@example.com']);
     }
 
+    public function test_mobile_registration_accepts_referral_code_and_rejects_unknown_code(): void
+    {
+        $referrer = User::factory()->create();
+        $referrer->forceFill(['referral_code' => 'MOBILE2026'])->save();
+
+        $response = $this->postJson('/api/mobile/register', [
+            'name' => 'Mobile Rider',
+            'email' => 'mobile-rider@example.com',
+            'password' => 'StrongPass123!',
+            'password_confirmation' => 'StrongPass123!',
+            'referral_code' => 'mobile2026',
+        ]);
+
+        $response->assertCreated()->assertJsonPath('user.email', 'mobile-rider@example.com');
+        $newUser = User::where('email', 'mobile-rider@example.com')->firstOrFail();
+        $this->assertSame($referrer->id, $newUser->referred_by_user_id);
+
+        $invalid = $this->postJson('/api/mobile/register', [
+            'name' => 'Invalid Mobile Rider',
+            'email' => 'invalid-mobile@example.com',
+            'password' => 'StrongPass123!',
+            'password_confirmation' => 'StrongPass123!',
+            'referral_code' => 'UNKNOWN123',
+        ]);
+        $invalid->assertUnprocessable()->assertJsonValidationErrors('referral_code');
+        $this->assertDatabaseMissing('users', ['email' => 'invalid-mobile@example.com']);
+    }
+
     public function test_weekly_and_monthly_leaderboards_rank_earned_points(): void
     {
         $first = User::factory()->create(['name' => 'Top Rider']);
