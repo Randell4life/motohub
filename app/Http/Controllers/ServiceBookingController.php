@@ -23,7 +23,7 @@ class ServiceBookingController extends Controller
             'customer_name' => ['required', 'string', 'max:160'],
             'customer_phone' => ['required', 'string', 'max:40'],
             'motorcycle' => ['nullable', 'string', 'max:180'],
-            'notes' => ['nullable', 'string', 'max:1500'],
+            'notes' => ['nullable', 'string', 'max:1500'],\n            'points' => ['nullable', 'integer', 'min:0', 'max:1000000'],
         ]);
 
         $service = $serviceCenter->services()
@@ -56,7 +56,7 @@ class ServiceBookingController extends Controller
             ]);
         }
 
-        DB::transaction(function () use ($serviceCenter, $service, $data, $start, $end) {
+        DB::transaction(function () use ($serviceCenter, $service, $data, $start, $end, $request) {
             // Lock the parent row so simultaneous requests for the same shop are checked serially.
             ServiceCenter::whereKey($serviceCenter->id)->lockForUpdate()->firstOrFail();
 
@@ -76,12 +76,12 @@ class ServiceBookingController extends Controller
                 }
             }
 
-            ServiceBooking::create([
+            $discount = app(RewardsCheckout::class)->apply($request->user(), (float) $service->price, (int) ($data['points'] ?? 0), 'service-booking:' . (string) \Illuminate\\Support\\Str::uuid(), 'სერვისის ჯავშნის ფასდაკლება', ['service_center_id' => $serviceCenter->id]);\n            ServiceBooking::create([
                 'service_center_id' => $serviceCenter->id,
                 'service_center_service_id' => $service->id,
                 'user_id' => auth()->id(),
                 'service_name' => $service->name,
-                'price_at_booking' => $service->price,
+                'price_at_booking' => $discount['total'],\n                'points_used' => $discount['points'],\n                'points_discount' => $discount['discount'],
                 'duration_minutes' => $service->duration_minutes,
                 'customer_name' => $data['customer_name'],
                 'customer_phone' => $data['customer_phone'],
