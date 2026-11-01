@@ -26,6 +26,7 @@
     <input type="hidden" name="description" value="{{ $item->description }}"><input type="hidden" name="image_url" value="{{ $item->image_url }}"><input type="hidden" name="sort_order" value="{{ $item->sort_order }}"><select name="is_active" style="padding:8px;background:#081421;color:white;border:1px solid #31577b;border-radius:7px"><option value="1" @selected($item->is_active)>აქტიური</option><option value="0" @selected(!$item->is_active)>დამალული</option></select>
     <button style="padding:8px 11px;border:0;border-radius:7px;background:#1677ff;color:white">შენახვა</button>
    </form>
+   <form method="POST" action="{{ route('admin.rewards.catalog.delete',$item) }}" style="margin-top:7px;text-align:right">@csrf @method('DELETE')<button style="padding:7px 11px;border:1px solid #8a4c4c;border-radius:7px;background:#351d26;color:#ffc4c4">წაშლა</button></form>
   </article>
  @empty <p style="color:#91a8c2">კატალოგი ცარიელია.</p> @endforelse
  </section>
