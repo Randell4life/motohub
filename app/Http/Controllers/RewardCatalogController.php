@@ -85,7 +85,7 @@ class RewardCatalogController extends Controller
     public function deleteItem(Request $request, RewardCatalogItem $item)
     {
         $this->authorizeAdmin($request);
-        abort_if($item->orders()->whereIn('status', ['pending', 'approved', 'processing'])->exists(), 422, 'ამ საჩუქარს აქტიური შეკვეთები აქვს. ჯერ დაამუშავე ისინი.');
+        abort_if($item->orders()->whereIn('status', ['pending', 'approved', 'processing', 'shipped'])->exists(), 422, 'ამ საჩუქარს აქტიური შეკვეთები აქვს. ჯერ დაამუშავე ისინი.');
         $item->delete();
         return back()->with('success', 'საჩუქარი წაიშალა.');
     }
@@ -119,10 +119,9 @@ class RewardCatalogController extends Controller
                         'action_key' => $key,
                         'metadata' => ['order_id' => $locked->id],
                     ]);
-                    $wasRefunded = true;
-                }
-                if ($locked->item_id) {
-                    RewardCatalogItem::whereKey($locked->item_id)->lockForUpdate()->increment('stock');
+                    if ($locked->item_id) {
+                        RewardCatalogItem::whereKey($locked->item_id)->lockForUpdate()->increment('stock');
+                    }
                 }
             }
             $locked->update([
