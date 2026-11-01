@@ -17,10 +17,10 @@ class RewardsCheckoutTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        DB::table('reward_settings')->insert([
-            'key' => 'points_per_gel', 'value' => '100',
-            'created_at' => now(), 'updated_at' => now(),
-        ]);
+        DB::table('reward_settings')->updateOrInsert(
+            ['key' => 'points_per_gel'],
+            ['value' => '100', 'created_at' => now(), 'updated_at' => now()],
+        );
     }
 
     public function test_points_discount_is_capped_at_thirty_percent(): void
