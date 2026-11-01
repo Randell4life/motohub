@@ -262,7 +262,7 @@ public function profile(): RedirectResponse|View
             'status' => ['required', Rule::in(['confirmed', 'declined', 'cancelled', 'completed'])],
         ]);
 
-        $booking->update(['status' => $data['status']]);
+        DB::transaction(function () use ($booking, $data) {\n            $booking->update(['status' => $data['status']]);\n            if (in_array($data['status'], ['declined', 'cancelled'], true)) app(\\App\\Services\\RewardsCheckout::class)->refundServiceBooking($booking);\n        });
 
         return back()->with('success', 'ჯავშნის სტატუსი განახლდა.');
     }
