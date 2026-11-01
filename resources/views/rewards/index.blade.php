@@ -22,6 +22,18 @@
         <div><span style="color:#78bdff;font-size:11px;font-weight:900;letter-spacing:1.5px">DAILY RIDER STREAK</span><h2 style="margin:7px 0">ყოველდღიური შესვლა</h2><p style="margin:0;color:#9bb2cc">დღეში ერთხელ მიიღე {{ $dailyCheckIn['daily_points'] }} ქულა. ზედიზედ 7 დღე — დამატებითი {{ $dailyCheckIn['weekly_bonus_points'] }} ქულა.</p></div>
         <div style="text-align:right"><strong style="display:block;color:#70baff;font-size:30px">{{ $dailyCheckIn['streak'] }} დღე</strong><small style="color:#9bb2cc">მიმდინარე სერია</small><strong style="display:block;margin-top:5px;color:#70d6aa">{{ $dailyCheckIn['already_checked_in'] ? 'დღევანდელი ბონუსი მიღებულია' : '+' . number_format($dailyCheckIn['points_awarded']) . ' ქულა დაემატა დღეს' }}</strong></div>
     </section>
+    <section style="margin-top:16px;padding:22px;border:1px solid #31577b;border-radius:16px;background:linear-gradient(120deg,#132b43,#0a1523)">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><span style="color:#78bdff;font-size:11px;font-weight:900;letter-spacing:1.5px">RIDER ACHIEVEMENTS</span><h2 style="margin:7px 0">მისიები და მიღწევები</h2><p style="margin:0;color:#a8bdd4">შეასრულე დავალებები, გახსენი ბეჯები და მიიღე დამატებითი ქულები.</p></div><strong style="color:#7dbfff;font-size:22px">{{ $achievements['unlocked_count'] }} / {{ $achievements['total_count'] }}</strong></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:16px">
+        @foreach($achievements['badges'] as $badge)
+            <article style="padding:14px;border:1px solid {{ $badge['unlocked'] ? '#3976a8' : '#29415e' }};border-radius:12px;background:{{ $badge['unlocked'] ? '#102b43' : '#091421' }};opacity:{{ $badge['unlocked'] ? '1' : '.82' }}">
+                <div style="font-size:26px">{{ $badge['icon'] }}</div><strong style="display:block;margin:7px 0">{{ $badge['title'] }}</strong><small style="display:block;color:#9bb2cc;min-height:34px">{{ $badge['description'] }}</small>
+                <div style="height:6px;margin:11px 0 7px;border-radius:99px;background:#263c52;overflow:hidden"><div style="height:100%;width:{{ $badge['progress_percent'] }}%;background:linear-gradient(90deg,#1677ff,#66c4ff)"></div></div>
+                <div style="display:flex;justify-content:space-between;gap:8px;color:#86c5ff;font-size:12px;font-weight:800"><span>{{ $badge['progress'] }} / {{ $badge['target'] }}</span><span>{{ $badge['unlocked'] ? 'მიღწეულია' : '+' . $badge['points'] . ' ქულა' }}</span></div>
+            </article>
+        @endforeach
+        </div>
+    </section>
     @if(session('success'))<p style="padding:12px;margin:16px 0;border:1px solid #327b64;border-radius:10px;color:#9ce6c9">{{ session('success') }}</p>@endif
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:22px">
         <section style="padding:22px;border:1px solid #29415e;border-radius:16px;background:#0d1827">
