@@ -34,6 +34,32 @@
         @endforeach
         </div>
     </section>
+    <section style="margin-top:16px;padding:22px;border:1px solid #31577b;border-radius:16px;background:linear-gradient(120deg,#132b43,#0a1523)">
+        <span style="color:#78bdff;font-size:11px;font-weight:900;letter-spacing:1.5px">MOTOHUB LEADERBOARD</span>
+        <h2 style="margin:7px 0 16px">მოტო საზოგადოების რეიტინგი</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+            @foreach([['label'=>'ამ კვირის ლიდერები','data'=>$weeklyLeaderboard],['label'=>'ამ თვის ლიდერები','data'=>$monthlyLeaderboard]] as $board)
+                <div style="padding:16px;border:1px solid #29415e;border-radius:12px;background:#091421">
+                    <h3 style="margin:0 0 12px">{{ $board['label'] }}</h3>
+                    @forelse($board['data']['entries'] as $entry)
+                        <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #ffffff12">
+                            <strong style="width:28px;color:{{ $entry['rank'] <= 3 ? '#80c5ff' : '#91a8c2' }}">#{{ $entry['rank'] }}</strong>
+                            <span style="flex:1">{{ $entry['name'] }}</span>
+                            <b style="color:#80c5ff">{{ number_format($entry['points']) }} ქ.</b>
+                        </div>
+                    @empty
+                        <p style="color:#9bb2cc">ამ პერიოდში ქულები ჯერ არ დაგროვებულა.</p>
+                    @endforelse
+                    @if($board['data']['current_user'])
+                        <p style="margin:12px 0 0;color:#9bb2cc">შენი ადგილი: <strong style="color:#80c5ff">#{{ $board['data']['current_user']['rank'] }}</strong> · {{ number_format($board['data']['current_user']['points']) }} ქულა</p>
+                    @else
+                        <p style="margin:12px 0 0;color:#9bb2cc">შენი რეიტინგი გამოჩნდება პირველი ქულების მიღების შემდეგ.</p>
+                    @endif
+                </div>
+            @endforeach
+        </div>
+        <small style="display:block;margin-top:12px;color:#91a8c2">რეიტინგი ითვლის მხოლოდ შესაბამის პერიოდში მიღებულ დადებით ქულებს.</small>
+    </section>
     @if(session('success'))<p style="padding:12px;margin:16px 0;border:1px solid #327b64;border-radius:10px;color:#9ce6c9">{{ session('success') }}</p>@endif
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:22px">
         <section style="padding:22px;border:1px solid #29415e;border-radius:16px;background:#0d1827">
