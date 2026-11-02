@@ -420,6 +420,17 @@ class MobileExtendedController extends Controller
             ->limit(40)
             ->select('service_center_inventory_movements.*', 'service_center_inventory.name as item_name', 'work_orders.order_number', 'users.name as user_name')
             ->get();
+        $suppliers = $center->suppliers()->where('is_active', true)->orderBy('name')->get();
+        $supplierPurchases = DB::table('service_center_inventory_movements')->where('service_center_id', $center->id)
+            ->whereNotNull('supplier_id')->where('type', 'in')->select('supplier_id')
+            ->selectRaw('COALESCE(SUM(quantity * unit_cost), 0) as total')->groupBy('supplier_id')->pluck('total', 'supplier_id');
+        $supplierPayments = $center->supplierPayments()->select('supplier_id')
+            ->selectRaw('COALESCE(SUM(amount), 0) as total')->groupBy('supplier_id')->pluck('total', 'supplier_id');
+        $suppliers->each(function ($supplier) use ($supplierPurchases, $supplierPayments) {
+            $supplier->purchased_total = (float) ($supplierPurchases[$supplier->id] ?? 0);
+            $supplier->paid_total = (float) ($supplierPayments[$supplier->id] ?? 0);
+            $supplier->balance = round($supplier->purchased_total - $supplier->paid_total, 2);
+        });
         return response()->json([
             'center' => $center->load(['services', 'hours']),
             'subscription_plans' => \App\Models\ServiceCenter::subscriptionPlans(),
@@ -431,6 +442,8 @@ class MobileExtendedController extends Controller
             'bays' => $center->bays()->orderBy('name')->get(),
             'inventory' => $center->inventory()->orderBy('name')->get(),
             'inventory_movements' => $stockMovements,
+            'suppliers' => $suppliers,
+            'supplier_payments' => $center->supplierPayments()->with('supplier')->latest('paid_at')->limit(40)->get(),
             'payments' => $center->payments()->with('workOrder')->latest('paid_at')->limit(40)->get(),
             'technician_payroll' => [
                 'earned' => round((float) $payroll->sum('amount'), 2),
@@ -506,6 +519,52 @@ class MobileExtendedController extends Controller
         return response()->json(['message' => 'ნაწილი დაემატა საწყობს.', 'item' => $item], 201);
     }
 
+    public function storeServiceCenterSupplier(Request $request)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('inventory'), 403, $center->featureLockedMessage('inventory'));
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:180'],
+            'contact_person' => ['nullable', 'string', 'max:160'],
+            'phone' => ['nullable', 'string', 'max:40'],
+            'email' => ['nullable', 'email', 'max:180'],
+            'tax_id' => ['nullable', 'string', 'max:80'],
+            'address' => ['nullable', 'string', 'max:255'],
+            'notes' => ['nullable', 'string', 'max:3000'],
+        ]);
+        return response()->json(['message' => 'მომწოდებელი დაემატა.', 'supplier' => $center->suppliers()->create($data)], 201);
+    }
+
+    public function payServiceCenterSupplier(Request $request, int $supplier)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('inventory'), 403, $center->featureLockedMessage('inventory'));
+        $data = $request->validate([
+            'amount' => ['required', 'numeric', 'gt:0', 'max:999999999'],
+            'method' => ['required', 'in:cash,bank_transfer,card,other'],
+            'reference' => ['nullable', 'string', 'max:120'],
+            'note' => ['nullable', 'string', 'max:255'],
+            'paid_at' => ['nullable', 'date'],
+        ]);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($center, $supplier, $data, $request) {
+            $locked = $center->suppliers()->whereKey($supplier)->lockForUpdate()->firstOrFail();
+            $purchased = DB::table('service_center_inventory_movements')->where('service_center_id', $center->id)
+                ->where('supplier_id', $locked->id)->where('type', 'in')
+                ->selectRaw('COALESCE(SUM(quantity * unit_cost), 0) as total')->value('total');
+            $paid = $center->supplierPayments()->where('supplier_id', $locked->id)->sum('amount');
+            if ((float) $data['amount'] > round((float) $purchased - (float) $paid, 2)) {
+                throw ValidationException::withMessages(['amount' => 'გადახდა მომწოდებლის მიმდინარე დავალიანებაზე მეტი ვერ იქნება.']);
+            }
+            $center->supplierPayments()->create([
+                'supplier_id' => $locked->id, 'user_id' => $request->user()->id,
+                'amount' => $data['amount'], 'method' => $data['method'],
+                'reference' => $data['reference'] ?? null, 'note' => $data['note'] ?? null,
+                'paid_at' => $data['paid_at'] ?? now(),
+            ]);
+        });
+        return response()->json(['message' => 'მომწოდებლის გადახდა აღირიცხა.']);
+    }
+
     public function receiveServiceCenterInventory(Request $request, int $item)
     {
         $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
@@ -514,11 +573,15 @@ class MobileExtendedController extends Controller
             'quantity' => ['required', 'integer', 'min:1', 'max:1000000'],
             'unit_cost' => ['required', 'numeric', 'min:0', 'max:999999999'],
             'note' => ['nullable', 'string', 'max:255'],
+            'supplier_id' => ['nullable', 'integer', 'exists:service_center_suppliers,id'],
+            'supplier_reference' => ['nullable', 'string', 'max:120'],
         ]);
+        if (!empty($data['supplier_id'])) $center->suppliers()->findOrFail($data['supplier_id']);
         $record = $center->inventory()->findOrFail($item);
         $updated = app(\App\Services\ServiceCenterStockService::class)->receive(
             $center, $record, (int) $data['quantity'], (float) $data['unit_cost'],
-            $request->user()->id, $data['note'] ?? null
+            $request->user()->id, $data['note'] ?? null,
+            isset($data['supplier_id']) ? (int) $data['supplier_id'] : null, $data['supplier_reference'] ?? null
         );
         return response()->json(['message' => 'მარაგი შეივსო.', 'item' => $updated]);
     }
