@@ -46,6 +46,15 @@ class ServiceCenterOperationsController extends Controller
         $technicians = $center->technicians()->where('is_active', true)->orderBy('name')->get();
         $bays = $center->bays()->where('is_active', true)->orderBy('name')->get();
         $inventory = $center->inventory()->where('is_active', true)->orderBy('name')->get();
+        $stockMovements = DB::table('service_center_inventory_movements')
+            ->join('service_center_inventory', 'service_center_inventory.id', '=', 'service_center_inventory_movements.inventory_item_id')
+            ->leftJoin('work_orders', 'work_orders.id', '=', 'service_center_inventory_movements.work_order_id')
+            ->leftJoin('users', 'users.id', '=', 'service_center_inventory_movements.user_id')
+            ->where('service_center_inventory_movements.service_center_id', $center->id)
+            ->latest('service_center_inventory_movements.created_at')
+            ->limit(40)
+            ->select('service_center_inventory_movements.*', 'service_center_inventory.name as item_name', 'work_orders.order_number', 'users.name as user_name')
+            ->get();
         $lowStock = $center->inventory()->where('is_active', true)->whereColumn('quantity', '<=', 'min_quantity')->count();
 
         $stats = [
@@ -71,7 +80,7 @@ class ServiceCenterOperationsController extends Controller
 
         return view('my-service-center.operations', compact(
             'center', 'orders', 'calendar', 'technicians', 'bays', 'inventory',
-            'lowStock', 'stats', 'payments', 'from', 'to', 'features'
+            'lowStock', 'stats', 'payments', 'from', 'to', 'features', 'stockMovements'
         ));
     }
 
@@ -318,6 +327,36 @@ class ServiceCenterOperationsController extends Controller
             }
         });
         return back()->with('success', 'ნაწილი დაემატა საწყობს.');
+    }
+
+    public function receiveInventory(Request $request, ServiceCenterInventoryItem $item)
+    {
+        $center = $this->center();
+        abort_unless($center->canUseFeature('inventory'), 403, $center->featureLockedMessage('inventory'));
+        $data = $request->validate([
+            'quantity' => ['required', 'integer', 'min:1', 'max:1000000'],
+            'unit_cost' => ['required', 'numeric', 'min:0', 'max:999999999'],
+            'note' => ['nullable', 'string', 'max:255'],
+        ]);
+        $updated = app(\App\Services\ServiceCenterStockService::class)->receive(
+            $center, $item, (int) $data['quantity'], (float) $data['unit_cost'], auth()->id(), $data['note'] ?? null
+        );
+        return back()->with('success', 'მარაგი შეივსო. ახალი საშუალო თვითღირებულება: '.number_format((float) $updated->cost_price, 2).' ₾');
+    }
+
+    public function adjustInventory(Request $request, ServiceCenterInventoryItem $item)
+    {
+        $center = $this->center();
+        abort_unless($center->canUseFeature('inventory'), 403, $center->featureLockedMessage('inventory'));
+        $data = $request->validate([
+            'direction' => ['required', 'in:in,out'],
+            'quantity' => ['required', 'integer', 'min:1', 'max:1000000'],
+            'note' => ['required', 'string', 'max:255'],
+        ]);
+        app(\App\Services\ServiceCenterStockService::class)->adjust(
+            $center, $item, $data['direction'], (int) $data['quantity'], auth()->id(), $data['note']
+        );
+        return back()->with('success', 'საწყობის ნაშთი დაკორექტირდა და მოძრაობა ისტორიაში ჩაიწერა.');
     }
 
     public function assign(Request $request, WorkOrder $workOrder)

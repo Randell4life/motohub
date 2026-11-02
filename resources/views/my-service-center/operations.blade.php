@@ -124,8 +124,36 @@
   <input name="sale_price" type="number" min="0" step=".01" required placeholder="გასაყიდი ფასი"><input name="category" placeholder="კატეგორია"><input name="fitment" placeholder="თავსებადობა">
   <button>ნაწილის დამატება</button>
  </form>
- <div class="ops-table-wrap" style="margin-top:15px"><table class="ops-table"><thead><tr><th>ნაწილი</th><th>კოდი</th><th>ნაშთი</th><th>მინიმუმი</th><th>თვითღირებულება</th><th>ფასი</th></tr></thead><tbody>
- @forelse($inventory as $item)<tr><td>{{ $item->name }}<div class="ops-muted">{{ $item->brand }}</div></td><td>{{ $item->sku ?? '—' }}</td><td>{{ $item->quantity }} @if($item->quantity <= $item->min_quantity)<span class="ops-pill">შესავსებია</span>@endif</td><td>{{ $item->min_quantity }}</td><td>{{ number_format((float)$item->cost_price,2) }} ₾</td><td>{{ number_format((float)$item->sale_price,2) }} ₾</td></tr>@empty<tr><td colspan="6" class="ops-muted">საწყობი ცარიელია.</td></tr>@endforelse
+ <div class="ops-table-wrap" style="margin-top:15px"><table class="ops-table"><thead><tr><th>ნაწილი</th><th>კოდი</th><th>ნაშთი</th><th>მინიმუმი</th><th>თვითღირებულება</th><th>ფასი</th><th>მოქმედება</th></tr></thead><tbody>
+ @forelse($inventory as $item)<tr>
+  <td>{{ $item->name }}<div class="ops-muted">{{ $item->brand }}</div></td><td>{{ $item->sku ?? '—' }}</td>
+  <td>{{ $item->quantity }} @if($item->quantity <= $item->min_quantity)<span class="ops-pill">შესავსებია</span>@endif</td>
+  <td>{{ $item->min_quantity }}</td><td>{{ number_format((float)$item->cost_price,2) }} ₾</td><td>{{ number_format((float)$item->sale_price,2) }} ₾</td>
+  <td style="min-width:250px">
+   <form method="POST" action="{{ route('my-service-center.inventory.receive',$item) }}" class="ops-inline">@csrf
+    <input name="quantity" type="number" min="1" required placeholder="მიღებული ცალი" style="width:95px">
+    <input name="unit_cost" type="number" min="0" step=".01" required placeholder="ერთეულის თვითღირებულება" style="width:130px">
+    <input name="note" maxlength="255" placeholder="მომწოდებელი / ზედნადები" style="width:150px">
+    <button>მარაგის მიღება</button>
+   </form>
+   <form method="POST" action="{{ route('my-service-center.inventory.adjust',$item) }}" class="ops-inline" style="margin-top:6px">@csrf
+    <select name="direction"><option value="in">დამატება</option><option value="out">ჩამოწერა</option></select>
+    <input name="quantity" type="number" min="1" required placeholder="რაოდენობა" style="width:95px">
+    <input name="note" maxlength="255" required placeholder="კორექტირების მიზეზი" style="width:150px">
+    <button>ნაშთის კორექტირება</button>
+   </form>
+  </td>
+ </tr>@empty<tr><td colspan="7" class="ops-muted">საწყობი ცარიელია.</td></tr>@endforelse
+ </tbody></table></div>
+ <h4 style="margin-top:22px">მარაგის მოძრაობის ისტორია</h4>
+ <div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>თარიღი</th><th>ნაწილი</th><th>ოპერაცია</th><th>რაოდენობა</th><th>ერთეულის თვითღ.</th><th>შეკვეთა / მიზეზი</th><th>მომხმარებელი</th></tr></thead><tbody>
+ @forelse($stockMovements as $movement)
+  <tr><td>{{ \Illuminate\Support\Carbon::parse($movement->created_at)->format('d.m.Y H:i') }}</td><td>{{ $movement->item_name }}</td>
+  <td>{{ match($movement->type) {'in' => 'მიღება', 'out' => 'შეკვეთაზე ჩამოწერა', 'adjustment_in' => 'კორექტირება +', 'adjustment_out' => 'კორექტირება −', default => $movement->type} }}</td>
+  <td>{{ $movement->type === 'out' || $movement->type === 'adjustment_out' ? '−' : '+' }}{{ $movement->quantity }}</td>
+  <td>{{ number_format((float)$movement->unit_cost,2) }} ₾</td>
+  <td>{{ $movement->order_number ? 'შეკვეთა '.$movement->order_number : ($movement->note ?? '—') }}</td><td>{{ $movement->user_name ?? 'სისტემა' }}</td></tr>
+ @empty<tr><td colspan="7" class="ops-muted">მოძრაობის ისტორია ჯერ ცარიელია.</td></tr>@endforelse
  </tbody></table></div>
 </section>
 

@@ -411,6 +411,15 @@ class MobileExtendedController extends Controller
         $payroll = $center->technicianPayroll()->with(['technician', 'workOrder'])
             ->whereBetween('earned_at', [now()->startOfMonth(), now()->endOfMonth()])
             ->latest('earned_at')->get();
+        $stockMovements = DB::table('service_center_inventory_movements')
+            ->join('service_center_inventory', 'service_center_inventory.id', '=', 'service_center_inventory_movements.inventory_item_id')
+            ->leftJoin('work_orders', 'work_orders.id', '=', 'service_center_inventory_movements.work_order_id')
+            ->leftJoin('users', 'users.id', '=', 'service_center_inventory_movements.user_id')
+            ->where('service_center_inventory_movements.service_center_id', $center->id)
+            ->latest('service_center_inventory_movements.created_at')
+            ->limit(40)
+            ->select('service_center_inventory_movements.*', 'service_center_inventory.name as item_name', 'work_orders.order_number', 'users.name as user_name')
+            ->get();
         return response()->json([
             'center' => $center->load(['services', 'hours']),
             'subscription_plans' => \App\Models\ServiceCenter::subscriptionPlans(),
@@ -421,6 +430,7 @@ class MobileExtendedController extends Controller
             'technicians' => $center->technicians()->orderBy('name')->get(),
             'bays' => $center->bays()->orderBy('name')->get(),
             'inventory' => $center->inventory()->orderBy('name')->get(),
+            'inventory_movements' => $stockMovements,
             'payments' => $center->payments()->with('workOrder')->latest('paid_at')->limit(40)->get(),
             'technician_payroll' => [
                 'earned' => round((float) $payroll->sum('amount'), 2),
@@ -494,6 +504,40 @@ class MobileExtendedController extends Controller
             return $item;
         });
         return response()->json(['message' => 'ნაწილი დაემატა საწყობს.', 'item' => $item], 201);
+    }
+
+    public function receiveServiceCenterInventory(Request $request, int $item)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('inventory'), 403, $center->featureLockedMessage('inventory'));
+        $data = $request->validate([
+            'quantity' => ['required', 'integer', 'min:1', 'max:1000000'],
+            'unit_cost' => ['required', 'numeric', 'min:0', 'max:999999999'],
+            'note' => ['nullable', 'string', 'max:255'],
+        ]);
+        $record = $center->inventory()->findOrFail($item);
+        $updated = app(\App\Services\ServiceCenterStockService::class)->receive(
+            $center, $record, (int) $data['quantity'], (float) $data['unit_cost'],
+            $request->user()->id, $data['note'] ?? null
+        );
+        return response()->json(['message' => 'მარაგი შეივსო.', 'item' => $updated]);
+    }
+
+    public function adjustServiceCenterInventory(Request $request, int $item)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('inventory'), 403, $center->featureLockedMessage('inventory'));
+        $data = $request->validate([
+            'direction' => ['required', 'in:in,out'],
+            'quantity' => ['required', 'integer', 'min:1', 'max:1000000'],
+            'note' => ['required', 'string', 'max:255'],
+        ]);
+        $record = $center->inventory()->findOrFail($item);
+        $updated = app(\App\Services\ServiceCenterStockService::class)->adjust(
+            $center, $record, $data['direction'], (int) $data['quantity'],
+            $request->user()->id, $data['note']
+        );
+        return response()->json(['message' => 'ნაშთი დაკორექტირდა.', 'item' => $updated]);
     }
 
     public function assignWorkOrder(Request $request, int $workOrder)
