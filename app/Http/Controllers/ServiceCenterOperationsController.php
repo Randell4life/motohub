@@ -287,12 +287,7 @@ class ServiceCenterOperationsController extends Controller
         $data = $request->validate(['decision' => ['required', 'in:approved,declined']]);
         $order = app(\App\Services\WorkOrderQuoteWorkflow::class)->decide($token, $data['decision']);
         $approved = $data['decision'] === 'approved';
-        app(\App\Services\ServiceCenterCustomerNotifier::class)->send(
-            $order,
-            $approved ? 'quote_approved' : 'quote_declined',
-            $approved ? 'ხარჯთაღრიცხვა დადასტურებულია' : 'ხარჯთაღრიცხვა უარყოფილია',
-            $approved ? 'კლიენტმა ხარჯთაღრიცხვა დაადასტურა.' : 'კლიენტმა ხარჯთაღრიცხვა არ დაადასტურა.'
-        );
+        app(\\App\\Services\\ServiceCenterQuoteDecisionNotifier::class)->send($order, $data['decision']);
         return back()->with('success', $approved ? 'ხარჯთაღრიცხვა დადასტურდა.' : 'უარი დაფიქსირდა. სერვისცენტრი დაგიკავშირდებათ.');
     }
 
