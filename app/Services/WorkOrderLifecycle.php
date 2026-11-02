@@ -43,6 +43,12 @@ class WorkOrderLifecycle
                 'cancelled' => [],
             ];
 
+            if ($nextStatus === 'in_repair' && $order->quote_sent_at && $order->customer_approval_status !== 'approved') {
+                throw ValidationException::withMessages([
+                    'status' => 'შეკეთების დაწყებამდე საჭიროა კლიენტის მიერ ხარჯთაღრიცხვის დადასტურება.',
+                ]);
+            }
+
             if (! in_array($nextStatus, $allowedTransitions[$previousStatus] ?? [], true)) {
                 throw ValidationException::withMessages([
                     'status' => 'სტატუსების ეს ცვლილება დაუშვებელია. დაიცავით შეკვეთის სამუშაო ეტაპების თანმიმდევრობა.',

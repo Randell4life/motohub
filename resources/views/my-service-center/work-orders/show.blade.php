@@ -507,6 +507,31 @@
     </section>
 
     <section class="od-card">
+    <div class="od-card-head"><div class="od-card-icon">✓</div><div><h3>დიაგნოსტიკა და ხარჯთაღრიცხვა</h3><p>კლიენტს გაეგზავნება დასადასტურებლად</p></div></div>
+    @if($workOrder->customer_approval_status === 'pending')
+        <div class="od-empty">კლიენტის პასუხს ველოდებით · {{ $workOrder->quote_sent_at?->format('d.m.Y H:i') }}</div>
+    @elseif($workOrder->customer_approval_status === 'approved')
+        <div class="od-empty">კლიენტმა ხარჯთაღრიცხვა დაადასტურა · {{ $workOrder->customer_approved_at?->format('d.m.Y H:i') }}</div>
+    @elseif($workOrder->customer_approval_status === 'declined')
+        <div class="od-empty">კლიენტმა ხარჯთაღრიცხვა უარყო. შეგიძლიათ განაახლოთ და ხელახლა გაუგზავნოთ.</div>
+    @endif
+    @if(!in_array($workOrder->status, ['completed','handed_over','cancelled']))
+    <form method="POST" action="{{ route('my-service-center.work-orders.quote', $workOrder) }}">
+        @csrf
+        <label class="od-muted">დიაგნოსტიკის შედეგი</label>
+        <textarea class="od-select" name="diagnosis" rows="3" required>{{ old('diagnosis', $workOrder->diagnosis) }}</textarea>
+        <label class="od-muted">შესასრულებელი სამუშაო</label>
+        <textarea class="od-select" name="work_description" rows="3" required>{{ old('work_description', $workOrder->work_description) }}</textarea>
+        <div class="od-fields">
+            <div class="od-field"><label>ხელობა (₾)</label><input class="od-select" type="number" min="0" step="0.01" name="labor_cost" value="{{ old('labor_cost', $workOrder->quoted_labor_cost ?? $workOrder->labor_cost) }}" required></div>
+            <div class="od-field"><label>ნაწილები (₾)</label><input class="od-select" type="number" min="0" step="0.01" name="parts_cost" value="{{ old('parts_cost', $workOrder->quoted_parts_cost ?? $workOrder->parts_cost) }}" required></div>
+        </div>
+        <button class="od-btn primary" type="submit">ხარჯთაღრიცხვის გაგზავნა →</button>
+    </form>
+    @endif
+</section>
+
+<section class="od-card">
         <div class="od-card-head">
             <div class="od-card-icon">₾</div>
             <div>

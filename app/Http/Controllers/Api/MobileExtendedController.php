@@ -542,6 +542,40 @@ class MobileExtendedController extends Controller
         ]);
     }
 
+    public function sendWorkOrderQuote(Request $request, int $workOrder)
+    {
+        $center = \App\Models\\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('work_orders'), 403, $center->featureLockedMessage('work_orders'));
+        $order = \App\Models\\WorkOrder::where('service_center_id', $center->id)->findOrFail($workOrder);
+        abort_if(in_array($order->status, ['in_repair', 'completed', 'handed_over', 'cancelled'], true), 422, 'შეკეთების დაწყების შემდეგ ხარჯთაღრიცხვის გაგზავნა შეუძლებელია.');
+        $data = $request->validate([
+            'diagnosis' => ['required', 'string', 'max:10000'],
+            'work_description' => ['required', 'string', 'max:10000'],
+            'labor_cost' => ['required', 'numeric', 'min:0', 'max:99999999'],
+            'parts_cost' => ['required', 'numeric', 'min:0', 'max:99999999'],
+        ]);
+        $labor = (float) $data['labor_cost'];
+        $parts = (float) $data['parts_cost'];
+        $order->update([
+            'diagnosis' => $data['diagnosis'],
+            'work_description' => $data['work_description'],
+            'quoted_labor_cost' => $labor,
+            'quoted_parts_cost' => $parts,
+            'quoted_total_cost' => $labor + $parts,
+            'customer_approval_status' => 'pending',
+            'quote_sent_at' => now(),
+            'customer_approved_at' => null,
+            'customer_declined_at' => null,
+        ]);
+        app(\App\Services\\ServiceCenterCustomerNotifier::class)->send(
+            $order,
+            'quote_sent',
+            'ხარჯთაღრიცხვა დასადასტურებელია',
+            'დიაგნოსტიკა და ხარჯთაღრიცხვა მზად არის. გთხოვთ, გაეცნოთ დეტალებს და დაადასტუროთ ან უარყოთ შეკეთება.'
+        );
+        return response()->json(['message' => 'ხარჯთაღრიცხვა კლიენტს გაეგზავნა დასადასტურებლად.', 'work_order' => $order->fresh()], 200);
+    }
+
     public function updateWorkOrderStatus(Request $request, int $workOrder)
     {
         $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
