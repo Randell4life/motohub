@@ -75,6 +75,8 @@ Route::prefix('mobile')->group(function () {
         Route::patch('/service-center/technicians/{technician}/pay', [MobileExtendedController::class, 'updateServiceCenterTechnicianPay'])->whereNumber('technician')->middleware('throttle:10,1');
         Route::post('/service-center/bays', [MobileExtendedController::class, 'storeBay'])->middleware('throttle:10,1');
         Route::post('/service-center/inventory', [MobileExtendedController::class, 'storeInventory'])->middleware('throttle:10,1');
+        Route::post('/service-center/inventory/{item}/receive', [MobileExtendedController::class, 'receiveServiceCenterInventory'])->whereNumber('item')->middleware('throttle:20,1');
+        Route::post('/service-center/inventory/{item}/adjust', [MobileExtendedController::class, 'adjustServiceCenterInventory'])->whereNumber('item')->middleware('throttle:20,1');
         Route::get('/service-center/finance', [MobileExtendedController::class, 'serviceCenterFinance']);
         Route::patch('/service-center/technician-payroll/{payroll}/paid', [MobileExtendedController::class, 'markServiceCenterPayrollPaid'])->whereNumber('payroll')->middleware('throttle:20,1');
         Route::post('/service-center/expenses', [MobileExtendedController::class, 'storeServiceCenterExpense'])->middleware('throttle:20,1');
