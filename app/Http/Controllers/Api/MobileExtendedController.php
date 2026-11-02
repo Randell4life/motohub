@@ -489,7 +489,10 @@ class MobileExtendedController extends Controller
         $order = \App\Models\WorkOrder::where('service_center_id', $center->id)->findOrFail($workOrder);
         $data = $request->validate(['inventory_item_id' => ['required', 'integer'], 'quantity' => ['required', 'integer', 'min:1']]);
 
-        if (in_array($order->status, ['in_repair', 'waiting_for_parts'], true)) {
+        if (in_array($order->status, ['in_repair', 'waiting_for_parts'], true) && $order->quote_sent_at) {
+            if ($order->customer_approval_status === 'pending') {
+                throw ValidationException::withMessages(['quote' => 'ჯერ დაელოდეთ კლიენტის პასუხს მიმდინარე ხარჯთაღრიცხვაზე.']);
+            }
             $item = $center->inventory()->whereKey($data['inventory_item_id'])->firstOrFail();
             app(\App\Services\WorkOrderQuoteWorkflow::class)->sendSupplemental(
                 $order,
