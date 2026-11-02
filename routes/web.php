@@ -686,6 +686,11 @@ Route::post('/my-service-center/subscription', [MyServiceCenterController::class
 Route::get('/my-service-center/operations', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'index'])
     ->name('my-service-center.operations');
 
+Route::get('/my-service-center/finance', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'financialReports'])
+    ->name('my-service-center.finance');
+Route::post('/my-service-center/expenses', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'storeExpense'])
+    ->middleware('throttle:20,1')->name('my-service-center.expenses.store');
+
 Route::post('/my-service-center/technicians', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'storeTechnician'])
     ->name('my-service-center.technicians.store');
 
