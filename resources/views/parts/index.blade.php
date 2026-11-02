@@ -546,6 +546,9 @@
                             <span class="tag">
                                 {{ ($part['source'] ?? '') === 'store' ? 'MOTOHUB STORE' : 'MARKETPLACE' }}
                             </span>
+                            @if (!empty($part['is_demo']))
+                                <span class="tag" style="left:auto;right:10px;border-color:#806b36;color:#ffe2a0">სადემონსტრაციო</span>
+                            @endif
 
                         </div>
 
@@ -582,6 +585,7 @@
 
                                     <div class="seller">
                                         გამყიდველი: {{ $part['seller_name'] ?? 'MotoHub' }}
+                                        @if (!empty($part['is_demo'])) <span style="color:#d9b96c">· სადემონსტრაციო პროფილი</span> @endif
                                     </div>
 
                                     @if (!empty($part['seller_phone']))
