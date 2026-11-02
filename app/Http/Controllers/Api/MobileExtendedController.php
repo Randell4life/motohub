@@ -569,9 +569,12 @@ class MobileExtendedController extends Controller
     {
         $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
         abort_unless($center->canUseFeature('financial_reports'), 403, $center->featureLockedMessage('financial_reports'));
-        $data = $request->validate(['from' => ['nullable', 'date'], 'to' => ['nullable', 'date', 'after_or_equal:from']]);
+        $data = $request->validate(['from' => ['nullable', 'date'], 'to' => ['nullable', 'date']]);
         $from = isset($data['from']) ? \Illuminate\Support\Carbon::parse($data['from'])->startOfDay() : now()->startOfMonth();
         $to = isset($data['to']) ? \Illuminate\Support\Carbon::parse($data['to'])->endOfDay() : now()->endOfMonth();
+        if ($to->lt($from)) {
+            throw ValidationException::withMessages(['to' => 'დასრულების თარიღი დაწყების თარიღზე ადრე ვერ იქნება.']);
+        }
 
         $orders = \App\Models\WorkOrder::where('service_center_id', $center->id)
             ->whereBetween('created_at', [$from, $to])->whereNotIn('status', ['cancelled'])
