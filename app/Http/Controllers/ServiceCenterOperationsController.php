@@ -168,7 +168,7 @@ class ServiceCenterOperationsController extends Controller
             $due = round((float) $lockedOrder->total_cost - $paid, 2);
 
             if ((float) $data['amount'] > $due) {
-                throw \\Illuminate\\Validation\\ValidationException::withMessages([
+                throw ValidationException::withMessages([
                     'amount' => 'გადასახდელ ნაშთზე მეტი თანხა არ შეიძლება.',
                 ]);
             }
