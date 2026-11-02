@@ -176,7 +176,7 @@
    const wrap = document.getElementById('supplier-invoice-lines');
    const index = wrap.querySelectorAll('.supplier-invoice-line').length;
    const row = wrap.querySelector('.supplier-invoice-line').cloneNode(true);
-   row.querySelectorAll('select,input').forEach(el => { el.name = el.name.replace(/items\\[0\\]/, 'items['+index+']'); el.value = ''; });
+   row.querySelectorAll('select,input').forEach(el => { el.name = el.name.replace('items[0]', 'items['+index+']'); el.value = ''; });
    wrap.appendChild(row);
  });
  </script>
