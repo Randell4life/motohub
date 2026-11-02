@@ -469,10 +469,16 @@ class MobileExtendedController extends Controller
         $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
         abort_unless($center->canUseFeature('work_orders'), 403, $center->featureLockedMessage('work_orders'));
         $order = \App\Models\WorkOrder::where('service_center_id', $center->id)->findOrFail($workOrder);
-        $data = $request->validate(['assigned_technician_id'=>['nullable','integer'],'service_center_bay_id'=>['nullable','integer']]);
-        if (!empty($data['assigned_technician_id'])) abort_unless($center->technicians()->whereKey($data['assigned_technician_id'])->exists(), 422);
-        if (!empty($data['service_center_bay_id'])) abort_unless($center->bays()->whereKey($data['service_center_bay_id'])->exists(), 422);
-        $order->update(['service_center_technician_id'=>$data['assigned_technician_id'] ?? null,'service_center_bay_id'=>$data['service_center_bay_id'] ?? null]);
+        $data = $request->validate([
+            'assigned_technician_id' => ['nullable', 'integer'],
+            'service_center_bay_id' => ['nullable', 'integer'],
+        ]);
+        app(\\App\\Services\\WorkOrderAssignmentService::class)->assign(
+            $center,
+            $order,
+            isset($data['assigned_technician_id']) ? (int) $data['assigned_technician_id'] : null,
+            isset($data['service_center_bay_id']) ? (int) $data['service_center_bay_id'] : null,
+        );
         return response()->json(['message' => 'ხელოსანი და ბოქსი მიენიჭა შეკვეთას.']);
     }
 
