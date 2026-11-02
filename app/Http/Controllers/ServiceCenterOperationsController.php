@@ -150,10 +150,17 @@ class ServiceCenterOperationsController extends Controller
         abort_unless($workOrder->service_center_id === $center->id, 404);
         $data = $request->validate(['inventory_item_id'=>['required','integer'],'quantity'=>['required','integer','min:1']]);
         DB::transaction(function () use ($center, $workOrder, $data) {
+            // შეკვეთა პირველ რიგში იბლოკება, რათა ნაწილების დამატება და გადახდა
+            // ერთდროულად არ დაეყრდნოს მოძველებულ ჯამურ ღირებულებას.
+            $lockedOrder = WorkOrder::whereKey($workOrder->id)
+                ->where('service_center_id', $center->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
             $item = $center->inventory()->whereKey($data['inventory_item_id'])->lockForUpdate()->firstOrFail();
             $quantity = (int)$data['quantity'];
             if ($item->quantity < $quantity) throw \Illuminate\Validation\ValidationException::withMessages(['quantity'=>'საწყობში საკმარისი რაოდენობა არ არის.']);
-            $line = ServiceCenterWorkOrderPart::firstOrNew(['work_order_id'=>$workOrder->id,'inventory_item_id'=>$item->id]);
+            $line = ServiceCenterWorkOrderPart::firstOrNew(['work_order_id'=>$lockedOrder->id,'inventory_item_id'=>$item->id]);
             $line->quantity = ($line->exists ? $line->quantity : 0) + $quantity;
             $line->unit_price = $item->sale_price;
             $line->total = $line->quantity * $item->sale_price;
@@ -164,8 +171,8 @@ class ServiceCenterOperationsController extends Controller
                 'user_id'=>auth()->id(),'type'=>'out','quantity'=>$quantity,'unit_cost'=>$item->cost_price,
                 'note'=>'სამუშაო შეკვეთა '.$workOrder->order_number,'created_at'=>now(),'updated_at'=>now(),
             ]);
-            $partsTotal = $workOrder->parts()->sum('total');
-            $workOrder->update(['parts_cost'=>$partsTotal,'total_cost'=>(float)$workOrder->labor_cost + (float)$partsTotal]);
+            $partsTotal = $lockedOrder->parts()->sum('total');
+            $lockedOrder->update(['parts_cost'=>$partsTotal,'total_cost'=>(float)$lockedOrder->labor_cost + (float)$partsTotal]);
         });
         return back()->with('success', 'ნაწილი შეკვეთას მიება და საწყობიდან ჩამოიწერა.');
     }
@@ -179,13 +186,31 @@ class ServiceCenterOperationsController extends Controller
             'amount'=>['required','numeric','gt:0'],'method'=>['required','in:cash,card,transfer,other'],
             'reference'=>['nullable','string','max:120'],'note'=>['nullable','string','max:2000'],
         ]);
-        $paid = (float)$workOrder->payments()->sum('amount');
-        $due = round((float)$workOrder->total_cost - $paid, 2);
-        if ((float)$data['amount'] > $due) return back()->withErrors(['amount'=>'გადასახდელ ნაშთზე მეტი თანხა არ შეიძლება.']);
-        ServiceCenterPayment::create([
-            ...$data,'service_center_id'=>$center->id,'work_order_id'=>$workOrder->id,
-            'received_by'=>auth()->id(),'paid_at'=>now(),
-        ]);
+        DB::transaction(function () use ($center, $workOrder, $data) {
+            // ყველა გადახდა ჯერ სამუშაო შეკვეთას ბლოკავს; ასე პარალელური მოთხოვნები
+            // ერთსა და იმავე ნაშთს ვეღარ გამოიყენებენ.
+            $lockedOrder = WorkOrder::whereKey($workOrder->id)
+                ->where('service_center_id', $center->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $paid = (float) $lockedOrder->payments()->sum('amount');
+            $due = round((float) $lockedOrder->total_cost - $paid, 2);
+            $amount = round((float) $data['amount'], 2);
+
+            if ($due <= 0 || $amount > $due) {
+                throw \\Illuminate\\Validation\\ValidationException::withMessages([
+                    'amount' => 'გადასახდელ ნაშთზე მეტი თანხა არ შეიძლება.',
+                ]);
+            }
+
+            $lockedOrder->payments()->create([
+                ...$data,
+                'service_center_id' => $center->id,
+                'received_by' => auth()->id(),
+                'paid_at' => now(),
+            ]);
+        });
         return back()->with('success', 'გადახდა აღირიცხა.');
     }
 
