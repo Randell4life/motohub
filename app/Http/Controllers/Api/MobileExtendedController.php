@@ -634,18 +634,21 @@ class MobileExtendedController extends Controller
 
     public function markServiceCenterPayrollPaid(Request $request, int $payroll)
     {
-        $center = \\App\\Models\\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
         abort_unless($center->canUseFeature('financial_reports'), 403, $center->featureLockedMessage('financial_reports'));
 
-        $entry = \\App\\Models\\ServiceCenterTechnicianPayroll::where('service_center_id', $center->id)
-            ->lockForUpdate()->findOrFail($payroll);
-        if ($entry->status !== 'paid') {
-            $entry->update([
-                'status' => 'paid',
-                'paid_at' => now(),
-                'paid_by' => $request->user()->id,
-            ]);
-        }
+        $entry = DB::transaction(function () use ($center, $payroll, $request) {
+            $locked = \App\Models\ServiceCenterTechnicianPayroll::where('service_center_id', $center->id)
+                ->lockForUpdate()->findOrFail($payroll);
+            if ($locked->status !== 'paid') {
+                $locked->update([
+                    'status' => 'paid',
+                    'paid_at' => now(),
+                    'paid_by' => $request->user()->id,
+                ]);
+            }
+            return $locked;
+        });
 
         return response()->json(['message' => 'ანაზღაურება გადახდილად მოინიშნა.', 'status' => $entry->fresh()->status]);
     }
