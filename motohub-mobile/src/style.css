@@ -726,7 +726,7 @@ body{background:radial-gradient(ellipse at 50% -8%,#1b3152 0,transparent 42%),li
 .community-bike-tag{display:inline-flex;margin:0 0 11px;padding:6px 9px;border:1px solid #294d75;border-radius:7px;background:#10243b;color:#9dcbff;font-size:9px}
 .community-image{display:block;width:100%;padding:0;overflow:hidden;border:1px solid #2b405d;border-radius:11px;background:#080e18}
 .community-image img{display:block;width:100%;max-height:430px;object-fit:cover}
-.community-post-actions{display:flex;align-items:center;gap:16px;padding:12px 0 10px;border-bottom:1px solid #22344b;color:#8299b7;font-size:9px}
+.community-feed-filter{display:grid;grid-template-columns:minmax(0,1fr) 110px 110px auto;gap:7px;margin:12px 0 16px;padding:10px;border:1px solid #223a58;border-radius:12px;background:#0c1727}.community-feed-filter input,.community-feed-filter select{min-width:0;width:100%;padding:10px;border:1px solid #29466b;border-radius:8px;background:#081326;color:#e8f2ff;font:inherit;font-size:11px}.community-feed-filter button{white-space:nowrap;padding:9px 12px;font-size:10px}@media(max-width:480px){.community-feed-filter{grid-template-columns:1fr 1fr}.community-feed-filter input{grid-column:1/-1}.community-feed-filter button{grid-column:1/-1;width:100%}}.community-post-actions{display:flex;align-items:center;gap:16px;padding:12px 0 10px;border-bottom:1px solid #22344b;color:#8299b7;font-size:9px}
 .community-post-actions button{padding:0;border:0;background:none;color:#9bb1cb;font-size:10px}
 .community-post-actions .community-like span{font-size:17px;vertical-align:-2px}
 .community-post-actions .community-like.is-liked{color:#71b5ff}
