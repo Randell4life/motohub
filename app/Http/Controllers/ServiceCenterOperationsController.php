@@ -225,6 +225,79 @@ class ServiceCenterOperationsController extends Controller
         return back()->with('success', 'გადახდა აღირიცხა.');
     }
 
+    public function sendQuote(Request $request, WorkOrder $workOrder)
+    {
+        $center = $this->center();
+        abort_unless($center->canUseFeature('work_orders'), 403, $center->featureLockedMessage('work_orders'));
+        abort_unless($workOrder->service_center_id === $center->id, 404);
+        abort_if(in_array($workOrder->status, ['completed', 'handed_over', 'cancelled'], true), 422, 'დასრულებულ შეკვეთაზე ხარჯთაღრიცხვა ვერ გაიგზავნება.');
+
+        $data = $request->validate([
+            'diagnosis' => ['required', 'string', 'max:10000'],
+            'work_description' => ['required', 'string', 'max:10000'],
+            'labor_cost' => ['required', 'numeric', 'min:0', 'max:99999999'],
+            'parts_cost' => ['required', 'numeric', 'min:0', 'max:99999999'],
+        ]);
+
+        $labor = (float) $data['labor_cost'];
+        $parts = (float) $data['parts_cost'];
+        $workOrder->update([
+            'diagnosis' => $data['diagnosis'],
+            'work_description' => $data['work_description'],
+            'quoted_labor_cost' => $labor,
+            'quoted_parts_cost' => $parts,
+            'quoted_total_cost' => $labor + $parts,
+            'customer_approval_status' => 'pending',
+            'quote_sent_at' => now(),
+            'customer_approved_at' => null,
+            'customer_declined_at' => null,
+        ]);
+
+        $message = 'დიაგნოსტიკა და ხარჯთაღრიცხვა მზად არის. გთხოვთ, გაეცნოთ დეტალებს და დაადასტუროთ ან უარყოთ შეკეთება.';
+        app(ServiceCenterCustomerNotifier::class)->send($workOrder, 'quote_sent', 'ხარჯთაღრიცხვა დასადასტურებელია', $message);
+
+        return back()->with('success', 'ხარჯთაღრიცხვა კლიენტს გაეგზავნა დასადასტურებლად.');
+    }
+
+    public function customerApproval(Request $request, string $token)
+    {
+        $data = $request->validate(['decision' => ['required', 'in:approved,declined']]);
+        $order = DB::transaction(function () use ($token, $data) {
+            $order = WorkOrder::where('public_token', $token)->lockForUpdate()->firstOrFail();
+            abort_unless($order->customer_approval_status === 'pending' && $order->quote_sent_at, 409, 'ხარჯთაღრიცხვა აღარ ელოდება პასუხს.');
+
+            if ($data['decision'] === 'approved') {
+                $order->update([
+                    'customer_approval_status' => 'approved',
+                    'customer_approved_at' => now(),
+                    'total_cost' => (float) $order->quoted_total_cost,
+                    'labor_cost' => (float) $order->quoted_labor_cost,
+                    'parts_cost' => (float) $order->quoted_parts_cost,
+                ]);
+            } else {
+                $order->update([
+                    'customer_approval_status' => 'declined',
+                    'customer_declined_at' => now(),
+                ]);
+            }
+
+            return $order->fresh();
+        });
+
+        $approved = $data['decision'] === 'approved';
+        $message = $approved
+            ? 'კლიენტმა ხარჯთაღრიცხვა დაადასტურა. სერვისცენტრს შეუძლია შეკეთების დაწყება.'
+            : 'კლიენტმა ხარჯთაღრიცხვა არ დაადასტურა. შეკეთება არ დაწყებულა.';
+        app(ServiceCenterCustomerNotifier::class)->send(
+            $order,
+            $approved ? 'quote_approved' : 'quote_declined',
+            $approved ? 'ხარჯთაღრიცხვა დადასტურებულია' : 'ხარჯთაღრიცხვა უარყოფილია',
+            $message
+        );
+
+        return back()->with('success', $approved ? 'ხარჯთაღრიცხვა დადასტურდა. მადლობა!' : 'უარი დაფიქსირდა. სერვისცენტრი დაგიკავშირდებათ.');
+    }
+
     public function customerStatus(string $token)
     {
         $order = WorkOrder::where('public_token', $token)->with(['serviceCenter','serviceBooking','parts.inventoryItem','payments'])->firstOrFail();
