@@ -7,6 +7,8 @@ use App\Models\ServiceCenterActivityLog;
 use App\Models\ServiceCenterBay;
 use App\Models\ServiceCenterInventoryItem;
 use App\Models\ServiceCenterPayment;
+use App\Models\ServiceCenterSupplier;
+use App\Models\ServiceCenterSupplierPayment;
 use App\Models\ServiceCenterTechnician;
 use App\Models\ServiceCenterWorkOrderPart;
 use App\Models\WorkOrder;
@@ -399,9 +401,13 @@ class ServiceCenterOperationsController extends Controller
             'quantity' => ['required', 'integer', 'min:1', 'max:1000000'],
             'unit_cost' => ['required', 'numeric', 'min:0', 'max:999999999'],
             'note' => ['nullable', 'string', 'max:255'],
+            'supplier_id' => ['nullable', 'integer', 'exists:service_center_suppliers,id'],
+            'supplier_reference' => ['nullable', 'string', 'max:120'],
         ]);
+        if (!empty($data['supplier_id'])) $center->suppliers()->findOrFail($data['supplier_id']);
         $updated = app(\App\Services\ServiceCenterStockService::class)->receive(
-            $center, $item, (int) $data['quantity'], (float) $data['unit_cost'], auth()->id(), $data['note'] ?? null
+            $center, $item, (int) $data['quantity'], (float) $data['unit_cost'], auth()->id(), $data['note'] ?? null,
+            isset($data['supplier_id']) ? (int) $data['supplier_id'] : null, $data['supplier_reference'] ?? null
         );
         return back()->with('success', 'მარაგი შეივსო. ახალი საშუალო თვითღირებულება: '.number_format((float) $updated->cost_price, 2).' ₾');
     }
