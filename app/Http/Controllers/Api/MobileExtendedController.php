@@ -429,8 +429,12 @@ class MobileExtendedController extends Controller
             ->selectRaw('COALESCE(SUM(total_amount), 0) as total')->groupBy('supplier_id')->pluck('total', 'supplier_id');
         $supplierPayments = $center->supplierPayments()->select('supplier_id')
             ->selectRaw('COALESCE(SUM(amount), 0) as total')->groupBy('supplier_id')->pluck('total', 'supplier_id');
-        $suppliers->each(function ($supplier) use ($supplierPurchases, $supplierInvoiceTotals, $supplierPayments) {
-            $supplier->purchased_total = (float) ($supplierPurchases[$supplier->id] ?? 0) + (float) ($supplierInvoiceTotals[$supplier->id] ?? 0);
+        $supplierLegacyPayments = $center->supplierPayments()->whereNull('invoice_id')->select('supplier_id')
+            ->selectRaw('COALESCE(SUM(amount), 0) as total')->groupBy('supplier_id')->pluck('total', 'supplier_id');
+        $suppliers->each(function ($supplier) use ($supplierPurchases, $supplierInvoiceTotals, $supplierPayments, $supplierLegacyPayments) {
+            $legacyPurchases = (float) ($supplierPurchases[$supplier->id] ?? 0);
+            $supplier->legacy_balance = round(max(0, $legacyPurchases - (float) ($supplierLegacyPayments[$supplier->id] ?? 0)), 2);
+            $supplier->purchased_total = $legacyPurchases + (float) ($supplierInvoiceTotals[$supplier->id] ?? 0);
             $supplier->paid_total = (float) ($supplierPayments[$supplier->id] ?? 0);
             $supplier->balance = round($supplier->purchased_total - $supplier->paid_total, 2);
         });
