@@ -62,6 +62,9 @@ $isCancelled = $order->status === 'cancelled';
  <div class="muted">ვერსია #{{ $revision->revision_number }} · {{ $revision->type === 'initial' ? 'საწყისი შეთავაზება' : 'დამატებითი ხარჯი' }} · {{ $revision->sent_at?->format('d.m.Y H:i') }}</div>
  <strong>{{ number_format((float)$revision->total_cost,2) }} ₾</strong>
  <div class="muted">ხელობა {{ number_format((float)$revision->labor_cost,2) }} ₾ · ნაწილები {{ number_format((float)$revision->parts_cost,2) }} ₾ · {{ match($revision->status) { 'approved' => 'დადასტურებულია', 'declined' => 'უარყოფილია', default => 'პასუხს ელოდება' } }}</div>
+ @foreach($revision->additions ?? [] as $addition)
+ <div class="muted">დამატება: {{ $addition['name'] ?? $addition['type'] }} · {{ $addition['quantity'] ?? 1 }} ც. · {{ number_format((float)($addition['total'] ?? 0),2) }} ₾</div>
+ @endforeach
  @if($revision->status === 'pending')<div class="muted">კლიენტის პასუხს ველოდებით.</div>@endif
 </div>
 @empty
