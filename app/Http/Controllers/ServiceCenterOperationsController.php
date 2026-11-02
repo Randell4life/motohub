@@ -56,6 +56,7 @@ class ServiceCenterOperationsController extends Controller
         $supplierPayments = $center->supplierPayments()
             ->select('supplier_id')->selectRaw('COALESCE(SUM(amount), 0) as total')
             ->groupBy('supplier_id')->pluck('total', 'supplier_id');
+        $supplierPaymentHistory = $center->supplierPayments()->with('supplier')->latest('paid_at')->limit(30)->get();
         $suppliers->each(function ($supplier) use ($supplierPurchases, $supplierPayments) {
             $supplier->purchased_total = (float) ($supplierPurchases[$supplier->id] ?? 0);
             $supplier->paid_total = (float) ($supplierPayments[$supplier->id] ?? 0);
@@ -96,7 +97,7 @@ class ServiceCenterOperationsController extends Controller
 
         return view('my-service-center.operations', compact(
             'center', 'orders', 'calendar', 'technicians', 'bays', 'inventory',
-            'lowStock', 'stats', 'payments', 'from', 'to', 'features', 'stockMovements', 'suppliers'
+            'lowStock', 'stats', 'payments', 'from', 'to', 'features', 'stockMovements', 'suppliers', 'supplierPaymentHistory'
         ));
     }
 
