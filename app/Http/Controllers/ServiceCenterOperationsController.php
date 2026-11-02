@@ -134,12 +134,12 @@ class ServiceCenterOperationsController extends Controller
             'assigned_technician_id'=>['nullable','integer', 'exists:service_center_technicians,id'],
             'service_center_bay_id'=>['nullable','integer','exists:service_center_bays,id'],
         ]);
-        if (!empty($data['assigned_technician_id'])) abort_unless($center->technicians()->whereKey($data['assigned_technician_id'])->exists(), 422);
-        if (!empty($data['service_center_bay_id'])) abort_unless($center->bays()->whereKey($data['service_center_bay_id'])->exists(), 422);
-        $workOrder->update([
-            'service_center_technician_id' => $data['assigned_technician_id'] ?? null,
-            'service_center_bay_id' => $data['service_center_bay_id'] ?? null,
-        ]);
+        app(\\App\\Services\\WorkOrderAssignmentService::class)->assign(
+            $center,
+            $workOrder,
+            isset($data['assigned_technician_id']) ? (int) $data['assigned_technician_id'] : null,
+            isset($data['service_center_bay_id']) ? (int) $data['service_center_bay_id'] : null,
+        );
         return back()->with('success', 'ხელოსანი და ბოქსი მიენიჭა შეკვეთას.');
     }
 
