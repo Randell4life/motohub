@@ -132,17 +132,26 @@ class ServiceCenterOperationsController extends Controller
         $payrollPaid = (float) $payroll->where('status', 'paid')->sum('amount');
         $payrollTotal = (float) $payroll->sum('amount');
         $netProfit = round($grossProfit - $expenseTotal - $payrollTotal, 2);
-        $technicianPerformance = $payroll->groupBy('service_center_technician_id')->map(function ($rows) {
-            $first = $rows->first();
+        $payrollByTechnician = $payroll->groupBy('service_center_technician_id');
+        $completedByTechnician = WorkOrder::where('service_center_id', $center->id)
+            ->whereIn('status', ['completed', 'handed_over'])
+            ->whereBetween('completed_at', [$from, $to])
+            ->whereNotNull('service_center_technician_id')
+            ->with('technician')
+            ->get()
+            ->groupBy('service_center_technician_id');
+
+        $technicianPerformance = $completedByTechnician->map(function ($completedOrders, $technicianId) use ($payrollByTechnician) {
+            $entries = $payrollByTechnician->get($technicianId, collect());
             return [
-                'technician' => $first->technician,
-                'completed_orders' => $rows->count(),
-                'labor_base' => (float) $rows->sum('labor_base'),
-                'earned' => (float) $rows->sum('amount'),
-                'paid' => (float) $rows->where('status', 'paid')->sum('amount'),
-                'pending' => (float) $rows->where('status', 'pending')->sum('amount'),
+                'technician' => $completedOrders->first()->technician,
+                'completed_orders' => $completedOrders->count(),
+                'labor_base' => (float) $completedOrders->sum('labor_cost'),
+                'earned' => (float) $entries->sum('amount'),
+                'paid' => (float) $entries->where('status', 'paid')->sum('amount'),
+                'pending' => (float) $entries->where('status', 'pending')->sum('amount'),
             ];
-        })->sortByDesc('earned')->values();
+        })->sortByDesc('completed_orders')->values();
         $partsCostByOrder = DB::table('service_center_inventory_movements')
             ->whereIn('work_order_id', $orders->pluck('id'))
             ->where('type', 'out')
