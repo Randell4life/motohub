@@ -129,6 +129,11 @@ class WorkOrder extends Model
         return $this->belongsTo(ServiceCenterTechnician::class, 'service_center_technician_id');
     }
 
+    public function technicianPayroll(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(ServiceCenterTechnicianPayroll::class);
+    }
+
     public function quoteRevisions(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(WorkOrderQuoteRevision::class)->orderBy('revision_number');
