@@ -530,6 +530,23 @@ class MobileExtendedController extends Controller
         return response()->json(['message' => 'ნაწილი შეკვეთას მიება და საწყობიდან ჩამოიწერა.']);
     }
 
+    public function decideCustomerWorkOrderQuote(Request $request, int $workOrder)
+    {
+        $data = $request->validate(['decision' => ['required', 'in:approved,declined']]);
+        $order = \App\Models\WorkOrder::whereHas('serviceBooking', function ($query) use ($request) {
+            $query->where('user_id', $request->user()->id);
+        })->findOrFail($workOrder);
+
+        $updated = app(\App\Services\WorkOrderQuoteWorkflow::class)->decide($order->public_token, $data['decision']);
+        app(\App\Services\ServiceCenterQuoteDecisionNotifier::class)->send($updated, $data['decision']);
+
+        return response()->json([
+            'message' => $data['decision'] === 'approved' ? 'ხარჯთაღრიცხვა დადასტურდა.' : 'ხარჯთაღრიცხვა უარყოფილია.',
+            'customer_approval_status' => $updated->customer_approval_status,
+            'total_cost' => $updated->total_cost,
+        ]);
+    }
+
     public function sendSupplementalWorkOrderQuote(Request $request, int $workOrder)
     {
         $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
