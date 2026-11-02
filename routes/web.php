@@ -586,7 +586,7 @@ Route::get('/service-centers', [ServiceCenterController::class, 'index'])
 
 Route::get('/service-work-orders/{token}', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'customerStatus'])
     ->middleware('throttle:30,1')->name('service-centers.work-orders.status');
-Route::post('/service-work-orders/{token}/approval', [\\App\\Http\\Controllers\\ServiceCenterOperationsController::class, 'customerApproval'])
+Route::post('/service-work-orders/{token}/approval', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'customerApproval'])
     ->middleware('throttle:10,1')->name('service-centers.work-orders.approval');
 
 Route::get('/service-centers/{serviceCenter:slug}', [
@@ -704,7 +704,7 @@ Route::post('/my-service-center/work-orders/{workOrder}/parts', [\App\Http\Contr
 Route::post('/my-service-center/work-orders/{workOrder}/payments', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'payment'])
     ->whereNumber('workOrder')->name('my-service-center.work-orders.payments');
 
-Route::post('/my-service-center/work-orders/{workOrder}/quote', [\\App\\Http\\Controllers\\ServiceCenterOperationsController::class, 'sendQuote'])
+Route::post('/my-service-center/work-orders/{workOrder}/quote', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'sendQuote'])
     ->whereNumber('workOrder')->name('my-service-center.work-orders.quote');
 
 Route::post('/my-service-center/work-orders/{workOrder}/updates', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'notify'])
