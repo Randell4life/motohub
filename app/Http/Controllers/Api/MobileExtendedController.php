@@ -445,7 +445,7 @@ class MobileExtendedController extends Controller
             'inventory_movements' => $stockMovements,
             'suppliers' => $suppliers,
             'supplier_payments' => $center->supplierPayments()->with('supplier')->latest('paid_at')->limit(40)->get(),
-            'supplier_invoices' => $center->supplierInvoices()->with('supplier')->latest('issue_date')->limit(50)->get()->map(function ($invoice) {
+            'supplier_invoices' => $center->supplierInvoices()->with(['supplier', 'items.inventoryItem'])->latest('issue_date')->limit(50)->get()->map(function ($invoice) {
                 $invoice->document_url = $invoice->file_path ? Storage::disk('public')->url($invoice->file_path) : null;
                 return $invoice;
             }),
@@ -552,25 +552,53 @@ class MobileExtendedController extends Controller
             'total_amount' => ['required', 'numeric', 'gt:0', 'max:999999999'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'document' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:10240'],
+            'items' => ['required', 'array', 'min:1', 'max:100'],
+            'items.*.inventory_item_id' => ['required', 'integer', 'distinct', 'exists:service_center_inventory,id'],
+            'items.*.quantity' => ['required', 'integer', 'min:1', 'max:1000000'],
+            'items.*.unit_cost' => ['required', 'numeric', 'min:0', 'max:999999999'],
         ]);
         $supplier = $center->suppliers()->findOrFail($data['supplier_id']);
+        $linesTotal = collect($data['items'])->sum(fn ($line) => (int) $line['quantity'] * (float) $line['unit_cost']);
+        if (abs($linesTotal - (float) $data['total_amount']) > 0.01) {
+            throw ValidationException::withMessages([
+                'total_amount' => 'ინვოისის ჯამი უნდა ემთხვეოდეს ნაწილების რაოდენობა × ერთეულის ფასის ჯამს ('.number_format($linesTotal, 2).' ₾).',
+            ]);
+        }
+        foreach ($data['items'] as $line) {
+            $center->inventory()->whereKey($line['inventory_item_id'])->firstOrFail();
+        }
         $path = isset($data['document']) ? $data['document']->store('service-center-invoices/'.$center->id, 'public') : null;
         try {
-            $invoice = $center->supplierInvoices()->create([
-                'supplier_id' => $supplier->id,
-                'user_id' => $request->user()->id,
-                'invoice_number' => trim($data['invoice_number']),
-                'issue_date' => $data['issue_date'],
-                'due_date' => $data['due_date'] ?? null,
-                'total_amount' => $data['total_amount'],
-                'file_path' => $path,
-                'notes' => $data['notes'] ?? null,
-            ]);
-        } catch (\Illuminate\Database\QueryException $exception) {
-            if ($path) \Illuminate\Support\Facades\Storage::disk('public')->delete($path);
+            $invoice = DB::transaction(function () use ($center, $supplier, $data, $path, $request) {
+                $invoice = $center->supplierInvoices()->create([
+                    'supplier_id' => $supplier->id, 'user_id' => $request->user()->id,
+                    'invoice_number' => trim($data['invoice_number']), 'issue_date' => $data['issue_date'],
+                    'due_date' => $data['due_date'] ?? null, 'total_amount' => $data['total_amount'],
+                    'file_path' => $path, 'notes' => $data['notes'] ?? null,
+                ]);
+                foreach ($data['items'] as $line) {
+                    $invoice->items()->create([
+                        'inventory_item_id' => $line['inventory_item_id'],
+                        'quantity' => $line['quantity'], 'unit_cost' => $line['unit_cost'],
+                    ]);
+                }
+                return $invoice->load(['supplier', 'items.inventoryItem']);
+            });
+        } catch (\Throwable $exception) {
+            if ($path) Storage::disk('public')->delete($path);
             throw $exception;
         }
-        return response()->json(['message' => 'ინვოისი შეინახა.', 'invoice' => $invoice->load('supplier')], 201);
+        return response()->json(['message' => 'ინვოისი და ნაწილები შეინახა.', 'invoice' => $invoice], 201);
+    }
+
+    public function receiveServiceCenterSupplierInvoiceItem(Request $request, int $line)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('inventory'), 403, $center->featureLockedMessage('inventory'));
+        $data = $request->validate(['quantity' => ['required', 'integer', 'min:1', 'max:1000000']]);
+        $record = \App\Models\ServiceCenterSupplierInvoiceItem::whereHas('invoice', fn ($query) => $query->where('service_center_id', $center->id))->findOrFail($line);
+        $updated = app(\App\Services\ServiceCenterSupplierInvoiceService::class)->receive($center, $record, (int) $data['quantity'], $request->user()->id);
+        return response()->json(['message' => 'ნაწილი საწყობში ჩაირიცხა.', 'line' => $updated]);
     }
 
     public function payServiceCenterSupplier(Request $request, int $supplier)
