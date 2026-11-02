@@ -461,7 +461,19 @@ class MobileExtendedController extends Controller
 
     public function serviceCenterDashboard(Request $request)
     {
-        $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        $user = $request->user();
+        $center = \App\Models\ServiceCenter::where('owner_id', $user->id)->first();
+
+        if (! $center) {
+            return response()->json([
+                'center' => null,
+                'account' => [
+                    'id' => $user->id,
+                    'email' => $user->email,
+                ],
+            ]);
+        }
+
         $orders = \App\Models\WorkOrder::where('service_center_id', $center->id)
             ->with(['serviceBooking', 'technician', 'bay', 'parts.inventoryItem', 'payments'])->latest()->limit(60)->get();
         $payroll = $center->technicianPayroll()->with(['technician', 'workOrder'])
