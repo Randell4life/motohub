@@ -408,6 +408,9 @@ class MobileExtendedController extends Controller
         $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
         $orders = \App\Models\WorkOrder::where('service_center_id', $center->id)
             ->with(['serviceBooking', 'technician', 'bay', 'parts.inventoryItem', 'payments'])->latest()->limit(60)->get();
+        $payroll = $center->technicianPayroll()->with(['technician', 'workOrder'])
+            ->whereBetween('earned_at', [now()->startOfMonth(), now()->endOfMonth()])
+            ->latest('earned_at')->get();
         return response()->json([
             'center' => $center->load(['services', 'hours']),
             'subscription_plans' => \App\Models\ServiceCenter::subscriptionPlans(),
@@ -419,6 +422,23 @@ class MobileExtendedController extends Controller
             'bays' => $center->bays()->orderBy('name')->get(),
             'inventory' => $center->inventory()->orderBy('name')->get(),
             'payments' => $center->payments()->with('workOrder')->latest('paid_at')->limit(40)->get(),
+            'technician_payroll' => [
+                'earned' => round((float) $payroll->sum('amount'), 2),
+                'pending' => round((float) $payroll->where('status', 'pending')->sum('amount'), 2),
+                'paid' => round((float) $payroll->where('status', 'paid')->sum('amount'), 2),
+                'entries' => $payroll->map(fn ($entry) => [
+                    'id' => $entry->id,
+                    'technician_id' => $entry->service_center_technician_id,
+                    'technician' => $entry->technician?->name,
+                    'order_number' => $entry->workOrder?->order_number,
+                    'rate_type' => $entry->rate_type,
+                    'rate_value' => (float) $entry->rate_value,
+                    'labor_base' => (float) $entry->labor_base,
+                    'amount' => (float) $entry->amount,
+                    'status' => $entry->status,
+                    'earned_at' => $entry->earned_at?->toISOString(),
+                ])->values(),
+            ],
         ]);
     }
 
