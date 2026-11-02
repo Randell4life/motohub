@@ -49,12 +49,14 @@ class ServiceBookingAutomation
                 ]
             );
 
-            app(ServiceCenterCustomerNotifier::class)->send(
-                $order,
-                'booking_confirmed',
-                'ჯავშანი დადასტურებულია',
-                'თქვენი სერვისცენტრის ჯავშანი დადასტურდა. სამუშაო შეკვეთა: ' . $order->order_number
-            );
+            if ($order->wasRecentlyCreated) {
+                app(ServiceCenterCustomerNotifier::class)->send(
+                    $order,
+                    'booking_confirmed',
+                    'ჯავშანი დადასტურებულია',
+                    'თქვენი სერვისცენტრის ჯავშანი დადასტურდა. სამუშაო შეკვეთა: ' . $order->order_number
+                );
+            }
 
             return $order;
         });
