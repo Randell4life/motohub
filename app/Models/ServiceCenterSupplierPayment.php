@@ -18,4 +18,9 @@ class ServiceCenterSupplierPayment extends Model
     {
         return $this->belongsTo(ServiceCenterSupplier::class, 'supplier_id');
     }
+
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(ServiceCenterSupplierInvoice::class, 'invoice_id');
+    }
 }
