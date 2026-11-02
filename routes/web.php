@@ -695,6 +695,8 @@ Route::patch('/my-service-center/technician-payroll/{payroll}/paid', [\App\Http\
 
 Route::post('/my-service-center/technicians', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'storeTechnician'])
     ->name('my-service-center.technicians.store');
+Route::patch('/my-service-center/technicians/{technician}/pay', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'updateTechnicianPay'])
+    ->whereNumber('technician')->name('my-service-center.technicians.pay');
 
 Route::post('/my-service-center/bays', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'storeBay'])
     ->name('my-service-center.bays.store');
