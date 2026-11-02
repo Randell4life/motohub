@@ -117,6 +117,40 @@
 </div>
 
 <section class="ops-section">
+ <h3>მომწოდებლები და დავალიანება</h3>
+ <form class="ops-form" method="POST" action="{{ route('my-service-center.suppliers.store') }}">@csrf
+  <input name="name" required placeholder="კომპანიის / მომწოდებლის სახელი">
+  <input name="contact_person" placeholder="საკონტაქტო პირი">
+  <input name="phone" placeholder="ტელეფონი">
+  <input name="email" type="email" placeholder="ელფოსტა">
+  <input name="tax_id" placeholder="საიდენტიფიკაციო კოდი">
+  <input name="address" placeholder="მისამართი">
+  <input name="notes" placeholder="შენიშვნა">
+  <button>მომწოდებლის დამატება</button>
+ </form>
+ <div class="ops-table-wrap" style="margin-top:15px"><table class="ops-table"><thead><tr><th>მომწოდებელი</th><th>კონტაქტი</th><th>შესყიდვები</th><th>გადახდილი</th><th>დავალიანება</th><th>გადახდის აღრიცხვა</th></tr></thead><tbody>
+ @forelse($suppliers as $supplier)<tr>
+  <td><b>{{ $supplier->name }}</b><div class="ops-muted">{{ $supplier->tax_id ?? '' }}</div></td>
+  <td>{{ $supplier->contact_person ?? '—' }}<div class="ops-muted">{{ $supplier->phone ?? '' }} {{ $supplier->email ?? '' }}</div></td>
+  <td>{{ number_format($supplier->purchased_total,2) }} ₾</td>
+  <td>{{ number_format($supplier->paid_total,2) }} ₾</td>
+  <td><b>{{ number_format($supplier->balance,2) }} ₾</b></td>
+  <td>
+   @if($supplier->balance > 0)
+   <form method="POST" action="{{ route('my-service-center.suppliers.pay',$supplier) }}" class="ops-inline">@csrf
+    <input name="amount" type="number" min=".01" max="{{ $supplier->balance }}" step=".01" required placeholder="თანხა" style="width:100px">
+    <select name="method"><option value="cash">ნაღდი</option><option value="bank_transfer">ბანკი</option><option value="card">ბარათი</option><option value="other">სხვა</option></select>
+    <input name="reference" maxlength="120" placeholder="ტრანზაქციის №" style="width:120px">
+    <input name="paid_at" type="datetime-local" value="{{ now()->format('Y-m-d\\TH:i') }}" required>
+    <button>გადახდა</button>
+   </form>
+   @else <span class="ops-pill">დავალიანება არ არის</span> @endif
+  </td>
+ </tr>@empty<tr><td colspan="6" class="ops-muted">მომწოდებლები ჯერ არ დაგიმატებია.</td></tr>@endforelse
+ </tbody></table></div>
+</section>
+
+<section class="ops-section">
  <h3>საწყობი @if($lowStock)<span class="ops-pill">დაბალი ნაშთი: {{ $lowStock }}</span>@endif</h3>
  <form class="ops-form" method="POST" action="{{ route('my-service-center.inventory.store') }}">@csrf
   <input name="name" required placeholder="ნაწილის დასახელება"><input name="sku" placeholder="SKU / კოდი"><input name="brand" placeholder="ბრენდი">
@@ -133,7 +167,9 @@
    <form method="POST" action="{{ route('my-service-center.inventory.receive',$item) }}" class="ops-inline">@csrf
     <input name="quantity" type="number" min="1" required placeholder="მიღებული ცალი" style="width:95px">
     <input name="unit_cost" type="number" min="0" step=".01" required placeholder="ერთეულის თვითღირებულება" style="width:130px">
-    <input name="note" maxlength="255" placeholder="მომწოდებელი / ზედნადები" style="width:150px">
+    <select name="supplier_id" style="width:150px"><option value="">მომწოდებელი</option>@foreach($suppliers as $supplier)<option value="{{ $supplier->id }}">{{ $supplier->name }}</option>@endforeach</select>
+    <input name="supplier_reference" maxlength="120" placeholder="ზედნადების №" style="width:120px">
+    <input name="note" maxlength="255" placeholder="შენიშვნა" style="width:130px">
     <button>მარაგის მიღება</button>
    </form>
    <form method="POST" action="{{ route('my-service-center.inventory.adjust',$item) }}" class="ops-inline" style="margin-top:6px">@csrf
@@ -152,7 +188,7 @@
   <td>{{ match($movement->type) {'in' => 'მიღება', 'out' => 'შეკვეთაზე ჩამოწერა', 'adjustment_in' => 'კორექტირება +', 'adjustment_out' => 'კორექტირება −', default => $movement->type} }}</td>
   <td>{{ $movement->type === 'out' || $movement->type === 'adjustment_out' ? '−' : '+' }}{{ $movement->quantity }}</td>
   <td>{{ number_format((float)$movement->unit_cost,2) }} ₾</td>
-  <td>{{ $movement->order_number ? 'შეკვეთა '.$movement->order_number : ($movement->note ?? '—') }}</td><td>{{ $movement->user_name ?? 'სისტემა' }}</td></tr>
+  <td>{{ $movement->order_number ? 'შეკვეთა '.$movement->order_number : ($movement->supplier_name ? 'მომწოდებელი: '.$movement->supplier_name : ($movement->note ?? '—')) }}<div class="ops-muted">{{ $movement->supplier_reference ?? '' }}</div></td><td>{{ $movement->user_name ?? 'სისტემა' }}</td></tr>
  @empty<tr><td colspan="7" class="ops-muted">მოძრაობის ისტორია ჯერ ცარიელია.</td></tr>@endforelse
  </tbody></table></div>
 </section>
