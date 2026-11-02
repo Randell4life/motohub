@@ -548,10 +548,20 @@ class MobileExtendedController extends Controller
         abort_unless($center->canUseFeature('work_orders'), 403, $center->featureLockedMessage('work_orders'));
         $order = \App\Models\WorkOrder::where('service_center_id', $center->id)->findOrFail($workOrder);
         $data = $request->validate(['status'=>['required','in:received,diagnostics,waiting_for_parts,in_repair,completed,handed_over,cancelled']]);
+        $previousStatus = $order->status;
         $changes = ['status'=>$data['status']];
         if ($data['status']==='completed') $changes['completed_at']=now();
-        if ($data['status']==='handed_over') $changes['handed_over_at']=now();
+        if ($data['status']==='handed_over') {
+            $changes['handed_over_at']=now();
+            if (!$order->completed_at) $changes['completed_at']=now();
+        }
         $order->update($changes);
+        if ($previousStatus !== $data['status']) {
+            [$title, $message] = app(\App\Services\ServiceCenterCustomerNotifier::class)
+                ->statusMessage($data['status'], $order->order_number);
+            app(\App\Services\ServiceCenterCustomerNotifier::class)
+                ->send($order, 'work_order_status_' . $data['status'], $title, $message);
+        }
         return response()->json(['message'=>'შეკვეთის სტატუსი განახლდა.']);
     }
 
