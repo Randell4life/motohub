@@ -338,7 +338,7 @@ class ServiceCenterOperationsController extends Controller
             'unit_cost' => ['required', 'numeric', 'min:0', 'max:999999999'],
             'note' => ['nullable', 'string', 'max:255'],
         ]);
-        $updated = app(\App\Services\\ServiceCenterStockService::class)->receive(
+        $updated = app(\App\Services\ServiceCenterStockService::class)->receive(
             $center, $item, (int) $data['quantity'], (float) $data['unit_cost'], auth()->id(), $data['note'] ?? null
         );
         return back()->with('success', 'მარაგი შეივსო. ახალი საშუალო თვითღირებულება: '.number_format((float) $updated->cost_price, 2).' ₾');
@@ -353,7 +353,7 @@ class ServiceCenterOperationsController extends Controller
             'quantity' => ['required', 'integer', 'min:1', 'max:1000000'],
             'note' => ['required', 'string', 'max:255'],
         ]);
-        app(\App\Services\\ServiceCenterStockService::class)->adjust(
+        app(\App\Services\ServiceCenterStockService::class)->adjust(
             $center, $item, $data['direction'], (int) $data['quantity'], auth()->id(), $data['note']
         );
         return back()->with('success', 'საწყობის ნაშთი დაკორექტირდა და მოძრაობა ისტორიაში ჩაიწერა.');
