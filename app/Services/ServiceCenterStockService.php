@@ -16,7 +16,7 @@ class ServiceCenterStockService
             if ($quantity < 1 || $unitCost < 0) {
                 throw ValidationException::withMessages(['quantity' => 'მიუთითე დადებითი რაოდენობა და სწორი თვითღირებულება.']);
             }
-            if ($supplierId !== null && !\\App\\Models\\ServiceCenterSupplier::where('service_center_id', $center->id)->whereKey($supplierId)->exists()) {
+            if ($supplierId !== null && !\App\Models\ServiceCenterSupplier::where('service_center_id', $center->id)->whereKey($supplierId)->exists()) {
                 throw ValidationException::withMessages(['supplier_id' => 'არჩეული მომწოდებელი ამ სერვისცენტრს არ ეკუთვნის.']);
             }
 
