@@ -175,6 +175,7 @@ public function updateStatus(Request $request, WorkOrder $workOrder)
     ]);
 
     $status = $validated['status'];
+    $previousStatus = $workOrder->status;
 
     $workOrder->status = $status;
 
@@ -191,6 +192,13 @@ public function updateStatus(Request $request, WorkOrder $workOrder)
     }
 
     $workOrder->save();
+
+    if ($previousStatus !== $status) {
+        [$title, $message] = app(\App\Services\ServiceCenterCustomerNotifier::class)
+            ->statusMessage($status, $workOrder->order_number);
+        app(\App\Services\ServiceCenterCustomerNotifier::class)
+            ->send($workOrder, 'work_order_status_' . $status, $title, $message);
+    }
 
     return redirect()
         ->route('my-service-center.work-orders.index')
