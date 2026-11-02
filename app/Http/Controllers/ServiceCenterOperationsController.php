@@ -154,7 +154,10 @@ class ServiceCenterOperationsController extends Controller
             'description' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        if (in_array($workOrder->status, ['in_repair', 'waiting_for_parts'], true)) {
+        if (in_array($workOrder->status, ['in_repair', 'waiting_for_parts'], true) && $workOrder->quote_sent_at) {
+            if ($workOrder->customer_approval_status === 'pending') {
+                throw \\Illuminate\\Validation\\ValidationException::withMessages(['quote' => 'ჯერ დაელოდეთ კლიენტის პასუხს მიმდინარე ხარჯთაღრიცხვაზე.']);
+            }
             $item = $center->inventory()->whereKey($data['inventory_item_id'])->firstOrFail();
             $revision = app(\App\Services\WorkOrderQuoteWorkflow::class)->sendSupplemental(
                 $workOrder,
