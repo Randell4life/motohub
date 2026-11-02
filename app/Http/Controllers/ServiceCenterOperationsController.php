@@ -134,7 +134,7 @@ class ServiceCenterOperationsController extends Controller
             'assigned_technician_id'=>['nullable','integer', 'exists:service_center_technicians,id'],
             'service_center_bay_id'=>['nullable','integer','exists:service_center_bays,id'],
         ]);
-        app(\\App\\Services\\WorkOrderAssignmentService::class)->assign(
+        app(\App\Services\WorkOrderAssignmentService::class)->assign(
             $center,
             $workOrder,
             isset($data['assigned_technician_id']) ? (int) $data['assigned_technician_id'] : null,
