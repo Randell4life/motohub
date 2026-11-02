@@ -415,10 +415,11 @@ class MobileExtendedController extends Controller
             ->join('service_center_inventory', 'service_center_inventory.id', '=', 'service_center_inventory_movements.inventory_item_id')
             ->leftJoin('work_orders', 'work_orders.id', '=', 'service_center_inventory_movements.work_order_id')
             ->leftJoin('users', 'users.id', '=', 'service_center_inventory_movements.user_id')
+            ->leftJoin('service_center_suppliers', 'service_center_suppliers.id', '=', 'service_center_inventory_movements.supplier_id')
             ->where('service_center_inventory_movements.service_center_id', $center->id)
             ->latest('service_center_inventory_movements.created_at')
             ->limit(40)
-            ->select('service_center_inventory_movements.*', 'service_center_inventory.name as item_name', 'work_orders.order_number', 'users.name as user_name')
+            ->select('service_center_inventory_movements.*', 'service_center_inventory.name as item_name', 'work_orders.order_number', 'users.name as user_name', 'service_center_suppliers.name as supplier_name', 'service_center_inventory_movements.supplier_reference')
             ->get();
         $suppliers = $center->suppliers()->where('is_active', true)->orderBy('name')->get();
         $supplierPurchases = DB::table('service_center_inventory_movements')->where('service_center_id', $center->id)
