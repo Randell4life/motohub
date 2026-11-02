@@ -590,6 +590,7 @@ class MobileExtendedController extends Controller
         $paid = (float) $payments->sum(fn ($payment) => (float) $payment->amount);
         $payroll = $center->technicianPayroll()->with('technician')
             ->whereBetween('earned_at', [$from, $to])->latest('earned_at')->get();
+        $payrollTotal = (float) $payroll->sum('amount');
 
         return response()->json([
             'period' => ['from' => $from->toDateString(), 'to' => $to->toDateString()],
@@ -601,7 +602,8 @@ class MobileExtendedController extends Controller
                 'parts_cost' => round($partsCost, 2),
                 'expenses' => round($expenseTotal, 2),
                 'gross_profit' => round($billed - $partsCost, 2),
-                'net_profit' => round($billed - $partsCost - $expenseTotal, 2),
+                'net_profit' => round($billed - $partsCost - $expenseTotal - $payrollTotal, 2),
+                'technician_payroll' => round($payrollTotal, 2),
                 'outstanding' => round((float) $orders->sum(fn ($order) => max(0, (float) $order->total_cost - (float) $order->payments->sum('amount'))), 2),
             ],
             'expense_categories' => $expenses->groupBy('category')->map(fn ($items) => round((float) $items->sum('amount'), 2)),
