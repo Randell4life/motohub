@@ -219,9 +219,21 @@ class ServiceCenterOperationsController extends Controller
             'name' => ['required','string','max:160'],
             'phone' => ['nullable','string','max:40'],
             'specialty' => ['nullable','string','max:160'],
-            'pay_type' => ['required', 'in:percentage_labor,fixed_per_order'],
-            'pay_rate' => ['required', 'numeric', 'min:0', 'max:1000000'],
         ]);
+
+        if ($center->canUseFeature('financial_reports')) {
+            $pay = $request->validate([
+                'pay_type' => ['required', 'in:percentage_labor,fixed_per_order'],
+                'pay_rate' => ['required', 'numeric', 'min:0', 'max:1000000'],
+            ]);
+            if ($pay['pay_type'] === 'percentage_labor' && (float) $pay['pay_rate'] > 100) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['pay_rate' => 'ხელობის პროცენტი 100%-ზე მეტი ვერ იქნება.']);
+            }
+            $data = [...$data, ...$pay];
+        } else {
+            $data = [...$data, 'pay_type' => 'percentage_labor', 'pay_rate' => 0];
+        }
+
         $center->technicians()->create($data);
         return back()->with('success', 'ხელოსანი დაემატა.');
     }
@@ -229,13 +241,16 @@ class ServiceCenterOperationsController extends Controller
     public function updateTechnicianPay(Request $request, ServiceCenterTechnician $technician)
     {
         $center = $this->center();
-        abort_unless($center->canUseFeature('team'), 403, $center->featureLockedMessage('team'));
+        abort_unless($center->canUseFeature('financial_reports'), 403, $center->featureLockedMessage('financial_reports'));
         abort_unless($technician->service_center_id === $center->id, 404);
 
         $data = $request->validate([
             'pay_type' => ['required', 'in:percentage_labor,fixed_per_order'],
             'pay_rate' => ['required', 'numeric', 'min:0', 'max:1000000'],
         ]);
+        if ($data['pay_type'] === 'percentage_labor' && (float) $data['pay_rate'] > 100) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['pay_rate' => 'ხელობის პროცენტი 100%-ზე მეტი ვერ იქნება.']);
+        }
         $technician->update($data);
 
         return back()->with('success', 'ხელოსნის ანაზღაურების ტარიფი განახლდა. ახალი ტარიფი გავრცელდება მომავალ დასრულებულ შეკვეთებზე.');
