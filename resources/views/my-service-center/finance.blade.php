@@ -49,6 +49,7 @@
  <div class="fin-card"><small>ხელობის შემოსავალი</small><strong>{{ number_format($laborRevenue,2) }} ₾</strong><div class="fin-muted">შეკვეთების ხელობის ღირებულება</div></div>
  <div class="fin-card"><small>ნაწილების გაყიდვა</small><strong>{{ number_format($partsRevenue,2) }} ₾</strong><div class="fin-muted">კლიენტისთვის დარიცხული</div></div>
  <div class="fin-card"><small>მთლიანი მოგება ნაწილების შემდეგ</small><strong class="{{ $grossProfit >= 0 ? 'fin-positive' : 'fin-negative' }}">{{ number_format($grossProfit,2) }} ₾</strong><div class="fin-muted">შემოსავალი მინუს ნაწილების თვითღირებულება</div></div>
+ <div class="fin-card"><small>ხელოსნების ანაზღაურება</small><strong class="fin-negative">{{ number_format($payrollTotal,2) }} ₾</strong><div class="fin-muted">ავტომატური დარიცხვა დასრულებული შეკვეთებიდან</div></div>
  <div class="fin-card"><small>საერთო ხარჯები</small><strong class="fin-negative">{{ number_format($expenseTotal,2) }} ₾</strong><div class="fin-muted">ხელით აღრიცხული ხარჯები</div></div>
  <div class="fin-card"><small>სავარაუდო წმინდა შედეგი</small><strong class="{{ $netProfit >= 0 ? 'fin-positive' : 'fin-negative' }}">{{ number_format($netProfit,2) }} ₾</strong><div class="fin-muted">დარიცხული შემოსავალი − ნაწილების თვითღირებულება − ხარჯები</div></div>
 </div>
@@ -101,7 +102,7 @@
 
 <section class="fin-section">
  <h3>შეკვეთების მოგებიანობა</h3>
- <div class="fin-table-wrap"><table class="fin-table"><thead><tr><th>შეკვეთა / კლიენტი</th><th>სტატუსი</th><th>დარიცხული</th><th>ნაწილების თვითღ.</th><th>პირდაპირი ხარჯი</th><th>გადახდილი</th><th>სავარაუდო მოგება</th></tr></thead><tbody>
+ <div class="fin-table-wrap"><table class="fin-table"><thead><tr><th>შეკვეთა / კლიენტი</th><th>სტატუსი</th><th>დარიცხული</th><th>ნაწილების თვითღ.</th><th>პირდაპირი ხარჯი</th><th>ხელოსნის ანაზღ.</th><th>გადახდილი</th><th>სავარაუდო მოგება</th></tr></thead><tbody>
  @forelse($orderProfitability as $row)
  <tr>
   <td><strong>{{ $row['order']->order_number }}</strong><div class="fin-muted">{{ $row['order']->serviceBooking?->customer_name ?? '—' }} · {{ $row['order']->serviceBooking?->motorcycle ?? '—' }}</div></td>
@@ -109,10 +110,11 @@
   <td>{{ number_format((float)$row['order']->total_cost,2) }} ₾</td>
   <td>{{ number_format($row['parts_cost'],2) }} ₾</td>
   <td>{{ number_format($row['direct_expenses'],2) }} ₾</td>
+  <td>{{ number_format($row['technician_payroll'],2) }} ₾</td>
   <td>{{ number_format($row['paid'],2) }} ₾</td>
   <td class="{{ $row['profit'] >= 0 ? 'fin-positive' : 'fin-negative' }}"><strong>{{ number_format($row['profit'],2) }} ₾</strong></td>
  </tr>
- @empty<tr><td colspan="7" class="fin-muted">არჩეულ პერიოდში შეკვეთები არ არის.</td></tr>@endforelse
+ @empty<tr><td colspan="8" class="fin-muted">არჩეულ პერიოდში შეკვეთები არ არის.</td></tr>@endforelse
  </tbody></table></div>
 </section>
 
