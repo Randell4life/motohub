@@ -1136,7 +1136,7 @@ body{background:radial-gradient(ellipse at 50% -8%,#1b3152 0,transparent 42%),li
 .event-description{margin:7px 0;color:#8fa4bd;font-size:8px;line-height:1.6}
 .event-card-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px;margin-top:9px;padding-top:8px;border-top:1px solid #ffffff13}
 .event-capacity{color:#8299b4;font-size:7px}
-.event-attending{padding:6px 8px;border:1px solid #327764;border-radius:8px;background:#10352e;color:#9ce6c9;font-size:8px;font-weight:800}
+.event-attending-wrap{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.event-cancel-btn{border:1px solid #405878;border-radius:8px;background:transparent;color:#a9bdd6;padding:7px 10px;font:inherit;font-size:10px;font-weight:700}.event-cancel-btn:active{background:#1a2b42}.event-attending{padding:6px 8px;border:1px solid #327764;border-radius:8px;background:#10352e;color:#9ce6c9;font-size:8px;font-weight:800}
 .event-member-note{color:#b8a77f;font-size:8px}
 .clubs-empty{padding:25px 15px;border:1px dashed #2d4a6b;border-radius:14px;background:#0c1725;text-align:center}
 .clubs-empty>span{color:#67b3ff;font-size:30px}

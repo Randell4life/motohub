@@ -258,10 +258,32 @@ class MobileExtendedController extends Controller
 
     public function joinClub(Request $request, int $club)
     {
-        $item = DB::table('moto_clubs')->where('is_public', true)->find($club);
+        $item = DB::table('moto_clubs')->find($club);
         abort_unless($item, 404);
-        DB::table('moto_club_members')->updateOrInsert(['club_id' => $club, 'user_id' => $request->user()->id], ['role' => 'member', 'status' => 'active', 'created_at' => now(), 'updated_at' => now()]);
-        return response()->json(['message' => 'კლუბს შეუერთდი.']);
+
+        $status = $item->is_public ? 'active' : 'pending';
+        DB::table('moto_club_members')->updateOrInsert(
+            ['club_id' => $club, 'user_id' => $request->user()->id],
+            ['role' => 'member', 'status' => $status, 'created_at' => now(), 'updated_at' => now()]
+        );
+
+        return response()->json([
+            'message' => $status === 'active' ? 'კლუბს შეუერთდი.' : 'გაწევრიანების მოთხოვნა გაიგზავნა.',
+            'status' => $status,
+        ]);
+    }
+
+    public function leaveEvent(Request $request, int $event)
+    {
+        $updated = DB::table('moto_event_attendees')
+            ->where('event_id', $event)
+            ->where('user_id', $request->user()->id)
+            ->where('status', 'going')
+            ->update(['status' => 'cancelled', 'updated_at' => now()]);
+
+        abort_unless($updated, 404);
+
+        return response()->json(['message' => 'ღონისძიებაში მონაწილეობა გაუქმდა.']);
     }
 
     public function attendEvent(Request $request, int $event)

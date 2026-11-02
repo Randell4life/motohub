@@ -52,6 +52,7 @@ Route::prefix('mobile')->group(function () {
         Route::post('/clubs/{club}/members/{member}/approve', [MobileExtendedController::class, 'approveClubMember'])->whereNumber('club')->whereNumber('member');
         Route::post('/clubs/{club}/events', [MobileExtendedController::class, 'storeEvent'])->whereNumber('club')->middleware('throttle:5,1');
         Route::post('/events/{event}/attend', [MobileExtendedController::class, 'attendEvent'])->whereNumber('event');
+        Route::post('/events/{event}/leave', [MobileExtendedController::class, 'leaveEvent'])->whereNumber('event');
         Route::get('/conversations', [MobileExtendedController::class, 'conversations']);
         Route::get('/conversations/{conversation}', [MobileExtendedController::class, 'conversation'])->whereNumber('conversation');
         Route::post('/conversations', [MobileExtendedController::class, 'startConversation'])->middleware('throttle:10,1');
