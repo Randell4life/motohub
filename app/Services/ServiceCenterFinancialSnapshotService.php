@@ -7,9 +7,6 @@ use Illuminate\Support\Facades\DB;
 
 class ServiceCenterFinancialSnapshotService
 {
-    /**
-     * Current balance-sheet style figures, independent of the selected report period.
-     */
     public function forCenter(ServiceCenter $center): array
     {
         $inventoryValue = (float) DB::table('service_center_inventory')
@@ -30,7 +27,7 @@ class ServiceCenterFinancialSnapshotService
                 'invoices.id'
             )
             ->where('invoices.service_center_id', $center->id)
-            ->selectRaw('COALESCE(SUM(GREATEST(invoices.total_amount - COALESCE(payments.paid, 0), 0)), 0) as total')
+            ->selectRaw('COALESCE(SUM(CASE WHEN invoices.total_amount > COALESCE(payments.paid, 0) THEN invoices.total_amount - COALESCE(payments.paid, 0) ELSE 0 END), 0) as total')
             ->value('total');
 
         $directPurchases = (float) DB::table('service_center_inventory_movements')
@@ -46,11 +43,14 @@ class ServiceCenterFinancialSnapshotService
             ->whereNull('invoice_id')
             ->sum('amount');
 
+        $invoiceDebt = (float) $invoiceBalances;
+        $directDebt = max(0, $directPurchases - $directPayments);
+
         return [
             'inventory_value' => round($inventoryValue, 2),
-            'supplier_invoice_debt' => round((float) $invoiceBalances, 2),
-            'supplier_direct_debt' => round(max(0, $directPurchases - $directPayments), 2),
-            'supplier_debt' => round((float) $invoiceBalances + max(0, $directPurchases - $directPayments), 2),
+            'supplier_invoice_debt' => round($invoiceDebt, 2),
+            'supplier_direct_debt' => round($directDebt, 2),
+            'supplier_debt' => round($invoiceDebt + $directDebt, 2),
         ];
     }
 }
