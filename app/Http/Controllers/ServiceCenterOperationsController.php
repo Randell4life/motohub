@@ -154,7 +154,7 @@ class ServiceCenterOperationsController extends Controller
             'description' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        if (in_array($workOrder->status, ['in_repair', 'waiting_for_parts'], true) && $workOrder->quote_sent_at) {
+        if ($workOrder->quote_sent_at && ! in_array($workOrder->status, ['completed', 'handed_over', 'cancelled'], true)) {
             if ($workOrder->customer_approval_status === 'pending') {
                 throw \Illuminate\Validation\ValidationException::withMessages(['quote' => 'ჯერ დაელოდეთ კლიენტის პასუხს მიმდინარე ხარჯთაღრიცხვაზე.']);
             }
