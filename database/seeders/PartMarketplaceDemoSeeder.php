@@ -1,12 +1,12 @@
 <?php
 
-namespace Database\\Seeders;
+namespace Database\Seeders;
 
-use App\\Models\\PartListing;
-use App\\Models\\User;
-use Illuminate\\Database\\Seeder;
-use Illuminate\\Support\\Facades\\Hash;
-use Illuminate\\Support\\Str;
+use App\Models\PartListing;
+use App\Models\User;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class PartMarketplaceDemoSeeder extends Seeder
 {
