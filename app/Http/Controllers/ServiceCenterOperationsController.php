@@ -254,7 +254,7 @@ class ServiceCenterOperationsController extends Controller
         ]);
 
         $message = 'დიაგნოსტიკა და ხარჯთაღრიცხვა მზად არის. გთხოვთ, გაეცნოთ დეტალებს და დაადასტუროთ ან უარყოთ შეკეთება.';
-        app(ServiceCenterCustomerNotifier::class)->send($workOrder, 'quote_sent', 'ხარჯთაღრიცხვა დასადასტურებელია', $message);
+        app(\\App\\Services\\ServiceCenterCustomerNotifier::class)->send($workOrder, 'quote_sent', 'ხარჯთაღრიცხვა დასადასტურებელია', $message);
 
         return back()->with('success', 'ხარჯთაღრიცხვა კლიენტს გაეგზავნა დასადასტურებლად.');
     }
