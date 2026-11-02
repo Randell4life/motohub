@@ -902,4 +902,9 @@ Route::middleware('auth')->group(function () {
         ->whereNumber('event')
         ->middleware('throttle:10,1')
         ->name('clubs.events.attend');
+    
+    Route::delete('/clubs/events/{event}/attend', [\App\Http\Controllers\MotoHubFeaturesController::class, 'leaveEvent'])
+        ->whereNumber('event')
+        ->middleware('throttle:10,1')
+        ->name('clubs.events.leave');
 });
