@@ -60,6 +60,19 @@
 <div class="fin-note">ანგარიში ითვლის არჩეულ პერიოდში შექმნილ შეკვეთებს. წმინდა შედეგიდან ცალკე აკლდება ავტომატურად დარიცხული ხელოსნის ანაზღაურება და ქვემოთ ხელით აღრიცხული საოპერაციო ხარჯები. ერთი და იგივე ხელოსნის ანაზღაურება აღარ უნდა შეიყვანო მეორედ ხელით ხარჯებში. დაუფიქსირებელი ხარჯები მოგებაში არ აისახება; ეს არ არის საგადასახადო დეკლარაცია.</div>
 
 <section class="fin-section">
+ <h3>მომწოდებლების დავალიანება</h3>
+ <div class="fin-table-wrap"><table class="fin-table">
+ <thead><tr><th>მომწოდებელი</th><th>ინვოისები</th><th>ინვოისის დავალიანება</th><th>პირდაპირი შესყიდვა</th><th>სულ</th></tr></thead>
+ <tbody>
+ @forelse($financialSnapshot['supplier_balances'] as $supplier)
+ <tr><td><strong>{{ $supplier['name'] }}</strong><div class="fin-muted">{{ $supplier['phone'] ?: ($supplier['email'] ?: 'საკონტაქტო ინფორმაცია არ არის') }}</div></td><td>{{ $supplier['invoice_count'] }}</td><td>{{ number_format($supplier['invoice_debt'],2) }} ₾</td><td>{{ number_format($supplier['direct_debt'],2) }} ₾</td><td><strong class="fin-negative">{{ number_format($supplier['total_debt'],2) }} ₾</strong></td></tr>
+ @empty
+ <tr><td colspan="5" class="fin-muted">მომწოდებლების დავალიანება არ ფიქსირდება.</td></tr>
+ @endforelse
+ </tbody></table></div>
+</section>
+
+<section class="fin-section">
  <h3>ახალი ხარჯის აღრიცხვა</h3>
  <form method="POST" action="{{ route('my-service-center.expenses.store') }}" class="fin-form">
   @csrf
