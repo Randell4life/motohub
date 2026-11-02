@@ -23,7 +23,8 @@
 .fin-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .fin-form button{align-self:end}
 .fin-tag{display:inline-block;padding:4px 8px;border:1px solid #2b5685;border-radius:30px;background:#102541;color:#8fc8ff;font-size:10px}
- .fin-note{padding:12px 14px;border:1px solid #344a64;border-radius:9px;background:#0a1421;color:#a9bad0;font-size:11px;line-height:1.8}\n@media print{body{background:#fff!important;color:#111!important}.mh-sidebar,.mh-topbar,.fin-filter,.fin-form,.fin-no-print,button{display:none!important}.mh-main,.mh-content,.mh-page{margin:0!important;padding:0!important;width:100%!important}.fin-section,.fin-card,.fin-hero{background:#fff!important;color:#111!important;border:1px solid #bbb!important;break-inside:avoid}.fin-muted,.fin-card small,.fin-note{color:#333!important}.fin-table th,.fin-table td{color:#111!important;border-color:#bbb!important}.fin-positive,.fin-negative,.fin-blue{color:#111!important}.fin-grid{grid-template-columns:repeat(3,1fr)!important}}
+ .fin-note{padding:12px 14px;border:1px solid #344a64;border-radius:9px;background:#0a1421;color:#a9bad0;font-size:11px;line-height:1.8}
+@media print{body{background:#fff!important;color:#111!important}.mh-sidebar,.mh-topbar,.fin-filter,.fin-form,.fin-no-print,button{display:none!important}.mh-main,.mh-content,.mh-page{margin:0!important;padding:0!important;width:100%!important}.fin-section,.fin-card,.fin-hero{background:#fff!important;color:#111!important;border:1px solid #bbb!important;break-inside:avoid}.fin-muted,.fin-card small,.fin-note{color:#333!important}.fin-table th,.fin-table td{color:#111!important;border-color:#bbb!important}.fin-positive,.fin-negative,.fin-blue{color:#111!important}.fin-grid{grid-template-columns:repeat(3,1fr)!important}}
 @media(max-width:900px){.fin-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.fin-grid,.fin-form{grid-template-columns:1fr}.fin-section{padding:14px}.fin-filter>*{flex:1 1 130px}}
 </style>
@@ -31,7 +32,8 @@
 <section class="fin-hero">
  <div style="display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;align-items:flex-start">
   <div><div class="fin-tag">FINANCIAL CONTROL</div><h2 style="margin:10px 0 5px;font-size:23px">ფინანსური შედეგები</h2><p class="fin-muted" style="margin:0">პერიოდი: {{ $from->format('d.m.Y') }} — {{ $to->format('d.m.Y') }}</p></div>
-  <div class="fin-no-print"><button type="button" class="fin-btn" onclick="window.print()">PDF / ბეჭდვა</button></div>\n  <form method="GET" action="{{ route('my-service-center.finance') }}" class="fin-filter">
+  <div class="fin-no-print"><button type="button" class="fin-btn" onclick="window.print()">PDF / ბეჭდვა</button></div>
+  <form method="GET" action="{{ route('my-service-center.finance') }}" class="fin-filter">
    <label>დან<input type="date" name="from" value="{{ $from->toDateString() }}" required></label>
    <label>მდე<input type="date" name="to" value="{{ $to->toDateString() }}" required></label>
    <button class="fin-btn">ანგარიშის ნახვა</button>
