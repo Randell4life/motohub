@@ -736,7 +736,7 @@ class MobileExtendedController extends Controller
             return response()->json(['message' => 'დამატებითი ნაწილი კლიენტს გაეგზავნა დასადასტურებლად. მარაგი ჩამოიწერება მხოლოდ თანხმობის შემდეგ.']);
         }
 
-        app(\\App\\Services\\WorkOrderInventoryService::class)->attachPart(
+        app(\App\Services\WorkOrderInventoryService::class)->attachPart(
             $order,
             (int) $data['inventory_item_id'],
             (int) $data['quantity'],
