@@ -763,6 +763,9 @@
  @forelse($workOrder->quoteRevisions as $revision)
   <div class="od-cost"><span>ვერსია #{{ $revision->revision_number }} · {{ $revision->type === 'initial' ? 'საწყისი' : 'დამატებითი' }} · {{ $revision->sent_at?->format('d.m.Y H:i') }}</span><strong>{{ number_format((float)$revision->total_cost, 2) }} ₾</strong></div>
   <p class="od-muted">ხელობა: {{ number_format((float)$revision->labor_cost, 2) }} ₾ · ნაწილები: {{ number_format((float)$revision->parts_cost, 2) }} ₾ · {{ match($revision->status) { 'approved' => 'დადასტურებულია', 'declined' => 'უარყოფილია', default => 'პასუხს ელოდება' } }}</p>
+  @foreach($revision->additions ?? [] as $addition)
+   <p class="od-muted">დამატება: {{ $addition['name'] ?? $addition['type'] }} · {{ $addition['quantity'] ?? 1 }} ც. · {{ number_format((float)($addition['total'] ?? 0), 2) }} ₾</p>
+  @endforeach
  @empty
   <p class="od-muted">ხარჯთაღრიცხვის ისტორია ჯერ ცარიელია.</p>
  @endforelse
