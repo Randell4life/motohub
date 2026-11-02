@@ -82,10 +82,13 @@ class ServiceCenterOperationsController extends Controller
 
         $data = $request->validate([
             'from' => ['nullable', 'date'],
-            'to' => ['nullable', 'date', 'after_or_equal:from'],
+            'to' => ['nullable', 'date'],
         ]);
         $from = isset($data['from']) ? \Illuminate\Support\Carbon::parse($data['from'])->startOfDay() : now()->startOfMonth();
         $to = isset($data['to']) ? \Illuminate\Support\Carbon::parse($data['to'])->endOfDay() : now()->endOfMonth();
+        if ($to->lt($from)) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['to' => 'დასრულების თარიღი დაწყების თარიღზე ადრე ვერ იქნება.']);
+        }
 
         $orders = WorkOrder::where('service_center_id', $center->id)
             ->whereBetween('created_at', [$from, $to])
