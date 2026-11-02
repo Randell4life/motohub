@@ -24,7 +24,9 @@
 
 </style></head><body><div class="wrap"><div class="nav"><a href="{{ route('parts.index') }}">MOTO<span>HUB</span> / PARTS</a></div>
 <main class="panel"><div class="photo">@if($item['image_url'])<img src="{{ $item['image_url'] }}" alt="{{ $item['title'] }}">@else<span class="no-photo">MOTOHUB / PARTS</span>@endif</div>
-<section class="content"><div class="eyebrow">{{ $item['source']==='store' ? 'MOTOHUB STORE' : 'COMMUNITY MARKETPLACE' }}</div><h1>{{ $item['title'] }}</h1><div class="price">₾{{ number_format((float)$item['price'],2) }}</div>
+<section class="content"><div class="eyebrow">{{ $item['source']==='store' ? 'MOTOHUB STORE' : 'COMMUNITY MARKETPLACE' }}</div>
+@if (!empty($item['is_demo']))<div style="display:inline-block;margin-top:10px;padding:6px 9px;border:1px solid #806b36;border-radius:6px;color:#ffe2a0;font-size:11px">სადემონსტრაციო განცხადება — მაგალითი, არა რეალური შეთავაზება</div>@endif
+<h1>{{ $item['title'] }}</h1><div class="price">₾{{ number_format((float)$item['price'],2) }}</div>
 <p class="muted">{{ $description ?: 'გამყიდველს დამატებითი აღწერა არ მიუთითებია.' }}</p>
 <div class="specs">
 <div class="spec"><small>ნაწილის ბრენდი</small><strong>{{ $item['brand'] ?: 'არ არის მითითებული' }}</strong></div>
@@ -36,7 +38,7 @@
 <div class="spec"><small>მოტოციკლი</small><strong>{{ trim(($item['motorcycle_brand'] ?? '').' '.($item['motorcycle_model'] ?? '')) ?: ($item['compatible_motorcycle'] ?: 'არ არის მითითებული') }}</strong></div>
 <div class="spec"><small>წელი / მოცულობა</small><strong>{{ $item['motorcycle_year'] ?: '—' }} / {{ $item['engine_cc'] ? $item['engine_cc'].' cc' : '—' }}</strong></div>
 </div>
-<div class="seller"><strong>გამყიდველი: {{ $sellerName }}</strong>@if($sellerPhone)<p class="muted">ტელეფონი: {{ $sellerPhone }}</p><a class="btn" href="tel:{{ preg_replace('/[^0-9+]/','',$sellerPhone) }}">დარეკვა გამყიდველთან</a>@else<p class="muted">საკონტაქტო ნომერი მითითებული არ არის. დაუკავშირდი პლატფორმის მეშვეობით ან მოითხოვე დამატებითი ინფორმაცია.</p>@endif</div>
+<div class="seller"><strong>გამყიდველი: {{ $sellerName }}</strong>@if(!empty($item['is_demo']))<p class="muted">ეს არის MotoHub-ის სადემონსტრაციო პროფილი. განცხადება შექმნილია პლატფორმის საჩვენებლად და არ წარმოადგენს რეალურ გასაყიდ შეთავაზებას.</p>@elseif($sellerPhone)<p class="muted">ტელეფონი: {{ $sellerPhone }}</p><a class="btn" href="tel:{{ preg_replace('/[^0-9+]/','',$sellerPhone) }}">დარეკვა გამყიდველთან</a>@else<p class="muted">საკონტაქტო ნომერი მითითებული არ არის. დაუკავშირდი პლატფორმის მეშვეობით ან მოითხოვე დამატებითი ინფორმაცია.</p>@endif</div>
 @auth
 @if($item['source']==='store')
 <form method="POST" action="{{ route('store.checkout') }}" style="margin-top:18px;padding:16px;background:#101b2c;border:1px solid #2c4262;border-radius:10px">
