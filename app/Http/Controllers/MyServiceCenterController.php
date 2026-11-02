@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Carbon\Carbon;
 
 class MyServiceCenterController extends Controller
 {
@@ -56,6 +57,59 @@ public function bookings(): RedirectResponse|View
         ->paginate(15);
 
     return view('my-service-center.bookings', compact('center', 'bookings'));
+}
+
+public function calendar(Request $request): RedirectResponse|View
+{
+    $center = $this->ownedCenter();
+
+    $data = $request->validate([
+        'week' => ['nullable', 'date_format:Y-m-d'],
+    ]);
+
+    $weekStart = isset($data['week'])
+        ? Carbon::createFromFormat('Y-m-d', $data['week'])->startOfWeek(Carbon::MONDAY)
+        : now()->startOfWeek(Carbon::MONDAY);
+    $weekEnd = $weekStart->copy()->endOfWeek(Carbon::SUNDAY);
+
+    $bookings = $center->bookings()
+        ->whereIn('status', ServiceBooking::ACTIVE_STATUSES)
+        ->whereBetween('scheduled_at', [$weekStart, $weekEnd])
+        ->with(['workOrder.technician', 'workOrder.bay'])
+        ->orderBy('scheduled_at')
+        ->get()
+        ->groupBy(fn (ServiceBooking $booking) => $booking->scheduled_at?->toDateString());
+
+    $dayNames = [
+        1 => 'ორშაბათი',
+        2 => 'სამშაბათი',
+        3 => 'ოთხშაბათი',
+        4 => 'ხუთშაბათი',
+        5 => 'პარასკევი',
+        6 => 'შაბათი',
+        0 => 'კვირა',
+    ];
+
+    $days = collect(range(0, 6))->map(function (int $offset) use ($weekStart, $bookings, $dayNames) {
+        $date = $weekStart->copy()->addDays($offset);
+        return [
+            'date' => $date,
+            'name' => $dayNames[$date->dayOfWeek],
+            'bookings' => $bookings->get($date->toDateString(), collect()),
+        ];
+    });
+
+    $bookingCount = $bookings->flatten(1)->count();
+    $pendingCount = $bookings->flatten(1)->where('status', 'pending')->count();
+
+    return view('my-service-center.calendar', compact(
+        'center',
+        'weekStart',
+        'weekEnd',
+        'days',
+        'bookingCount',
+        'pendingCount'
+    ));
 }
 
 public function services(): RedirectResponse|View
