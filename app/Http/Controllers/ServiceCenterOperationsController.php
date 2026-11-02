@@ -211,6 +211,17 @@ class ServiceCenterOperationsController extends Controller
                 'paid_at' => now(),
             ]);
         });
+
+        $workOrder->refresh();
+        $paidTotal = (float) $workOrder->payments()->sum('amount');
+        $remaining = max(0, round((float) $workOrder->total_cost - $paidTotal, 2));
+        app(\App\Services\ServiceCenterCustomerNotifier::class)->send(
+            $workOrder,
+            'payment_recorded',
+            'გადახდა აღირიცხა',
+            'გადახდა მიღებულია. გადახდილი ჯამი: ' . number_format($paidTotal, 2) . ' ₾. დარჩენილი თანხა: ' . number_format($remaining, 2) . ' ₾.'
+        );
+
         return back()->with('success', 'გადახდა აღირიცხა.');
     }
 
