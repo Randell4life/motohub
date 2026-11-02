@@ -609,7 +609,11 @@ class MobileExtendedController extends Controller
         }
 
         $orders = \App\Models\WorkOrder::where('service_center_id', $center->id)
-            ->whereBetween('created_at', [$from, $to])->whereNotIn('status', ['cancelled'])
+            ->where(function ($query) use ($from, $to) {
+                $query->whereBetween('created_at', [$from, $to])
+                    ->orWhereBetween('completed_at', [$from, $to]);
+            })
+            ->whereNotIn('status', ['cancelled'])
             ->with(['payments', 'expenses'])->get();
         $payments = $center->payments()->whereBetween('paid_at', [$from, $to])->get();
         $expenses = $center->expenses()->whereBetween('expense_date', [$from->toDateString(), $to->toDateString()])->get();
