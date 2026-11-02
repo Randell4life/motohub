@@ -217,6 +217,21 @@ class ServiceCenterOperationsController extends Controller
         return back()->with('success', 'ხელოსანი დაემატა.');
     }
 
+    public function updateTechnicianPay(Request $request, ServiceCenterTechnician $technician)
+    {
+        $center = $this->center();
+        abort_unless($center->canUseFeature('team'), 403, $center->featureLockedMessage('team'));
+        abort_unless($technician->service_center_id === $center->id, 404);
+
+        $data = $request->validate([
+            'pay_type' => ['required', 'in:percentage_labor,fixed_per_order'],
+            'pay_rate' => ['required', 'numeric', 'min:0', 'max:1000000'],
+        ]);
+        $technician->update($data);
+
+        return back()->with('success', 'ხელოსნის ანაზღაურების ტარიფი განახლდა. ახალი ტარიფი გავრცელდება მომავალ დასრულებულ შეკვეთებზე.');
+    }
+
     public function markTechnicianPayrollPaid(Request $request, \App\Models\ServiceCenterTechnicianPayroll $payroll)
     {
         $center = $this->center();
