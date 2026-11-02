@@ -162,8 +162,24 @@
   <input name="total_amount" type="number" min=".01" step=".01" required placeholder="ინვოისის ჯამი ₾">
   <input name="document" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp">
   <input name="notes" maxlength="1000" placeholder="შენიშვნა">
+  <div style="grid-column:1/-1"><b>ინვოისის ნაწილები</b><div id="supplier-invoice-lines">
+   <div class="ops-form supplier-invoice-line" style="grid-template-columns:2fr 1fr 1fr;margin-top:8px">
+    <select name="items[0][inventory_item_id]" required><option value="">აირჩიე საწყობის ნაწილი</option>@foreach($inventory as $item)<option value="{{ $item->id }}">{{ $item->name }} @if($item->sku) · {{ $item->sku }} @endif</option>@endforeach</select>
+    <input name="items[0][quantity]" type="number" min="1" required placeholder="რაოდენობა">
+    <input name="items[0][unit_cost]" type="number" min="0" step=".01" required placeholder="ერთეულის ფასი">
+   </div>
+  </div><button type="button" id="add-supplier-invoice-line" style="margin-top:8px">+ ნაწილის დამატება</button></div>
   <button>ინვოისის შენახვა</button>
  </form>
+ <script>
+ document.getElementById('add-supplier-invoice-line')?.addEventListener('click', function () {
+   const wrap = document.getElementById('supplier-invoice-lines');
+   const index = wrap.querySelectorAll('.supplier-invoice-line').length;
+   const row = wrap.querySelector('.supplier-invoice-line').cloneNode(true);
+   row.querySelectorAll('select,input').forEach(el => { el.name = el.name.replace(/items\\[0\\]/, 'items['+index+']'); el.value = ''; });
+   wrap.appendChild(row);
+ });
+ </script>
  <h4 style="margin-top:18px">ინვოისების რეესტრი</h4>
  <div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>თარიღი</th><th>მომწოდებელი</th><th>ინვოისი</th><th>გადახდის ვადა</th><th>თანხა</th><th>დოკუმენტი</th></tr></thead><tbody>
  @forelse($supplierInvoices as $invoice)<tr>
@@ -171,7 +187,18 @@
   <td><b>{{ $invoice->invoice_number }}</b><div class="ops-muted">{{ $invoice->notes }}</div></td>
   <td>{{ $invoice->due_date?->format('d.m.Y') ?? '—' }}</td><td><b>{{ number_format((float)$invoice->total_amount,2) }} ₾</b></td>
   <td>@if($invoice->file_path)<a href="{{ asset('storage/'.$invoice->file_path) }}" target="_blank" rel="noopener">დოკუმენტის ნახვა</a>@else — @endif</td>
- </tr>@empty<tr><td colspan="6" class="ops-muted">ინვოისები ჯერ არ არის რეგისტრირებული.</td></tr>@endforelse
+ </tr>
+ @foreach($invoice->items as $line)
+  <tr><td colspan="2" class="ops-muted">{{ $line->inventoryItem?->name ?? 'ნაწილი' }}</td><td>{{ $line->received_quantity }} / {{ $line->quantity }} მიღებულია</td><td>{{ number_format((float)$line->unit_cost,2) }} ₾ / ც.</td><td colspan="2">
+   @if($line->received_quantity < $line->quantity)
+    <form method="POST" action="{{ route('my-service-center.supplier-invoice-items.receive',$line->id) }}" class="ops-inline">@csrf
+     <input name="quantity" type="number" min="1" max="{{ $line->quantity - $line->received_quantity }}" required placeholder="მიღების რაოდენობა" style="width:130px">
+     <button>საწყობში მიღება</button>
+    </form>
+   @else <span class="ops-pill">სრულად მიღებულია</span> @endif
+  </td></tr>
+ @endforeach
+ @empty<tr><td colspan="6" class="ops-muted">ინვოისები ჯერ არ არის რეგისტრირებული.</td></tr>@endforelse
  </tbody></table></div>
 </section>
 
