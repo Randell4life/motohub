@@ -544,9 +544,9 @@ class MobileExtendedController extends Controller
 
     public function sendWorkOrderQuote(Request $request, int $workOrder)
     {
-        $center = \\App\\Models\\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        $center = \App\Models\\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
         abort_unless($center->canUseFeature('work_orders'), 403, $center->featureLockedMessage('work_orders'));
-        $order = \\App\\Models\\WorkOrder::where('service_center_id', $center->id)->findOrFail($workOrder);
+        $order = \App\Models\\WorkOrder::where('service_center_id', $center->id)->findOrFail($workOrder);
         abort_if(in_array($order->status, ['in_repair', 'completed', 'handed_over', 'cancelled'], true), 422, 'შეკეთების დაწყების შემდეგ ხარჯთაღრიცხვის გაგზავნა შეუძლებელია.');
         $data = $request->validate([
             'diagnosis' => ['required', 'string', 'max:10000'],
@@ -567,7 +567,7 @@ class MobileExtendedController extends Controller
             'customer_approved_at' => null,
             'customer_declined_at' => null,
         ]);
-        app(\\App\\Services\\ServiceCenterCustomerNotifier::class)->send(
+        app(\App\Services\\ServiceCenterCustomerNotifier::class)->send(
             $order,
             'quote_sent',
             'ხარჯთაღრიცხვა დასადასტურებელია',
