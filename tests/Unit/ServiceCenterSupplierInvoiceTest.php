@@ -20,13 +20,20 @@ class ServiceCenterSupplierInvoiceTest extends TestCase
     {
         Carbon::setTestNow(Carbon::parse($today));
 
+        $invoice = $this->makeInvoice($dueDate, 0);
+
+        $this->assertSame($expected, $invoice->payment_status);
+    }
+
+    private function makeInvoice(string $dueDate, float $paidTotal): ServiceCenterSupplierInvoice
+    {
         $invoice = new ServiceCenterSupplierInvoice([
             'total_amount' => 100,
             'due_date' => $dueDate,
-            'payments_sum_amount' => 0,
         ]);
+        $invoice->setAttribute('payments_sum_amount', $paidTotal);
 
-        $this->assertSame($expected, $invoice->payment_status);
+        return $invoice;
     }
 
     public static function dueDateCases(): array
@@ -42,11 +49,7 @@ class ServiceCenterSupplierInvoiceTest extends TestCase
     {
         Carbon::setTestNow(Carbon::parse('2026-11-02 12:00:00'));
 
-        $invoice = new ServiceCenterSupplierInvoice([
-            'total_amount' => 100,
-            'due_date' => '2026-11-01',
-            'payments_sum_amount' => 25,
-        ]);
+        $invoice = $this->makeInvoice('2026-11-01', 25);
 
         $this->assertSame('partial', $invoice->payment_status);
         $this->assertSame(75.0, $invoice->balance);
@@ -56,11 +59,7 @@ class ServiceCenterSupplierInvoiceTest extends TestCase
     {
         Carbon::setTestNow(Carbon::parse('2026-11-02 12:00:00'));
 
-        $invoice = new ServiceCenterSupplierInvoice([
-            'total_amount' => 100,
-            'due_date' => '2026-10-01',
-            'payments_sum_amount' => 100,
-        ]);
+        $invoice = $this->makeInvoice('2026-10-01', 100);
 
         $this->assertSame('paid', $invoice->payment_status);
         $this->assertSame(0.0, $invoice->balance);
