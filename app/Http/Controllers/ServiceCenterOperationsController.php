@@ -91,7 +91,10 @@ class ServiceCenterOperationsController extends Controller
         }
 
         $orders = WorkOrder::where('service_center_id', $center->id)
-            ->whereBetween('created_at', [$from, $to])
+            ->where(function ($query) use ($from, $to) {
+                $query->whereBetween('created_at', [$from, $to])
+                    ->orWhereBetween('completed_at', [$from, $to]);
+            })
             ->whereNotIn('status', ['cancelled'])
             ->with(['serviceBooking', 'technician', 'parts.inventoryItem', 'payments', 'expenses', 'technicianPayroll'])
             ->latest()
