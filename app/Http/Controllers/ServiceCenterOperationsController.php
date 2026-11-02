@@ -53,15 +53,26 @@ class ServiceCenterOperationsController extends Controller
         $suppliers = $center->suppliers()->where('is_active', true)->orderBy('name')->get();
         $supplierPurchases = DB::table('service_center_inventory_movements')
             ->where('service_center_id', $center->id)->whereNotNull('supplier_id')->where('type', 'in')
+            ->whereNull('supplier_invoice_item_id')
             ->select('supplier_id')->selectRaw('COALESCE(SUM(quantity * unit_cost), 0) as total')
+            ->groupBy('supplier_id')->pluck('total', 'supplier_id');
+        $supplierInvoiceTotals = $center->supplierInvoices()
+            ->select('supplier_id')->selectRaw('COALESCE(SUM(total_amount), 0) as total')
             ->groupBy('supplier_id')->pluck('total', 'supplier_id');
         $supplierPayments = $center->supplierPayments()
             ->select('supplier_id')->selectRaw('COALESCE(SUM(amount), 0) as total')
             ->groupBy('supplier_id')->pluck('total', 'supplier_id');
-        $supplierPaymentHistory = $center->supplierPayments()->with('supplier')->latest('paid_at')->limit(30)->get();
-        $supplierInvoices = $center->supplierInvoices()->with(['supplier', 'items.inventoryItem'])->latest('issue_date')->latest()->limit(50)->get();
-        $suppliers->each(function ($supplier) use ($supplierPurchases, $supplierPayments) {
-            $supplier->purchased_total = (float) ($supplierPurchases[$supplier->id] ?? 0);
+        $supplierLegacyPayments = $center->supplierPayments()->whereNull('invoice_id')
+            ->select('supplier_id')->selectRaw('COALESCE(SUM(amount), 0) as total')
+            ->groupBy('supplier_id')->pluck('total', 'supplier_id');
+        $supplierPaymentHistory = $center->supplierPayments()->with(['supplier', 'invoice'])->latest('paid_at')->limit(30)->get();
+        $supplierInvoices = $center->supplierInvoices()->with(['supplier', 'items.inventoryItem'])
+            ->withSum('payments', 'amount')->with(['payments' => fn ($query) => $query->latest('paid_at')])
+            ->latest('issue_date')->latest()->limit(50)->get();
+        $suppliers->each(function ($supplier) use ($supplierPurchases, $supplierInvoiceTotals, $supplierPayments, $supplierLegacyPayments) {
+            $legacyPurchases = (float) ($supplierPurchases[$supplier->id] ?? 0);
+            $supplier->legacy_balance = round(max(0, $legacyPurchases - (float) ($supplierLegacyPayments[$supplier->id] ?? 0)), 2);
+            $supplier->purchased_total = $legacyPurchases + (float) ($supplierInvoiceTotals[$supplier->id] ?? 0);
             $supplier->paid_total = (float) ($supplierPayments[$supplier->id] ?? 0);
             $supplier->balance = round($supplier->purchased_total - $supplier->paid_total, 2);
         });
@@ -440,6 +451,25 @@ class ServiceCenterOperationsController extends Controller
         return back()->with('success', 'ინვოისის მიღებული რაოდენობა ჩაირიცხა საწყობში.');
     }
 
+    public function paySupplierInvoice(Request $request, int $invoice)
+    {
+        $center = $this->center();
+        abort_unless($center->canUseFeature('inventory'), 403, $center->featureLockedMessage('inventory'));
+        $data = $request->validate([
+            'amount' => ['required', 'numeric', 'gt:0', 'max:999999999'],
+            'method' => ['required', 'in:cash,bank_transfer,card,other'],
+            'reference' => ['nullable', 'string', 'max:120'],
+            'note' => ['nullable', 'string', 'max:255'],
+            'paid_at' => ['required', 'date'],
+        ]);
+        app(\App\Services\ServiceCenterSupplierPaymentService::class)->recordInvoicePayment(
+            $center, $invoice, (float) $data['amount'], $data['method'], auth()->id(),
+            $data['reference'] ?? null, $data['note'] ?? null, $data['paid_at'],
+        );
+
+        return back()->with('success', 'ინვოისზე გადახდა აღირიცხა.');
+    }
+
     public function paySupplier(Request $request, ServiceCenterSupplier $supplier)
     {
         $center = $this->center();
@@ -456,8 +486,9 @@ class ServiceCenterOperationsController extends Controller
             $locked = ServiceCenterSupplier::where('service_center_id', $center->id)->whereKey($supplier->id)->lockForUpdate()->firstOrFail();
             $purchased = (float) DB::table('service_center_inventory_movements')
                 ->where('service_center_id', $center->id)->where('supplier_id', $locked->id)->where('type', 'in')
+                ->whereNull('supplier_invoice_item_id')
                 ->selectRaw('COALESCE(SUM(quantity * unit_cost), 0) as total')->value('total');
-            $paid = (float) $center->supplierPayments()->where('supplier_id', $locked->id)->sum('amount');
+            $paid = (float) $center->supplierPayments()->where('supplier_id', $locked->id)->whereNull('invoice_id')->sum('amount');
             if ((float) $data['amount'] > round($purchased - $paid, 2)) {
                 throw \Illuminate\Validation\ValidationException::withMessages(['amount' => 'გადახდა მომწოდებლის მიმდინარე დავალიანებაზე მეტი ვერ იქნება.']);
             }

@@ -37,4 +37,26 @@ class ServiceCenterSupplierInvoice extends Model
     {
         return $this->hasMany(ServiceCenterSupplierInvoiceItem::class, 'invoice_id')->with('inventoryItem');
     }
+
+    public function payments()
+    {
+        return $this->hasMany(ServiceCenterSupplierPayment::class, 'invoice_id')->orderBy('paid_at');
+    }
+
+    public function getPaidTotalAttribute(): float
+    {
+        return round((float) ($this->payments_sum_amount ?? $this->payments()->sum('amount')), 2);
+    }
+
+    public function getBalanceAttribute(): float
+    {
+        return round(max(0, (float) $this->total_amount - $this->paid_total), 2);
+    }
+
+    public function getPaymentStatusAttribute(): string
+    {
+        if ($this->balance <= 0) return 'paid';
+        if ($this->paid_total > 0) return 'partial';
+        return $this->due_date && $this->due_date->isPast() ? 'overdue' : 'unpaid';
+    }
 }
