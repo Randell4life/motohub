@@ -1,11 +1,11 @@
 <?php
 
-namespace App\\Services;
+namespace App\Services;
 
-use App\\Models\\ServiceCenter;
-use App\\Models\\ServiceCenterInventoryItem;
-use Illuminate\\Support\\Facades\\DB;
-use Illuminate\\Validation\\ValidationException;
+use App\Models\\ServiceCenter;
+use App\Models\\ServiceCenterInventoryItem;
+use Illuminate\Support\Facades\\DB;
+use Illuminate\Validation\ValidationException;
 
 class ServiceCenterStockService
 {
