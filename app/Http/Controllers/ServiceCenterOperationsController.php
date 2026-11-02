@@ -120,10 +120,16 @@ class ServiceCenterOperationsController extends Controller
         $netProfit = round($grossProfit - $expenseTotal, 2);
 
         $categoryTotals = $expenses->groupBy('category')->map(fn ($rows) => (float) $rows->sum('amount'));
-        $orderProfitability = $orders->map(function ($order) {
-            $partCost = (float) DB::table('service_center_inventory_movements')
-                ->where('work_order_id', $order->id)->where('type', 'out')
-                ->selectRaw('COALESCE(SUM(quantity * unit_cost), 0) as total')->value('total');
+        $partsCostByOrder = DB::table('service_center_inventory_movements')
+            ->whereIn('work_order_id', $orders->pluck('id'))
+            ->where('type', 'out')
+            ->select('work_order_id')
+            ->selectRaw('COALESCE(SUM(quantity * unit_cost), 0) as total')
+            ->groupBy('work_order_id')
+            ->pluck('total', 'work_order_id');
+
+        $orderProfitability = $orders->map(function ($order) use ($partsCostByOrder) {
+            $partCost = (float) ($partsCostByOrder[$order->id] ?? 0);
             $directExpenses = (float) $order->expenses->sum('amount');
             return [
                 'order' => $order,
