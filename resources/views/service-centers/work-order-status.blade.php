@@ -62,13 +62,7 @@ $isCancelled = $order->status === 'cancelled';
  <div class="muted">ვერსია #{{ $revision->revision_number }} · {{ $revision->type === 'initial' ? 'საწყისი შეთავაზება' : 'დამატებითი ხარჯი' }} · {{ $revision->sent_at?->format('d.m.Y H:i') }}</div>
  <strong>{{ number_format((float)$revision->total_cost,2) }} ₾</strong>
  <div class="muted">ხელობა {{ number_format((float)$revision->labor_cost,2) }} ₾ · ნაწილები {{ number_format((float)$revision->parts_cost,2) }} ₾ · {{ match($revision->status) { 'approved' => 'დადასტურებულია', 'declined' => 'უარყოფილია', default => 'პასუხს ელოდება' } }}</div>
- @if($revision->status === 'pending')
- <form method="POST" action="{{ route('service-centers.work-orders.approval',$order->public_token) }}" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
- @csrf
- <button name="decision" value="approved" style="padding:11px 16px;border:0;border-radius:9px;background:#1677ff;color:white;font-weight:700">ვეთანხმები</button>
- <button name="decision" value="declined" style="padding:11px 16px;border:1px solid #52647a;border-radius:9px;background:#172233;color:#f3f7ff">არ ვეთანხმები</button>
- </form>
- @endif
+ @if($revision->status === 'pending')<div class="muted">კლიენტის პასუხს ველოდებით.</div>@endif
 </div>
 @empty
 <p class="muted">ხარჯთაღრიცხვის ისტორია ჯერ ცარიელია.</p>
