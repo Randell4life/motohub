@@ -486,8 +486,9 @@ class ServiceCenterOperationsController extends Controller
             $locked = ServiceCenterSupplier::where('service_center_id', $center->id)->whereKey($supplier->id)->lockForUpdate()->firstOrFail();
             $purchased = (float) DB::table('service_center_inventory_movements')
                 ->where('service_center_id', $center->id)->where('supplier_id', $locked->id)->where('type', 'in')
+                ->whereNull('supplier_invoice_item_id')
                 ->selectRaw('COALESCE(SUM(quantity * unit_cost), 0) as total')->value('total');
-            $paid = (float) $center->supplierPayments()->where('supplier_id', $locked->id)->sum('amount');
+            $paid = (float) $center->supplierPayments()->where('supplier_id', $locked->id)->whereNull('invoice_id')->sum('amount');
             if ((float) $data['amount'] > round($purchased - $paid, 2)) {
                 throw \Illuminate\Validation\ValidationException::withMessages(['amount' => 'გადახდა მომწოდებლის მიმდინარე დავალიანებაზე მეტი ვერ იქნება.']);
             }
