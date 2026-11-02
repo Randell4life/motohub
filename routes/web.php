@@ -611,6 +611,11 @@ Route::get('/my-service-center/bookings', [
     'bookings',
 ])->name('my-service-center.bookings');
 
+Route::get('/my-service-center/calendar', [
+    MyServiceCenterController::class,
+    'calendar',
+])->name('my-service-center.calendar');
+
 Route::get('/my-service-center/services', [
     MyServiceCenterController::class,
     'services',
