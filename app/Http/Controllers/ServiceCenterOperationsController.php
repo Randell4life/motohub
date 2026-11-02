@@ -75,6 +75,101 @@ class ServiceCenterOperationsController extends Controller
         ));
     }
 
+    public function financialReports(Request $request)
+    {
+        $center = $this->center();
+        abort_unless($center->canUseFeature('financial_reports'), 403, $center->featureLockedMessage('financial_reports'));
+
+        $data = $request->validate([
+            'from' => ['nullable', 'date'],
+            'to' => ['nullable', 'date', 'after_or_equal:from'],
+        ]);
+        $from = isset($data['from']) ? \Illuminate\Support\Carbon::parse($data['from'])->startOfDay() : now()->startOfMonth();
+        $to = isset($data['to']) ? \Illuminate\Support\Carbon::parse($data['to'])->endOfDay() : now()->endOfMonth();
+
+        $orders = WorkOrder::where('service_center_id', $center->id)
+            ->whereBetween('created_at', [$from, $to])
+            ->whereNotIn('status', ['cancelled'])
+            ->with(['serviceBooking', 'technician', 'parts.inventoryItem', 'payments', 'expenses'])
+            ->latest()
+            ->get();
+
+        $payments = $center->payments()->with('workOrder')
+            ->whereBetween('paid_at', [$from, $to])
+            ->latest('paid_at')->get();
+
+        $expenses = $center->expenses()->with('workOrder')
+            ->whereBetween('expense_date', [$from->toDateString(), $to->toDateString()])
+            ->latest('expense_date')->latest()->get();
+
+        $partsCost = (float) DB::table('service_center_inventory_movements')
+            ->where('service_center_id', $center->id)
+            ->where('type', 'out')
+            ->whereNotNull('work_order_id')
+            ->whereBetween('created_at', [$from, $to])
+            ->selectRaw('COALESCE(SUM(quantity * unit_cost), 0) as total')
+            ->value('total');
+
+        $billedRevenue = (float) $orders->sum(fn ($order) => (float) $order->total_cost);
+        $laborRevenue = (float) $orders->sum(fn ($order) => (float) $order->labor_cost);
+        $partsRevenue = (float) $orders->sum(fn ($order) => (float) $order->parts_cost);
+        $collected = (float) $payments->sum(fn ($payment) => (float) $payment->amount);
+        $expenseTotal = (float) $expenses->sum(fn ($expense) => (float) $expense->amount);
+        $outstanding = (float) $orders->sum(fn ($order) => max(0, round((float) $order->total_cost - (float) $order->payments->sum('amount'), 2)));
+        $grossProfit = round($billedRevenue - $partsCost, 2);
+        $netProfit = round($grossProfit - $expenseTotal, 2);
+
+        $categoryTotals = $expenses->groupBy('category')->map(fn ($rows) => (float) $rows->sum('amount'));
+        $orderProfitability = $orders->map(function ($order) {
+            $partCost = (float) DB::table('service_center_inventory_movements')
+                ->where('work_order_id', $order->id)->where('type', 'out')
+                ->selectRaw('COALESCE(SUM(quantity * unit_cost), 0) as total')->value('total');
+            $directExpenses = (float) $order->expenses->sum('amount');
+            return [
+                'order' => $order,
+                'parts_cost' => $partCost,
+                'direct_expenses' => $directExpenses,
+                'profit' => round((float) $order->total_cost - $partCost - $directExpenses, 2),
+                'paid' => (float) $order->payments->sum('amount'),
+            ];
+        });
+
+        return view('my-service-center.finance', compact(
+            'center', 'from', 'to', 'orders', 'payments', 'expenses',
+            'billedRevenue', 'laborRevenue', 'partsRevenue', 'collected',
+            'partsCost', 'expenseTotal', 'outstanding', 'grossProfit',
+            'netProfit', 'categoryTotals', 'orderProfitability'
+        ));
+    }
+
+    public function storeExpense(Request $request)
+    {
+        $center = $this->center();
+        abort_unless($center->canUseFeature('finance'), 403, $center->featureLockedMessage('finance'));
+
+        $data = $request->validate([
+            'work_order_id' => ['nullable', 'integer'],
+            'category' => ['required', 'in:'.implode(',', array_keys(\App\Models\ServiceCenterExpense::CATEGORIES))],
+            'description' => ['required', 'string', 'max:180'],
+            'amount' => ['required', 'numeric', 'gt:0', 'max:999999999'],
+            'expense_date' => ['required', 'date'],
+            'reference' => ['nullable', 'string', 'max:120'],
+        ]);
+
+        $workOrder = null;
+        if (! empty($data['work_order_id'])) {
+            $workOrder = $center->workOrders()->whereKey($data['work_order_id'])->firstOrFail();
+        }
+
+        $center->expenses()->create([
+            ...$data,
+            'work_order_id' => $workOrder?->id,
+            'created_by' => auth()->id(),
+        ]);
+
+        return back()->with('success', 'ხარჯი წარმატებით აღირიცხა.');
+    }
+
     public function storeTechnician(Request $request)
     {
         $center = $this->center();
