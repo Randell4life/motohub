@@ -374,6 +374,11 @@
 
             <button class="btn" type="submit">ძიება →</button>
         </form>
+
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:18px">
+            <a class="btn" href="{{ route('part-listings.create') }}">＋ განათავსე განცხადება</a>
+            <span class="muted">გაყიდე შენი მოტო ნაწილი MotoHub-ის საზოგადოებაში</span>
+        </div>
     </section>
 
     <section class="layout">
