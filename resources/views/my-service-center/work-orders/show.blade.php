@@ -730,15 +730,19 @@
 
 <div class="od-grid">
 <section class="od-card">
- <div class="od-card-head"><div class="od-card-icon">＋</div><div><h3>ნაწილის დამატება</h3><p>{{ in_array($workOrder->status, ['in_repair', 'waiting_for_parts'], true) ? 'დამატებითი ნაწილი კლიენტის თანხმობის შემდეგ ჩამოიწერება' : 'საწყობიდან ჩამოწერა ავტომატურად მოხდება' }}</p></div></div>
+ <div class="od-card-head"><div class="od-card-icon">＋</div><div><h3>ნაწილის დამატება</h3><p>{{ $workOrder->quote_sent_at ? 'დამატებითი ნაწილი კლიენტის თანხმობის შემდეგ ჩამოიწერება' : 'საწყობიდან ჩამოწერა ავტომატურად მოხდება' }}</p></div></div>
+ @if($workOrder->quote_sent_at && $workOrder->customer_approval_status === 'pending')
+  <div class="od-empty">კლიენტის პასუხს ველოდებით. ახალი ნაწილი დაემატება მხოლოდ პასუხის შემდეგ.</div>
+ @else
  <form method="POST" action="{{ route('my-service-center.work-orders.parts',$workOrder) }}" class="od-status-form">@csrf
   <select class="od-select" name="inventory_item_id" required><option value="">აირჩიე ნაწილი</option>@foreach($inventory as $item)<option value="{{ $item->id }}">{{ $item->name }} · მარაგი {{ $item->quantity }} · {{ number_format((float)$item->sale_price,2) }} ₾</option>@endforeach</select>
   <input class="od-select" style="max-width:110px" type="number" min="1" name="quantity" value="1" required>
   <button class="od-btn primary">დამატება</button>
  </form>
  @foreach($workOrder->parts as $part)<p class="od-muted">{{ $part->inventoryItem->name }} × {{ $part->quantity }} — {{ number_format((float)$part->total,2) }} ₾</p>@endforeach
+ @endif
 </section>
-@if(in_array($workOrder->status, ['in_repair', 'waiting_for_parts'], true) && in_array($workOrder->customer_approval_status, ['approved', 'declined'], true) && $workOrder->quoteRevisions->contains(fn ($revision) => $revision->type === 'initial' && $revision->status === 'approved'))
+@if(!in_array($workOrder->status, ['completed', 'handed_over', 'cancelled'], true) && in_array($workOrder->customer_approval_status, ['approved', 'declined'], true) && $workOrder->quoteRevisions->contains(fn ($revision) => $revision->type === 'initial' && $revision->status === 'approved'))
 <section class="od-card">
  <div class="od-card-head"><div class="od-card-icon">＋</div><div><h3>დამატებითი სამუშაოს ხარჯი</h3><p>კლიენტის თანხმობის შემდეგ დაემატება შეკვეთის თანხას</p></div></div>
  <form method="POST" action="{{ route('my-service-center.work-orders.supplemental-quote', $workOrder) }}">
