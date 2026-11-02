@@ -473,7 +473,7 @@ class MobileExtendedController extends Controller
             'assigned_technician_id' => ['nullable', 'integer'],
             'service_center_bay_id' => ['nullable', 'integer'],
         ]);
-        app(\\App\\Services\\WorkOrderAssignmentService::class)->assign(
+        app(\App\Services\WorkOrderAssignmentService::class)->assign(
             $center,
             $order,
             isset($data['assigned_technician_id']) ? (int) $data['assigned_technician_id'] : null,
