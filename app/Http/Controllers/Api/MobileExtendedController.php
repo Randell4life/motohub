@@ -429,6 +429,18 @@ class MobileExtendedController extends Controller
         $limit = $center->technicianLimit();
         abort_if($limit !== null && $center->technicians()->count() >= $limit, 422, 'შენი პაკეტის ლიმიტია '.$limit.' ხელოსანი.');
         $data = $request->validate(['name' => ['required','string','max:160'], 'phone' => ['nullable','string','max:40'], 'specialty' => ['nullable','string','max:160']]);
+        if ($center->canUseFeature('financial_reports')) {
+            $pay = $request->validate([
+                'pay_type' => ['required', 'in:percentage_labor,fixed_per_order'],
+                'pay_rate' => ['required', 'numeric', 'min:0', 'max:1000000'],
+            ]);
+            if ($pay['pay_type'] === 'percentage_labor' && (float) $pay['pay_rate'] > 100) {
+                throw ValidationException::withMessages(['pay_rate' => 'ხელობის პროცენტი 100%-ზე მეტი ვერ იქნება.']);
+            }
+            $data = [...$data, ...$pay];
+        } else {
+            $data = [...$data, 'pay_type' => 'percentage_labor', 'pay_rate' => 0];
+        }
         return response()->json(['message' => 'ხელოსანი დაემატა.', 'technician' => $center->technicians()->create($data)], 201);
     }
 
@@ -588,7 +600,7 @@ class MobileExtendedController extends Controller
         $billed = (float) $orders->sum(fn ($order) => (float) $order->total_cost);
         $expenseTotal = (float) $expenses->sum(fn ($expense) => (float) $expense->amount);
         $paid = (float) $payments->sum(fn ($payment) => (float) $payment->amount);
-        $payroll = $center->technicianPayroll()->with('technician')
+        $payroll = $center->technicianPayroll()->with(['technician', 'workOrder'])
             ->whereBetween('earned_at', [$from, $to])->latest('earned_at')->get();
         $payrollTotal = (float) $payroll->sum('amount');
 
@@ -625,6 +637,10 @@ class MobileExtendedController extends Controller
                     'id' => $entry->id,
                     'technician' => $entry->technician?->name,
                     'work_order_id' => $entry->work_order_id,
+                    'order_number' => $entry->workOrder?->order_number,
+                    'rate_type' => $entry->rate_type,
+                    'rate_value' => (float) $entry->rate_value,
+                    'labor_base' => (float) $entry->labor_base,
                     'amount' => (float) $entry->amount,
                     'status' => $entry->status,
                     'earned_at' => $entry->earned_at?->toISOString(),
@@ -632,6 +648,22 @@ class MobileExtendedController extends Controller
                 ])->values(),
             ],
         ]);
+    }
+
+    public function updateServiceCenterTechnicianPay(Request $request, int $technician)
+    {
+        $center = \\App\\Models\\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('financial_reports'), 403, $center->featureLockedMessage('financial_reports'));
+        $data = $request->validate([
+            'pay_type' => ['required', 'in:percentage_labor,fixed_per_order'],
+            'pay_rate' => ['required', 'numeric', 'min:0', 'max:1000000'],
+        ]);
+        if ($data['pay_type'] === 'percentage_labor' && (float) $data['pay_rate'] > 100) {
+            throw ValidationException::withMessages(['pay_rate' => 'ხელობის პროცენტი 100%-ზე მეტი ვერ იქნება.']);
+        }
+        $record = $center->technicians()->findOrFail($technician);
+        $record->update($data);
+        return response()->json(['message' => 'ტარიფი განახლდა.', 'technician' => $record->fresh()]);
     }
 
     public function markServiceCenterPayrollPaid(Request $request, int $payroll)
