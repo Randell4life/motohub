@@ -547,7 +547,7 @@ class MobileExtendedController extends Controller
         $center = \\App\\Models\\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
         abort_unless($center->canUseFeature('work_orders'), 403, $center->featureLockedMessage('work_orders'));
         $order = \\App\\Models\\WorkOrder::where('service_center_id', $center->id)->findOrFail($workOrder);
-        abort_if(in_array($order->status, ['completed', 'handed_over', 'cancelled'], true), 422, 'დასრულებულ შეკვეთაზე ხარჯთაღრიცხვა ვერ გაიგზავნება.');
+        abort_if(in_array($order->status, ['in_repair', 'completed', 'handed_over', 'cancelled'], true), 422, 'შეკეთების დაწყების შემდეგ ხარჯთაღრიცხვის გაგზავნა შეუძლებელია.');
         $data = $request->validate([
             'diagnosis' => ['required', 'string', 'max:10000'],
             'work_description' => ['required', 'string', 'max:10000'],
