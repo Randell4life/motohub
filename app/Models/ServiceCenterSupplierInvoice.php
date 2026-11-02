@@ -57,6 +57,6 @@ class ServiceCenterSupplierInvoice extends Model
     {
         if ($this->balance <= 0) return 'paid';
         if ($this->paid_total > 0) return 'partial';
-        return $this->due_date && $this->due_date->isPast() ? 'overdue' : 'unpaid';
+        return $this->due_date && $this->due_date->lt(now()->startOfDay()) ? 'overdue' : 'unpaid';
     }
 }
