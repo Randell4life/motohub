@@ -445,6 +445,10 @@ class MobileExtendedController extends Controller
             'inventory_movements' => $stockMovements,
             'suppliers' => $suppliers,
             'supplier_payments' => $center->supplierPayments()->with('supplier')->latest('paid_at')->limit(40)->get(),
+            'supplier_invoices' => $center->supplierInvoices()->with('supplier')->latest('issue_date')->limit(50)->get()->map(function ($invoice) {
+                $invoice->document_url = $invoice->file_path ? Storage::disk('public')->url($invoice->file_path) : null;
+                return $invoice;
+            }),
             'payments' => $center->payments()->with('workOrder')->latest('paid_at')->limit(40)->get(),
             'technician_payroll' => [
                 'earned' => round((float) $payroll->sum('amount'), 2),
@@ -534,6 +538,39 @@ class MobileExtendedController extends Controller
             'notes' => ['nullable', 'string', 'max:3000'],
         ]);
         return response()->json(['message' => 'მომწოდებელი დაემატა.', 'supplier' => $center->suppliers()->create($data)], 201);
+    }
+
+    public function storeServiceCenterSupplierInvoice(Request $request)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('inventory'), 403, $center->featureLockedMessage('inventory'));
+        $data = $request->validate([
+            'supplier_id' => ['required', 'integer', 'exists:service_center_suppliers,id'],
+            'invoice_number' => ['required', 'string', 'max:120', Rule::unique('service_center_supplier_invoices', 'invoice_number')->where(fn ($query) => $query->where('supplier_id', $request->input('supplier_id')))],
+            'issue_date' => ['required', 'date'],
+            'due_date' => ['nullable', 'date', 'after_or_equal:issue_date'],
+            'total_amount' => ['required', 'numeric', 'gt:0', 'max:999999999'],
+            'notes' => ['nullable', 'string', 'max:1000'],
+            'document' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:10240'],
+        ]);
+        $supplier = $center->suppliers()->findOrFail($data['supplier_id']);
+        $path = isset($data['document']) ? $data['document']->store('service-center-invoices/'.$center->id, 'public') : null;
+        try {
+            $invoice = $center->supplierInvoices()->create([
+                'supplier_id' => $supplier->id,
+                'user_id' => $request->user()->id,
+                'invoice_number' => trim($data['invoice_number']),
+                'issue_date' => $data['issue_date'],
+                'due_date' => $data['due_date'] ?? null,
+                'total_amount' => $data['total_amount'],
+                'file_path' => $path,
+                'notes' => $data['notes'] ?? null,
+            ]);
+        } catch (\Illuminate\Database\QueryException $exception) {
+            if ($path) \Illuminate\Support\Facades\Storage::disk('public')->delete($path);
+            throw $exception;
+        }
+        return response()->json(['message' => 'ინვოისი შეინახა.', 'invoice' => $invoice->load('supplier')], 201);
     }
 
     public function payServiceCenterSupplier(Request $request, int $supplier)

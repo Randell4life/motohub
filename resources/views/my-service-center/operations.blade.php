@@ -152,6 +152,27 @@
  <div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>თარიღი</th><th>მომწოდებელი</th><th>თანხა</th><th>მეთოდი</th><th>რეფერენსი</th></tr></thead><tbody>
  @forelse($supplierPaymentHistory as $payment)<tr><td>{{ $payment->paid_at?->format('d.m.Y H:i') }}</td><td>{{ $payment->supplier?->name ?? '—' }}</td><td>{{ number_format((float)$payment->amount,2) }} ₾</td><td>{{ $payment->method }}</td><td>{{ $payment->reference ?? '—' }}</td></tr>@empty<tr><td colspan="5" class="ops-muted">გადახდების ისტორია ჯერ ცარიელია.</td></tr>@endforelse
  </tbody></table></div>
+ <p class="ops-muted">ინვოისი ინახება დოკუმენტურ რეესტრში. მომწოდებლის დავალიანება კვლავ საწყობში მომწოდებელზე მიბმული მიღებებით ითვლება, რათა ერთი შესყიდვა ორჯერ არ დაითვალოს.</p>
+ <h4 style="margin-top:20px">ინვოისის რეგისტრაცია</h4>
+ <form class="ops-form" method="POST" enctype="multipart/form-data" action="{{ route('my-service-center.supplier-invoices.store') }}">@csrf
+  <select name="supplier_id" required><option value="">აირჩიე მომწოდებელი</option>@foreach($suppliers as $supplier)<option value="{{ $supplier->id }}">{{ $supplier->name }}</option>@endforeach</select>
+  <input name="invoice_number" required maxlength="120" placeholder="ინვოისის ნომერი">
+  <input name="issue_date" type="date" value="{{ now()->toDateString() }}" required>
+  <input name="due_date" type="date" placeholder="გადახდის ვადა">
+  <input name="total_amount" type="number" min=".01" step=".01" required placeholder="ინვოისის ჯამი ₾">
+  <input name="document" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp">
+  <input name="notes" maxlength="1000" placeholder="შენიშვნა">
+  <button>ინვოისის შენახვა</button>
+ </form>
+ <h4 style="margin-top:18px">ინვოისების რეესტრი</h4>
+ <div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>თარიღი</th><th>მომწოდებელი</th><th>ინვოისი</th><th>გადახდის ვადა</th><th>თანხა</th><th>დოკუმენტი</th></tr></thead><tbody>
+ @forelse($supplierInvoices as $invoice)<tr>
+  <td>{{ $invoice->issue_date?->format('d.m.Y') }}</td><td>{{ $invoice->supplier?->name ?? '—' }}</td>
+  <td><b>{{ $invoice->invoice_number }}</b><div class="ops-muted">{{ $invoice->notes }}</div></td>
+  <td>{{ $invoice->due_date?->format('d.m.Y') ?? '—' }}</td><td><b>{{ number_format((float)$invoice->total_amount,2) }} ₾</b></td>
+  <td>@if($invoice->file_path)<a href="{{ asset('storage/'.$invoice->file_path) }}" target="_blank" rel="noopener">დოკუმენტის ნახვა</a>@else — @endif</td>
+ </tr>@empty<tr><td colspan="6" class="ops-muted">ინვოისები ჯერ არ არის რეგისტრირებული.</td></tr>@endforelse
+ </tbody></table></div>
 </section>
 
 <section class="ops-section">

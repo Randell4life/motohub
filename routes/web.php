@@ -705,6 +705,8 @@ Route::post('/my-service-center/inventory', [\App\Http\Controllers\ServiceCenter
     ->name('my-service-center.inventory.store');
 Route::post('/my-service-center/suppliers', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'storeSupplier'])
     ->name('my-service-center.suppliers.store');
+Route::post('/my-service-center/supplier-invoices', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'storeSupplierInvoice'])
+    ->middleware('throttle:20,1')->name('my-service-center.supplier-invoices.store');
 Route::post('/my-service-center/suppliers/{supplier}/payments', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'paySupplier'])
     ->whereNumber('supplier')->name('my-service-center.suppliers.pay');
 Route::post('/my-service-center/inventory/{item}/receive', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'receiveInventory'])

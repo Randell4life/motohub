@@ -14,6 +14,7 @@ use App\Models\ServiceCenterWorkOrderPart;
 use App\Models\WorkOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 
 class ServiceCenterOperationsController extends Controller
@@ -57,6 +58,7 @@ class ServiceCenterOperationsController extends Controller
             ->select('supplier_id')->selectRaw('COALESCE(SUM(amount), 0) as total')
             ->groupBy('supplier_id')->pluck('total', 'supplier_id');
         $supplierPaymentHistory = $center->supplierPayments()->with('supplier')->latest('paid_at')->limit(30)->get();
+        $supplierInvoices = $center->supplierInvoices()->with('supplier')->latest('issue_date')->latest()->limit(50)->get();
         $suppliers->each(function ($supplier) use ($supplierPurchases, $supplierPayments) {
             $supplier->purchased_total = (float) ($supplierPurchases[$supplier->id] ?? 0);
             $supplier->paid_total = (float) ($supplierPayments[$supplier->id] ?? 0);
@@ -97,7 +99,7 @@ class ServiceCenterOperationsController extends Controller
 
         return view('my-service-center.operations', compact(
             'center', 'orders', 'calendar', 'technicians', 'bays', 'inventory',
-            'lowStock', 'stats', 'payments', 'from', 'to', 'features', 'stockMovements', 'suppliers', 'supplierPaymentHistory'
+            'lowStock', 'stats', 'payments', 'from', 'to', 'features', 'stockMovements', 'suppliers', 'supplierPaymentHistory', 'supplierInvoices'
         ));
     }
 
@@ -361,6 +363,43 @@ class ServiceCenterOperationsController extends Controller
         ]);
         $center->suppliers()->create($data);
         return back()->with('success', 'მომწოდებელი დაემატა.');
+    }
+
+    public function storeSupplierInvoice(Request $request)
+    {
+        $center = $this->center();
+        abort_unless($center->canUseFeature('inventory'), 403, $center->featureLockedMessage('inventory'));
+        $data = $request->validate([
+            'supplier_id' => ['required', 'integer', 'exists:service_center_suppliers,id'],
+            'invoice_number' => ['required', 'string', 'max:120', Rule::unique('service_center_supplier_invoices', 'invoice_number')->where(fn ($query) => $query->where('supplier_id', $request->input('supplier_id')))],
+            'issue_date' => ['required', 'date'],
+            'due_date' => ['nullable', 'date', 'after_or_equal:issue_date'],
+            'total_amount' => ['required', 'numeric', 'gt:0', 'max:999999999'],
+            'notes' => ['nullable', 'string', 'max:1000'],
+            'document' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:10240'],
+        ]);
+        $supplier = $center->suppliers()->findOrFail($data['supplier_id']);
+        $path = isset($data['document'])
+            ? $data['document']->store('service-center-invoices/'.$center->id, 'public')
+            : null;
+
+        try {
+            $center->supplierInvoices()->create([
+                'supplier_id' => $supplier->id,
+                'user_id' => auth()->id(),
+                'invoice_number' => trim($data['invoice_number']),
+                'issue_date' => $data['issue_date'],
+                'due_date' => $data['due_date'] ?? null,
+                'total_amount' => $data['total_amount'],
+                'file_path' => $path,
+                'notes' => $data['notes'] ?? null,
+            ]);
+        } catch (\Illuminate\Database\QueryException $exception) {
+            if ($path) \Illuminate\Support\Facades\Storage::disk('public')->delete($path);
+            throw $exception;
+        }
+
+        return back()->with('success', 'მომწოდებლის ინვოისი შეინახა.');
     }
 
     public function paySupplier(Request $request, ServiceCenterSupplier $supplier)
