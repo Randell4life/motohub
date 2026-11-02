@@ -77,6 +77,7 @@ Route::prefix('mobile')->group(function () {
         Route::post('/service-center/inventory', [MobileExtendedController::class, 'storeInventory'])->middleware('throttle:10,1');
         Route::post('/service-center/suppliers', [MobileExtendedController::class, 'storeServiceCenterSupplier'])->middleware('throttle:10,1');
         Route::post('/service-center/supplier-invoices', [MobileExtendedController::class, 'storeServiceCenterSupplierInvoice'])->middleware('throttle:10,1');
+        Route::post('/service-center/supplier-invoice-items/{line}/receive', [MobileExtendedController::class, 'receiveServiceCenterSupplierInvoiceItem'])->whereNumber('line')->middleware('throttle:30,1');
         Route::post('/service-center/suppliers/{supplier}/payments', [MobileExtendedController::class, 'payServiceCenterSupplier'])->whereNumber('supplier')->middleware('throttle:20,1');
         Route::post('/service-center/inventory/{item}/receive', [MobileExtendedController::class, 'receiveServiceCenterInventory'])->whereNumber('item')->middleware('throttle:20,1');
         Route::post('/service-center/inventory/{item}/adjust', [MobileExtendedController::class, 'adjustServiceCenterInventory'])->whereNumber('item')->middleware('throttle:20,1');
