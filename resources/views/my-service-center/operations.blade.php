@@ -148,6 +148,10 @@
   </td>
  </tr>@empty<tr><td colspan="6" class="ops-muted">მომწოდებლები ჯერ არ დაგიმატებია.</td></tr>@endforelse
  </tbody></table></div>
+ <h4 style="margin-top:18px">გადახდების ისტორია</h4>
+ <div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>თარიღი</th><th>მომწოდებელი</th><th>თანხა</th><th>მეთოდი</th><th>რეფერენსი</th></tr></thead><tbody>
+ @forelse($supplierPaymentHistory as $payment)<tr><td>{{ $payment->paid_at?->format('d.m.Y H:i') }}</td><td>{{ $payment->supplier?->name ?? '—' }}</td><td>{{ number_format((float)$payment->amount,2) }} ₾</td><td>{{ $payment->method }}</td><td>{{ $payment->reference ?? '—' }}</td></tr>@empty<tr><td colspan="5" class="ops-muted">გადახდების ისტორია ჯერ ცარიელია.</td></tr>@endforelse
+ </tbody></table></div>
 </section>
 
 <section class="ops-section">
