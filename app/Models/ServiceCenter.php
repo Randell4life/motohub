@@ -145,6 +145,16 @@ class ServiceCenter extends Model
         return $this->hasMany(ServiceCenterInventoryItem::class, 'service_center_id');
     }
 
+    public function suppliers(): HasMany
+    {
+        return $this->hasMany(ServiceCenterSupplier::class, 'service_center_id');
+    }
+
+    public function supplierPayments(): HasMany
+    {
+        return $this->hasMany(ServiceCenterSupplierPayment::class, 'service_center_id');
+    }
+
     public function payments(): HasMany
     {
         return $this->hasMany(ServiceCenterPayment::class);

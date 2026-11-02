@@ -7,6 +7,8 @@ use App\Models\ServiceCenterActivityLog;
 use App\Models\ServiceCenterBay;
 use App\Models\ServiceCenterInventoryItem;
 use App\Models\ServiceCenterPayment;
+use App\Models\ServiceCenterSupplier;
+use App\Models\ServiceCenterSupplierPayment;
 use App\Models\ServiceCenterTechnician;
 use App\Models\ServiceCenterWorkOrderPart;
 use App\Models\WorkOrder;
@@ -46,14 +48,29 @@ class ServiceCenterOperationsController extends Controller
         $technicians = $center->technicians()->where('is_active', true)->orderBy('name')->get();
         $bays = $center->bays()->where('is_active', true)->orderBy('name')->get();
         $inventory = $center->inventory()->where('is_active', true)->orderBy('name')->get();
+        $suppliers = $center->suppliers()->where('is_active', true)->orderBy('name')->get();
+        $supplierPurchases = DB::table('service_center_inventory_movements')
+            ->where('service_center_id', $center->id)->whereNotNull('supplier_id')->where('type', 'in')
+            ->select('supplier_id')->selectRaw('COALESCE(SUM(quantity * unit_cost), 0) as total')
+            ->groupBy('supplier_id')->pluck('total', 'supplier_id');
+        $supplierPayments = $center->supplierPayments()
+            ->select('supplier_id')->selectRaw('COALESCE(SUM(amount), 0) as total')
+            ->groupBy('supplier_id')->pluck('total', 'supplier_id');
+        $supplierPaymentHistory = $center->supplierPayments()->with('supplier')->latest('paid_at')->limit(30)->get();
+        $suppliers->each(function ($supplier) use ($supplierPurchases, $supplierPayments) {
+            $supplier->purchased_total = (float) ($supplierPurchases[$supplier->id] ?? 0);
+            $supplier->paid_total = (float) ($supplierPayments[$supplier->id] ?? 0);
+            $supplier->balance = round($supplier->purchased_total - $supplier->paid_total, 2);
+        });
         $stockMovements = DB::table('service_center_inventory_movements')
             ->join('service_center_inventory', 'service_center_inventory.id', '=', 'service_center_inventory_movements.inventory_item_id')
             ->leftJoin('work_orders', 'work_orders.id', '=', 'service_center_inventory_movements.work_order_id')
             ->leftJoin('users', 'users.id', '=', 'service_center_inventory_movements.user_id')
+            ->leftJoin('service_center_suppliers', 'service_center_suppliers.id', '=', 'service_center_inventory_movements.supplier_id')
             ->where('service_center_inventory_movements.service_center_id', $center->id)
             ->latest('service_center_inventory_movements.created_at')
             ->limit(40)
-            ->select('service_center_inventory_movements.*', 'service_center_inventory.name as item_name', 'work_orders.order_number', 'users.name as user_name')
+            ->select('service_center_inventory_movements.*', 'service_center_inventory.name as item_name', 'work_orders.order_number', 'users.name as user_name', 'service_center_suppliers.name as supplier_name', 'service_center_inventory_movements.supplier_reference')
             ->get();
         $lowStock = $center->inventory()->where('is_active', true)->whereColumn('quantity', '<=', 'min_quantity')->count();
 
@@ -80,7 +97,7 @@ class ServiceCenterOperationsController extends Controller
 
         return view('my-service-center.operations', compact(
             'center', 'orders', 'calendar', 'technicians', 'bays', 'inventory',
-            'lowStock', 'stats', 'payments', 'from', 'to', 'features', 'stockMovements'
+            'lowStock', 'stats', 'payments', 'from', 'to', 'features', 'stockMovements', 'suppliers', 'supplierPaymentHistory'
         ));
     }
 
@@ -329,6 +346,54 @@ class ServiceCenterOperationsController extends Controller
         return back()->with('success', 'ნაწილი დაემატა საწყობს.');
     }
 
+    public function storeSupplier(Request $request)
+    {
+        $center = $this->center();
+        abort_unless($center->canUseFeature('inventory'), 403, $center->featureLockedMessage('inventory'));
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:180'],
+            'contact_person' => ['nullable', 'string', 'max:160'],
+            'phone' => ['nullable', 'string', 'max:40'],
+            'email' => ['nullable', 'email', 'max:180'],
+            'tax_id' => ['nullable', 'string', 'max:80'],
+            'address' => ['nullable', 'string', 'max:255'],
+            'notes' => ['nullable', 'string', 'max:3000'],
+        ]);
+        $center->suppliers()->create($data);
+        return back()->with('success', 'მომწოდებელი დაემატა.');
+    }
+
+    public function paySupplier(Request $request, ServiceCenterSupplier $supplier)
+    {
+        $center = $this->center();
+        abort_unless($center->canUseFeature('inventory'), 403, $center->featureLockedMessage('inventory'));
+        abort_unless($supplier->service_center_id === $center->id, 404);
+        $data = $request->validate([
+            'amount' => ['required', 'numeric', 'gt:0', 'max:999999999'],
+            'method' => ['required', 'in:cash,bank_transfer,card,other'],
+            'reference' => ['nullable', 'string', 'max:120'],
+            'note' => ['nullable', 'string', 'max:255'],
+            'paid_at' => ['required', 'date'],
+        ]);
+        DB::transaction(function () use ($center, $supplier, $data) {
+            $locked = ServiceCenterSupplier::where('service_center_id', $center->id)->whereKey($supplier->id)->lockForUpdate()->firstOrFail();
+            $purchased = (float) DB::table('service_center_inventory_movements')
+                ->where('service_center_id', $center->id)->where('supplier_id', $locked->id)->where('type', 'in')
+                ->selectRaw('COALESCE(SUM(quantity * unit_cost), 0) as total')->value('total');
+            $paid = (float) $center->supplierPayments()->where('supplier_id', $locked->id)->sum('amount');
+            if ((float) $data['amount'] > round($purchased - $paid, 2)) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['amount' => 'გადახდა მომწოდებლის მიმდინარე დავალიანებაზე მეტი ვერ იქნება.']);
+            }
+            $center->supplierPayments()->create([
+                'supplier_id' => $locked->id, 'user_id' => auth()->id(),
+                'amount' => $data['amount'], 'method' => $data['method'],
+                'reference' => $data['reference'] ?? null, 'note' => $data['note'] ?? null,
+                'paid_at' => $data['paid_at'],
+            ]);
+        });
+        return back()->with('success', 'მომწოდებლის გადახდა აღირიცხა.');
+    }
+
     public function receiveInventory(Request $request, ServiceCenterInventoryItem $item)
     {
         $center = $this->center();
@@ -337,9 +402,13 @@ class ServiceCenterOperationsController extends Controller
             'quantity' => ['required', 'integer', 'min:1', 'max:1000000'],
             'unit_cost' => ['required', 'numeric', 'min:0', 'max:999999999'],
             'note' => ['nullable', 'string', 'max:255'],
+            'supplier_id' => ['nullable', 'integer', 'exists:service_center_suppliers,id'],
+            'supplier_reference' => ['nullable', 'string', 'max:120'],
         ]);
+        if (!empty($data['supplier_id'])) $center->suppliers()->findOrFail($data['supplier_id']);
         $updated = app(\App\Services\ServiceCenterStockService::class)->receive(
-            $center, $item, (int) $data['quantity'], (float) $data['unit_cost'], auth()->id(), $data['note'] ?? null
+            $center, $item, (int) $data['quantity'], (float) $data['unit_cost'], auth()->id(), $data['note'] ?? null,
+            isset($data['supplier_id']) ? (int) $data['supplier_id'] : null, $data['supplier_reference'] ?? null
         );
         return back()->with('success', 'მარაგი შეივსო. ახალი საშუალო თვითღირებულება: '.number_format((float) $updated->cost_price, 2).' ₾');
     }
