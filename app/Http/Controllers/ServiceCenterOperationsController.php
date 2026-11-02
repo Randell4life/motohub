@@ -157,13 +157,31 @@ class ServiceCenterOperationsController extends Controller
             'amount'=>['required','numeric','gt:0'],'method'=>['required','in:cash,card,transfer,other'],
             'reference'=>['nullable','string','max:120'],'note'=>['nullable','string','max:2000'],
         ]);
-        $paid = (float)$workOrder->payments()->sum('amount');
-        $due = round((float)$workOrder->total_cost - $paid, 2);
-        if ((float)$data['amount'] > $due) return back()->withErrors(['amount'=>'გადასახდელ ნაშთზე მეტი თანხა არ შეიძლება.']);
-        ServiceCenterPayment::create([
-            ...$data,'service_center_id'=>$center->id,'work_order_id'=>$workOrder->id,
-            'received_by'=>auth()->id(),'paid_at'=>now(),
-        ]);
+        DB::transaction(function () use ($center, $workOrder, $data) {
+            // შეკვეთის ჩაკეტვა იცავს პარალელური გადახდებისას ზედმეტი თანხის აღრიცხვისგან.
+            $lockedOrder = WorkOrder::whereKey($workOrder->id)
+                ->where('service_center_id', $center->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $paid = (float) $lockedOrder->payments()->sum('amount');
+            $due = round((float) $lockedOrder->total_cost - $paid, 2);
+
+            if ((float) $data['amount'] > $due) {
+                throw \\Illuminate\\Validation\\ValidationException::withMessages([
+                    'amount' => 'გადასახდელ ნაშთზე მეტი თანხა არ შეიძლება.',
+                ]);
+            }
+
+            ServiceCenterPayment::create([
+                ...$data,
+                'service_center_id' => $center->id,
+                'work_order_id' => $lockedOrder->id,
+                'received_by' => auth()->id(),
+                'paid_at' => now(),
+            ]);
+        });
+
         return back()->with('success', 'გადახდა აღირიცხა.');
     }
 
