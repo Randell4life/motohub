@@ -640,9 +640,9 @@ class MobileExtendedController extends Controller
         \Illuminate\Support\Facades\DB::transaction(function () use ($center, $supplier, $data, $request) {
             $locked = $center->suppliers()->whereKey($supplier)->lockForUpdate()->firstOrFail();
             $purchased = DB::table('service_center_inventory_movements')->where('service_center_id', $center->id)
-                ->where('supplier_id', $locked->id)->where('type', 'in')
+                ->where('supplier_id', $locked->id)->where('type', 'in')->whereNull('supplier_invoice_item_id')
                 ->selectRaw('COALESCE(SUM(quantity * unit_cost), 0) as total')->value('total');
-            $paid = $center->supplierPayments()->where('supplier_id', $locked->id)->sum('amount');
+            $paid = $center->supplierPayments()->where('supplier_id', $locked->id)->whereNull('invoice_id')->sum('amount');
             if ((float) $data['amount'] > round((float) $purchased - (float) $paid, 2)) {
                 throw ValidationException::withMessages(['amount' => 'გადახდა მომწოდებლის მიმდინარე დავალიანებაზე მეტი ვერ იქნება.']);
             }
