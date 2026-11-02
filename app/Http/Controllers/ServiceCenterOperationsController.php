@@ -148,33 +148,68 @@ class ServiceCenterOperationsController extends Controller
         $center = $this->center();
         abort_unless($center->canUseFeature('inventory'), 403, $center->featureLockedMessage('inventory'));
         abort_unless($workOrder->service_center_id === $center->id, 404);
-        $data = $request->validate(['inventory_item_id'=>['required','integer'],'quantity'=>['required','integer','min:1']]);
-        DB::transaction(function () use ($center, $workOrder, $data) {
-            // შეკვეთა პირველ რიგში იბლოკება, რათა ნაწილების დამატება და გადახდა
-            // ერთდროულად არ დაეყრდნოს მოძველებულ ჯამურ ღირებულებას.
-            $lockedOrder = WorkOrder::whereKey($workOrder->id)
-                ->where('service_center_id', $center->id)
-                ->lockForUpdate()
-                ->firstOrFail();
+        $data = $request->validate([
+            'inventory_item_id' => ['required', 'integer'],
+            'quantity' => ['required', 'integer', 'min:1'],
+            'description' => ['nullable', 'string', 'max:2000'],
+        ]);
 
+        if (in_array($workOrder->status, ['in_repair', 'waiting_for_parts'], true)) {
+            $item = $center->inventory()->whereKey($data['inventory_item_id'])->firstOrFail();
+            $revision = app(\App\Services\WorkOrderQuoteWorkflow::class)->sendSupplemental(
+                $workOrder,
+                ['description' => $data['description'] ?: ('დამატებითი ნაწილი: '.$item->name), 'labor_cost' => 0, 'parts_cost' => 0],
+                ['inventory_item_id' => $item->id, 'quantity' => (int) $data['quantity']]
+            );
+            app(\App\Services\ServiceCenterCustomerNotifier::class)->send(
+                $workOrder->fresh(),
+                'supplemental_quote_sent',
+                'დამატებითი ხარჯი დასადასტურებელია',
+                'სერვისცენტრმა გამოგიგზავნათ დამატებითი ნაწილის შეთავაზება. გთხოვთ, დაადასტუროთ ან უარყოთ.'
+            );
+            return back()->with('success', 'დამატებითი ნაწილი კლიენტს გაეგზავნა დასადასტურებლად. საწყობიდან ჩამოიწერება მხოლოდ თანხმობის შემდეგ.');
+        }
+
+        DB::transaction(function () use ($center, $workOrder, $data) {
+            $lockedOrder = WorkOrder::whereKey($workOrder->id)->where('service_center_id', $center->id)->lockForUpdate()->firstOrFail();
             $item = $center->inventory()->whereKey($data['inventory_item_id'])->lockForUpdate()->firstOrFail();
-            $quantity = (int)$data['quantity'];
-            if ($item->quantity < $quantity) throw \Illuminate\Validation\ValidationException::withMessages(['quantity'=>'საწყობში საკმარისი რაოდენობა არ არის.']);
-            $line = ServiceCenterWorkOrderPart::firstOrNew(['work_order_id'=>$lockedOrder->id,'inventory_item_id'=>$item->id]);
+            $quantity = (int) $data['quantity'];
+            if ($item->quantity < $quantity) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['quantity' => 'საწყობში საკმარისი რაოდენობა არ არის.']);
+            }
+            $line = ServiceCenterWorkOrderPart::firstOrNew(['work_order_id' => $lockedOrder->id, 'inventory_item_id' => $item->id]);
             $line->quantity = ($line->exists ? $line->quantity : 0) + $quantity;
             $line->unit_price = $item->sale_price;
             $line->total = $line->quantity * $item->sale_price;
             $line->save();
             $item->decrement('quantity', $quantity);
             DB::table('service_center_inventory_movements')->insert([
-                'service_center_id'=>$center->id,'inventory_item_id'=>$item->id,'work_order_id'=>$workOrder->id,
-                'user_id'=>auth()->id(),'type'=>'out','quantity'=>$quantity,'unit_cost'=>$item->cost_price,
-                'note'=>'სამუშაო შეკვეთა '.$workOrder->order_number,'created_at'=>now(),'updated_at'=>now(),
+                'service_center_id' => $center->id, 'inventory_item_id' => $item->id, 'work_order_id' => $workOrder->id,
+                'user_id' => auth()->id(), 'type' => 'out', 'quantity' => $quantity, 'unit_cost' => $item->cost_price,
+                'note' => 'სამუშაო შეკვეთა '.$workOrder->order_number, 'created_at' => now(), 'updated_at' => now(),
             ]);
             $partsTotal = $lockedOrder->parts()->sum('total');
-            $lockedOrder->update(['parts_cost'=>$partsTotal,'total_cost'=>(float)$lockedOrder->labor_cost + (float)$partsTotal]);
+            $lockedOrder->update(['parts_cost' => $partsTotal, 'total_cost' => (float) $lockedOrder->labor_cost + (float) $partsTotal]);
         });
         return back()->with('success', 'ნაწილი შეკვეთას მიება და საწყობიდან ჩამოიწერა.');
+    }
+
+    public function sendSupplementalQuote(Request $request, WorkOrder $workOrder)
+    {
+        $center = $this->center();
+        abort_unless($center->canUseFeature('work_orders'), 403, $center->featureLockedMessage('work_orders'));
+        abort_unless($workOrder->service_center_id === $center->id, 404);
+        $data = $request->validate([
+            'description' => ['required', 'string', 'max:2000'],
+            'labor_cost' => ['nullable', 'numeric', 'min:0', 'max:99999999'],
+            'parts_cost' => ['nullable', 'numeric', 'min:0', 'max:99999999'],
+        ]);
+        $revision = app(\App\Services\WorkOrderQuoteWorkflow::class)->sendSupplemental($workOrder, $data);
+        app(\App\Services\ServiceCenterCustomerNotifier::class)->send(
+            $workOrder->fresh(), 'supplemental_quote_sent', 'დამატებითი ხარჯი დასადასტურებელია',
+            'სერვისცენტრმა გამოგიგზავნათ დამატებითი სამუშაოს ხარჯთაღრიცხვა. გთხოვთ, გაეცნოთ და უპასუხოთ.'
+        );
+        return back()->with('success', 'დამატებითი ხარჯი კლიენტს გაეგზავნა დასადასტურებლად.');
     }
 
     public function payment(Request $request, WorkOrder $workOrder)
