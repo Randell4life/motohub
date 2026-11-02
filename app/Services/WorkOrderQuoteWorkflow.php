@@ -20,6 +20,10 @@ class WorkOrderQuoteWorkflow
                 throw ValidationException::withMessages(['quote' => 'კლიენტის პასუხს უკვე გაგზავნილ ხარჯთაღრიცხვაზე უნდა დაელოდოთ.']);
             }
 
+            if ($order->quoteRevisions()->where('type', 'initial')->where('status', 'approved')->exists()) {
+                throw ValidationException::withMessages(['quote' => 'საწყისი ხარჯთაღრიცხვა უკვე დადასტურებულია. დამატებითი ცვლილება ცალკე შეთავაზებად გაგზავნეთ.']);
+            }
+
             if (in_array($order->status, ['in_repair', 'completed', 'handed_over', 'cancelled'], true)) {
                 throw ValidationException::withMessages(['quote' => 'ამ ეტაპზე საწყისი ხარჯთაღრიცხვის გაგზავნა შეუძლებელია.']);
             }
