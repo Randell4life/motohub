@@ -145,4 +145,9 @@ class ServiceCenter extends Model
         return $this->hasMany(ServiceCenterPayment::class);
     }
 
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(ServiceCenterExpense::class);
+    }
+
 }

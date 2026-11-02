@@ -565,6 +565,71 @@ class MobileExtendedController extends Controller
         return response()->json(['message' => 'დამატებითი ხარჯი კლიენტს გაეგზავნა დასადასტურებლად.', 'revision' => $revision]);
     }
 
+    public function serviceCenterFinance(Request $request)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('financial_reports'), 403, $center->featureLockedMessage('financial_reports'));
+        $data = $request->validate(['from' => ['nullable', 'date'], 'to' => ['nullable', 'date']]);
+        $from = isset($data['from']) ? \Illuminate\Support\Carbon::parse($data['from'])->startOfDay() : now()->startOfMonth();
+        $to = isset($data['to']) ? \Illuminate\Support\Carbon::parse($data['to'])->endOfDay() : now()->endOfMonth();
+        if ($to->lt($from)) {
+            throw ValidationException::withMessages(['to' => 'დასრულების თარიღი დაწყების თარიღზე ადრე ვერ იქნება.']);
+        }
+
+        $orders = \App\Models\WorkOrder::where('service_center_id', $center->id)
+            ->whereBetween('created_at', [$from, $to])->whereNotIn('status', ['cancelled'])
+            ->with(['payments', 'expenses'])->get();
+        $payments = $center->payments()->whereBetween('paid_at', [$from, $to])->get();
+        $expenses = $center->expenses()->whereBetween('expense_date', [$from->toDateString(), $to->toDateString()])->get();
+        $partsCost = (float) DB::table('service_center_inventory_movements')
+            ->where('service_center_id', $center->id)->where('type', 'out')->whereNotNull('work_order_id')
+            ->whereBetween('created_at', [$from, $to])
+            ->selectRaw('COALESCE(SUM(quantity * unit_cost), 0) as total')->value('total');
+        $billed = (float) $orders->sum(fn ($order) => (float) $order->total_cost);
+        $expenseTotal = (float) $expenses->sum(fn ($expense) => (float) $expense->amount);
+        $paid = (float) $payments->sum(fn ($payment) => (float) $payment->amount);
+
+        return response()->json([
+            'period' => ['from' => $from->toDateString(), 'to' => $to->toDateString()],
+            'summary' => [
+                'billed_revenue' => round($billed, 2),
+                'collected' => round($paid, 2),
+                'labor_revenue' => round((float) $orders->sum('labor_cost'), 2),
+                'parts_revenue' => round((float) $orders->sum('parts_cost'), 2),
+                'parts_cost' => round($partsCost, 2),
+                'expenses' => round($expenseTotal, 2),
+                'gross_profit' => round($billed - $partsCost, 2),
+                'net_profit' => round($billed - $partsCost - $expenseTotal, 2),
+                'outstanding' => round((float) $orders->sum(fn ($order) => max(0, (float) $order->total_cost - (float) $order->payments->sum('amount'))), 2),
+            ],
+            'expense_categories' => $expenses->groupBy('category')->map(fn ($items) => round((float) $items->sum('amount'), 2)),
+            'recent_expenses' => $expenses->sortByDesc('expense_date')->take(30)->values(),
+        ]);
+    }
+
+    public function storeServiceCenterExpense(Request $request)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('finance'), 403, $center->featureLockedMessage('finance'));
+        $data = $request->validate([
+            'work_order_id' => ['nullable', 'integer'],
+            'category' => ['required', 'in:'.implode(',', array_keys(\App\Models\ServiceCenterExpense::CATEGORIES))],
+            'description' => ['required', 'string', 'max:180'],
+            'amount' => ['required', 'numeric', 'gt:0', 'max:999999999'],
+            'expense_date' => ['required', 'date'],
+            'reference' => ['nullable', 'string', 'max:120'],
+        ]);
+        $order = ! empty($data['work_order_id'])
+            ? $center->workOrders()->whereKey($data['work_order_id'])->firstOrFail()
+            : null;
+        $expense = $center->expenses()->create([
+            ...$data,
+            'work_order_id' => $order?->id,
+            'created_by' => $request->user()->id,
+        ]);
+        return response()->json(['message' => 'ხარჯი აღირიცხა.', 'expense' => $expense], 201);
+    }
+
     public function recordWorkOrderPayment(Request $request, int $workOrder)
     {
         $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();

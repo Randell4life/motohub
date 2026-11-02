@@ -34,6 +34,13 @@
             <span>⚙</span> სამუშაო შეკვეთები
         </a>
 
+        @if(isset($center) && $center->canUseFeature('financial_reports'))
+        <a href="{{ route('my-service-center.finance') }}"
+           class="mh-menu-link {{ request()->routeIs('my-service-center.finance') ? 'active' : '' }}">
+            <span>₾</span> ფინანსები და მოგება
+        </a>
+        @endif
+
         <a href="{{ route('my-service-center.services') }}"
            class="mh-menu-link {{ request()->routeIs('my-service-center.services') ? 'active' : '' }}">
             <span>🔧</span> მომსახურებები

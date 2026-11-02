@@ -114,6 +114,11 @@ class WorkOrder extends Model
         return $this->hasMany(ServiceCenterPayment::class);
     }
 
+    public function expenses(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ServiceCenterExpense::class);
+    }
+
     public function bay(): BelongsTo
     {
         return $this->belongsTo(ServiceCenterBay::class, 'service_center_bay_id');
