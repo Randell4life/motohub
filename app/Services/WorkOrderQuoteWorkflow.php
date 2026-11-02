@@ -62,7 +62,7 @@ class WorkOrderQuoteWorkflow
         return DB::transaction(function () use ($workOrder, $data, $inventoryPart) {
             $order = WorkOrder::query()->whereKey($workOrder->id)->lockForUpdate()->firstOrFail();
 
-            if (! in_array($order->status, ['in_repair', 'waiting_for_parts'], true)) {
+            if (in_array($order->status, ['completed', 'handed_over', 'cancelled'], true)) {
                 throw ValidationException::withMessages(['quote' => 'დამატებითი ხარჯის შეთანხმება შესაძლებელია მხოლოდ მიმდინარე შეკეთებისას.']);
             }
 
