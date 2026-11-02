@@ -706,6 +706,8 @@ Route::post('/my-service-center/work-orders/{workOrder}/payments', [\App\Http\Co
 
 Route::post('/my-service-center/work-orders/{workOrder}/quote', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'sendQuote'])
     ->whereNumber('workOrder')->name('my-service-center.work-orders.quote');
+Route::post('/my-service-center/work-orders/{workOrder}/supplemental-quote', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'sendSupplementalQuote'])
+    ->whereNumber('workOrder')->name('my-service-center.work-orders.supplemental-quote');
 
 Route::post('/my-service-center/work-orders/{workOrder}/updates', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'notify'])
     ->whereNumber('workOrder')->name('my-service-center.work-orders.updates');
