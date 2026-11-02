@@ -16,6 +16,10 @@ class WorkOrderQuoteWorkflow
         return DB::transaction(function () use ($workOrder, $data) {
             $order = WorkOrder::query()->whereKey($workOrder->id)->lockForUpdate()->firstOrFail();
 
+            if ($order->quoteRevisions()->where('status', 'pending')->exists()) {
+                throw ValidationException::withMessages(['quote' => 'კლიენტის პასუხს უკვე გაგზავნილ ხარჯთაღრიცხვაზე უნდა დაელოდოთ.']);
+            }
+
             if (in_array($order->status, ['in_repair', 'completed', 'handed_over', 'cancelled'], true)) {
                 throw ValidationException::withMessages(['quote' => 'ამ ეტაპზე საწყისი ხარჯთაღრიცხვის გაგზავნა შეუძლებელია.']);
             }
@@ -66,8 +70,9 @@ class WorkOrderQuoteWorkflow
                 throw ValidationException::withMessages(['quote' => 'ჯერ დაელოდეთ კლიენტის მიმდინარე შეთავაზებაზე პასუხს.']);
             }
 
-            if ($order->customer_approval_status !== 'approved') {
-                throw ValidationException::withMessages(['quote' => 'დამატებით ხარჯამდე საჭიროა საწყისი ხარჯთაღრიცხვის დადასტურება.']);
+            $hasApprovedInitial = $order->quoteRevisions()->where('type', 'initial')->where('status', 'approved')->exists();
+            if (! $hasApprovedInitial || ! in_array($order->customer_approval_status, ['approved', 'declined'], true)) {
+                throw ValidationException::withMessages(['quote' => 'დამატებით ხარჯამდე საჭიროა საწყისი ხარჯთაღრიცხვის დადასტურება და წინა შეთავაზებაზე პასუხი.']);
             }
 
             $laborIncrement = round((float) ($data['labor_cost'] ?? 0), 2);
