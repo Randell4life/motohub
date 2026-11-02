@@ -136,21 +136,21 @@
   <td>{{ number_format($supplier->paid_total,2) }} ₾</td>
   <td><b>{{ number_format($supplier->balance,2) }} ₾</b></td>
   <td>
-   @if($supplier->balance > 0)
+   @if($supplier->legacy_balance > 0)
    <form method="POST" action="{{ route('my-service-center.suppliers.pay',$supplier) }}" class="ops-inline">@csrf
-    <input name="amount" type="number" min=".01" max="{{ $supplier->balance }}" step=".01" required placeholder="თანხა" style="width:100px">
+    <input name="amount" type="number" min=".01" max="{{ $supplier->legacy_balance }}" step=".01" required placeholder="ძველი დავალიანება" style="width:120px">
     <select name="method"><option value="cash">ნაღდი</option><option value="bank_transfer">ბანკი</option><option value="card">ბარათი</option><option value="other">სხვა</option></select>
     <input name="reference" maxlength="120" placeholder="ტრანზაქციის №" style="width:120px">
     <input name="paid_at" type="datetime-local" value="{{ now()->format('Y-m-d\\TH:i') }}" required>
-    <button>გადახდა</button>
+    <button>ძველი დავალიანების გადახდა</button>
    </form>
-   @else <span class="ops-pill">დავალიანება არ არის</span> @endif
+   @else <span class="ops-pill">ინვოისის გადახდა მის რეესტრში ხდება</span> @endif
   </td>
  </tr>@empty<tr><td colspan="6" class="ops-muted">მომწოდებლები ჯერ არ დაგიმატებია.</td></tr>@endforelse
  </tbody></table></div>
  <h4 style="margin-top:18px">გადახდების ისტორია</h4>
- <div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>თარიღი</th><th>მომწოდებელი</th><th>თანხა</th><th>მეთოდი</th><th>რეფერენსი</th></tr></thead><tbody>
- @forelse($supplierPaymentHistory as $payment)<tr><td>{{ $payment->paid_at?->format('d.m.Y H:i') }}</td><td>{{ $payment->supplier?->name ?? '—' }}</td><td>{{ number_format((float)$payment->amount,2) }} ₾</td><td>{{ $payment->method }}</td><td>{{ $payment->reference ?? '—' }}</td></tr>@empty<tr><td colspan="5" class="ops-muted">გადახდების ისტორია ჯერ ცარიელია.</td></tr>@endforelse
+ <div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>თარიღი</th><th>მომწოდებელი</th><th>ინვოისი</th><th>თანხა</th><th>მეთოდი</th><th>რეფერენსი</th></tr></thead><tbody>
+ @forelse($supplierPaymentHistory as $payment)<tr><td>{{ $payment->paid_at?->format('d.m.Y H:i') }}</td><td>{{ $payment->supplier?->name ?? '—' }}</td><td>{{ $payment->invoice?->invoice_number ?? 'ძველი დავალიანება' }}</td><td>{{ number_format((float)$payment->amount,2) }} ₾</td><td>{{ $payment->method }}</td><td>{{ $payment->reference ?? '—' }}</td></tr>@empty<tr><td colspan="6" class="ops-muted">გადახდების ისტორია ჯერ ცარიელია.</td></tr>@endforelse
  </tbody></table></div>
  <p class="ops-muted">ინვოისი ინახება დოკუმენტურ რეესტრში. მომწოდებლის დავალიანება კვლავ საწყობში მომწოდებელზე მიბმული მიღებებით ითვლება, რათა ერთი შესყიდვა ორჯერ არ დაითვალოს.</p>
  <h4 style="margin-top:20px">ინვოისის რეგისტრაცია</h4>
@@ -185,8 +185,23 @@
  @forelse($supplierInvoices as $invoice)<tr>
   <td>{{ $invoice->issue_date?->format('d.m.Y') }}</td><td>{{ $invoice->supplier?->name ?? '—' }}</td>
   <td><b>{{ $invoice->invoice_number }}</b><div class="ops-muted">{{ $invoice->notes }}</div></td>
-  <td>{{ $invoice->due_date?->format('d.m.Y') ?? '—' }}</td><td><b>{{ number_format((float)$invoice->total_amount,2) }} ₾</b></td>
-  <td>@if($invoice->file_path)<a href="{{ asset('storage/'.$invoice->file_path) }}" target="_blank" rel="noopener">დოკუმენტის ნახვა</a>@else — @endif</td>
+  @php($invoicePaid = (float) ($invoice->payments_sum_amount ?? 0))
+  @php($invoiceBalance = max(0, (float) $invoice->total_amount - $invoicePaid))
+  <td>{{ $invoice->due_date?->format('d.m.Y') ?? '—' }}</td>
+  <td><b>{{ number_format((float)$invoice->total_amount,2) }} ₾</b><div class="ops-muted">გადახდილი: {{ number_format($invoicePaid,2) }} ₾</div><div><b>დარჩენილი: {{ number_format($invoiceBalance,2) }} ₾</b></div>
+   @if($invoiceBalance <= 0)<span class="ops-pill">გადახდილია</span>@elseif($invoicePaid > 0)<span class="ops-pill">ნაწილობრივ</span>@elseif($invoice->due_date && $invoice->due_date->isPast())<span class="ops-pill">ვადაგადაცილებული</span>@else<span class="ops-pill">გადასახდელი</span>@endif
+  </td>
+  <td>@if($invoice->file_path)<a href="{{ asset('storage/'.$invoice->file_path) }}" target="_blank" rel="noopener">დოკუმენტის ნახვა</a>@else — @endif
+   @if($invoiceBalance > 0)
+    <form method="POST" action="{{ route('my-service-center.supplier-invoices.pay',$invoice->id) }}" class="ops-inline" style="margin-top:8px">@csrf
+     <input name="amount" type="number" min=".01" max="{{ $invoiceBalance }}" step=".01" required placeholder="გადახდის თანხა" style="width:130px">
+     <select name="method"><option value="bank_transfer">ბანკი</option><option value="cash">ნაღდი</option><option value="card">ბარათი</option><option value="other">სხვა</option></select>
+     <input name="reference" maxlength="120" placeholder="ტრანზაქციის №" style="width:120px">
+     <input name="paid_at" type="datetime-local" value="{{ now()->format('Y-m-d\\TH:i') }}" required>
+     <button>ინვოისზე გადახდა</button>
+    </form>
+   @endif
+  </td>
  </tr>
  @foreach($invoice->items as $line)
   <tr><td colspan="2" class="ops-muted">{{ $line->inventoryItem?->name ?? 'ნაწილი' }}</td><td>{{ $line->received_quantity }} / {{ $line->quantity }} მიღებულია</td><td>{{ number_format((float)$line->unit_cost,2) }} ₾ / ც.</td><td colspan="2">
