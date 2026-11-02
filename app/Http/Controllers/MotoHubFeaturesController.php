@@ -301,6 +301,22 @@ class MotoHubFeaturesController extends Controller
         return back()->with('success', 'ღონისძიება გამოქვეყნდა.');
     }
 
+    public function leaveEvent(Request $request, int $event): RedirectResponse
+    {
+        $eventRow = DB::table('moto_events')->where('id', $event)->first();
+        abort_unless($eventRow, 404);
+
+        $updated = DB::table('moto_event_attendees')
+            ->where('event_id', $event)
+            ->where('user_id', $request->user()->id)
+            ->where('status', 'going')
+            ->update(['status' => 'cancelled', 'updated_at' => now()]);
+
+        abort_unless($updated, 404, 'მონაწილეობის აქტიური რეგისტრაცია ვერ მოიძებნა.');
+
+        return back()->with('success', 'ღონისძიებაში მონაწილეობა გაუქმდა. ადგილი თავისუფალია სხვა მონაწილესთვის.');
+    }
+
     public function attendEvent(Request $request, int $event): RedirectResponse
     {
         $eventRow = DB::table('moto_events')->where('id', $event)->first();
