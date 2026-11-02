@@ -584,7 +584,7 @@ class ServiceCenterOperationsController extends Controller
             return back()->with('success', 'დამატებითი ნაწილი კლიენტს გაეგზავნა დასადასტურებლად. საწყობიდან ჩამოიწერება მხოლოდ თანხმობის შემდეგ.');
         }
 
-        app(\\App\\Services\\WorkOrderInventoryService::class)->attachPart(
+        app(\App\Services\WorkOrderInventoryService::class)->attachPart(
             $workOrder,
             (int) $data['inventory_item_id'],
             (int) $data['quantity'],
