@@ -24,4 +24,9 @@ class ServiceCenterSupplier extends Model
     {
         return $this->hasMany(ServiceCenterSupplierPayment::class, 'supplier_id');
     }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(ServiceCenterSupplierInvoice::class, 'supplier_id');
+    }
 }
