@@ -9,9 +9,9 @@ use Illuminate\Validation\ValidationException;
 
 class ServiceCenterStockService
 {
-    public function receive(ServiceCenter $center, ServiceCenterInventoryItem $item, int $quantity, float $unitCost, ?int $userId, ?string $note = null, ?int $supplierId = null, ?string $supplierReference = null): ServiceCenterInventoryItem
+    public function receive(ServiceCenter $center, ServiceCenterInventoryItem $item, int $quantity, float $unitCost, ?int $userId, ?string $note = null, ?int $supplierId = null, ?string $supplierReference = null, ?int $supplierInvoiceItemId = null): ServiceCenterInventoryItem
     {
-        return DB::transaction(function () use ($center, $item, $quantity, $unitCost, $userId, $note, $supplierId, $supplierReference) {
+        return DB::transaction(function () use ($center, $item, $quantity, $unitCost, $userId, $note, $supplierId, $supplierReference, $supplierInvoiceItemId) {
             $locked = ServiceCenterInventoryItem::where('service_center_id', $center->id)->whereKey($item->id)->lockForUpdate()->firstOrFail();
             if ($quantity < 1 || $unitCost < 0) {
                 throw ValidationException::withMessages(['quantity' => 'მიუთითე დადებითი რაოდენობა და სწორი თვითღირებულება.']);
@@ -31,6 +31,7 @@ class ServiceCenterStockService
                 'service_center_id' => $center->id,
                 'inventory_item_id' => $locked->id,
                 'supplier_id' => $supplierId,
+                'supplier_invoice_item_id' => $supplierInvoiceItemId,
                 'supplier_reference' => $supplierReference,
                 'user_id' => $userId,
                 'type' => 'in',
