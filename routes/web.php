@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MyServiceCenterController;
 use App\Http\Controllers\ServiceBookingController;
 use App\Http\Controllers\ServiceCenterController;
+use App\Http\Controllers\ServiceCenterOperationsController;
 use App\Http\Controllers\MyServiceBookingsController;
 use App\Http\Controllers\TransportController;
 use App\Http\Controllers\TransportPartnerController;
@@ -602,7 +603,7 @@ Route::post('/workshops1/{slug}/booking', [
 Route::get('/service-centers', [ServiceCenterController::class, 'index'])
     ->name('service-centers.index');
 
-Route::get('/service-work-orders/{token}', [\\App\\Http\\Controllers\\ServiceCenterOperationsController::class, 'customerStatus'])
+Route::get('/service-work-orders/{token}', [ServiceCenterOperationsController::class, 'customerStatus'])
     ->middleware('throttle:30,1')->name('service-centers.work-orders.status');
 
 Route::get('/service-centers/{serviceCenter:slug}', [
@@ -691,28 +692,28 @@ Route::get('/my-service-center/profile', [
     'availability',
 ])->name('service-centers.availability');   
 
-Route::get('/my-service-center/operations', [\\App\\Http\\Controllers\\ServiceCenterOperationsController::class, 'index'])
+Route::get('/my-service-center/operations', [ServiceCenterOperationsController::class, 'index'])
     ->name('my-service-center.operations');
 
-Route::post('/my-service-center/technicians', [\\App\\Http\\Controllers\\ServiceCenterOperationsController::class, 'storeTechnician'])
+Route::post('/my-service-center/technicians', [ServiceCenterOperationsController::class, 'storeTechnician'])
     ->name('my-service-center.technicians.store');
 
-Route::post('/my-service-center/bays', [\\App\\Http\\Controllers\\ServiceCenterOperationsController::class, 'storeBay'])
+Route::post('/my-service-center/bays', [ServiceCenterOperationsController::class, 'storeBay'])
     ->name('my-service-center.bays.store');
 
-Route::post('/my-service-center/inventory', [\\App\\Http\\Controllers\\ServiceCenterOperationsController::class, 'storeInventory'])
+Route::post('/my-service-center/inventory', [ServiceCenterOperationsController::class, 'storeInventory'])
     ->name('my-service-center.inventory.store');
 
-Route::patch('/my-service-center/work-orders/{workOrder}/assignment', [\\App\\Http\\Controllers\\ServiceCenterOperationsController::class, 'assign'])
+Route::patch('/my-service-center/work-orders/{workOrder}/assignment', [ServiceCenterOperationsController::class, 'assign'])
     ->whereNumber('workOrder')->name('my-service-center.work-orders.assignment');
 
-Route::post('/my-service-center/work-orders/{workOrder}/parts', [\\App\\Http\\Controllers\\ServiceCenterOperationsController::class, 'addPart'])
+Route::post('/my-service-center/work-orders/{workOrder}/parts', [ServiceCenterOperationsController::class, 'addPart'])
     ->whereNumber('workOrder')->name('my-service-center.work-orders.parts');
 
-Route::post('/my-service-center/work-orders/{workOrder}/payments', [\\App\\Http\\Controllers\\ServiceCenterOperationsController::class, 'payment'])
+Route::post('/my-service-center/work-orders/{workOrder}/payments', [ServiceCenterOperationsController::class, 'payment'])
     ->whereNumber('workOrder')->name('my-service-center.work-orders.payments');
 
-Route::post('/my-service-center/work-orders/{workOrder}/updates', [\\App\\Http\\Controllers\\ServiceCenterOperationsController::class, 'notify'])
+Route::post('/my-service-center/work-orders/{workOrder}/updates', [ServiceCenterOperationsController::class, 'notify'])
     ->whereNumber('workOrder')->name('my-service-center.work-orders.updates');
 
 Route::get(
