@@ -16,11 +16,45 @@ class CommunityController extends Controller
     public function index(Request $request): View
     {
         $userId = $request->user()?->id ?? 0;
-        $posts = CommunityPost::query()
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:100'],
+            'sort' => ['nullable', 'in:latest,popular'],
+            'filter' => ['nullable', 'in:all,mine,photos'],
+        ]);
+
+        $search = trim($filters['q'] ?? '');
+        $sort = $filters['sort'] ?? 'latest';
+        $filter = $filters['filter'] ?? 'all';
+
+        $postsQuery = CommunityPost::query()
             ->with(['user', 'motorcycle', 'comments.user'])
             ->withCount(['comments', 'likes'])
-            ->withExists(['likes as liked_by_me' => fn ($query) => $query->where('users.id', $userId)])
-            ->latest()->paginate(12)->withQueryString();
+            ->withExists(['likes as liked_by_me' => fn ($query) => $query->where('users.id', $userId)]);
+
+        if ($search !== '') {
+            $postsQuery->where(function ($query) use ($search) {
+                $query->where('body', 'like', "%{$search}%")
+                    ->orWhereHas('user', fn ($user) => $user->where('name', 'like', "%{$search}%"))
+                    ->orWhereHas('motorcycle', fn ($motorcycle) => $motorcycle
+                        ->where('title', 'like', "%{$search}%")
+                        ->orWhere('brand', 'like', "%{$search}%")
+                        ->orWhere('model', 'like', "%{$search}%"));
+            });
+        }
+
+        if ($filter === 'mine') {
+            $postsQuery->where('user_id', $userId);
+        } elseif ($filter === 'photos') {
+            $postsQuery->whereNotNull('image_path');
+        }
+
+        if ($sort === 'popular') {
+            $postsQuery->orderByDesc('likes_count')->orderByDesc('comments_count')->latest('id');
+        } else {
+            $postsQuery->latest();
+        }
+
+        $posts = $postsQuery->paginate(12)->withQueryString();
 
         $myMotorcycles = $request->user()
             ? Motorcycle::where('user_id', $userId)->where('status', 'published')->latest()->get()
@@ -29,7 +63,7 @@ class CommunityController extends Controller
         $notifications = $request->user()?->notifications()->latest()->limit(8)->get() ?? collect();
         $unreadNotifications = $request->user()?->unreadNotifications()->count() ?? 0;
 
-        return view('community.index', compact('posts', 'myMotorcycles', 'notifications', 'unreadNotifications'));
+        return view('community.index', compact('posts', 'myMotorcycles', 'notifications', 'unreadNotifications', 'search', 'sort', 'filter'));
     }
 
     public function store(Request $request, RewardsService $rewards): RedirectResponse
