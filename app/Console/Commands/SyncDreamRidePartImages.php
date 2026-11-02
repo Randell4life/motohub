@@ -51,12 +51,16 @@ class SyncDreamRidePartImages extends Command
                 // do not put the generic "product" class on the card element.
                 $titleNodes = $xpath->query(
                     "//*[contains(concat(' ', normalize-space(@class), ' '), ' woocommerce-loop-product__title ')"
-                    . " or contains(concat(' ', normalize-space(@class), ' '), ' product-title ')]"
+                    . " or contains(concat(' ', normalize-space(@class), ' '), ' product-title ')"
+                    . " or contains(concat(' ', normalize-space(@class), ' '), ' wd-entities-title ')]"
                 );
 
                 foreach ($titleNodes as $titleNode) {
                     $title = trim(preg_replace('/\\s+/u', ' ', $titleNode->textContent));
-                    $card = $xpath->query('ancestor::*[.//img][1]', $titleNode)->item(0);
+                    $card = $xpath->query(
+                        "ancestor::*[.//img and (contains(@class, 'product') or contains(@class, 'wd-'))][1]",
+                        $titleNode
+                    )->item(0) ?: $xpath->query('ancestor::*[.//img][1]', $titleNode)->item(0);
                     if (!$card) {
                         continue;
                     }
