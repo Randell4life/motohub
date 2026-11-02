@@ -154,50 +154,22 @@ public function index()
 
 public function updateStatus(Request $request, WorkOrder $workOrder)
 {
-    $center = ServiceCenter::where(
-        'owner_id',
-        auth()->id()
-    )->firstOrFail();
+    $center = ServiceCenter::where('owner_id', auth()->id())->firstOrFail();
     abort_unless($center->canUseFeature('work_orders'), 403, $center->featureLockedMessage('work_orders'));
-
-    // შეკვეთა აუცილებლად ამ სახელოსნოს უნდა ეკუთვნოდეს.
-    abort_unless(
-        $workOrder->service_center_id === $center->id,
-        404
-    );
+    abort_unless($workOrder->service_center_id === $center->id, 404);
 
     $validated = $request->validate([
-        'status' => [
-            'required',
-            'string',
-            'in:' . implode(',', WorkOrder::STATUSES),
-        ],
+        'status' => ['required', 'string', 'in:' . implode(',', WorkOrder::STATUSES)],
     ]);
 
-    $status = $validated['status'];
-    $previousStatus = $workOrder->status;
+    [$updatedOrder, $previousStatus] = app(\App\Services\WorkOrderLifecycle::class)
+        ->transition($workOrder, $validated['status']);
 
-    $workOrder->status = $status;
-
-    if ($status === 'completed' && !$workOrder->completed_at) {
-        $workOrder->completed_at = now();
-    }
-
-    if ($status === 'handed_over' && !$workOrder->handed_over_at) {
-        $workOrder->handed_over_at = now();
-
-        if (!$workOrder->completed_at) {
-            $workOrder->completed_at = now();
-        }
-    }
-
-    $workOrder->save();
-
-    if ($previousStatus !== $status) {
+    if ($previousStatus !== $updatedOrder->status) {
         [$title, $message] = app(\App\Services\ServiceCenterCustomerNotifier::class)
-            ->statusMessage($status, $workOrder->order_number);
+            ->statusMessage($updatedOrder->status, $updatedOrder->order_number);
         app(\App\Services\ServiceCenterCustomerNotifier::class)
-            ->send($workOrder, 'work_order_status_' . $status, $title, $message);
+            ->send($updatedOrder, 'work_order_status_' . $updatedOrder->status, $title, $message);
     }
 
     return redirect()

@@ -547,22 +547,25 @@ class MobileExtendedController extends Controller
         $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
         abort_unless($center->canUseFeature('work_orders'), 403, $center->featureLockedMessage('work_orders'));
         $order = \App\Models\WorkOrder::where('service_center_id', $center->id)->findOrFail($workOrder);
-        $data = $request->validate(['status'=>['required','in:received,diagnostics,waiting_for_parts,in_repair,completed,handed_over,cancelled']]);
-        $previousStatus = $order->status;
-        $changes = ['status'=>$data['status']];
-        if ($data['status']==='completed') $changes['completed_at']=now();
-        if ($data['status']==='handed_over') {
-            $changes['handed_over_at']=now();
-            if (!$order->completed_at) $changes['completed_at']=now();
-        }
-        $order->update($changes);
-        if ($previousStatus !== $data['status']) {
+        $data = $request->validate([
+            'status' => ['required', 'in:' . implode(',', \App\Models\WorkOrder::STATUSES)],
+        ]);
+
+        [$updatedOrder, $previousStatus] = app(\App\Services\WorkOrderLifecycle::class)
+            ->transition($order, $data['status']);
+
+        if ($previousStatus !== $updatedOrder->status) {
             [$title, $message] = app(\App\Services\ServiceCenterCustomerNotifier::class)
-                ->statusMessage($data['status'], $order->order_number);
+                ->statusMessage($updatedOrder->status, $updatedOrder->order_number);
             app(\App\Services\ServiceCenterCustomerNotifier::class)
-                ->send($order, 'work_order_status_' . $data['status'], $title, $message);
+                ->send($updatedOrder, 'work_order_status_' . $updatedOrder->status, $title, $message);
         }
-        return response()->json(['message'=>'შეკვეთის სტატუსი განახლდა.']);
+
+        return response()->json([
+            'message' => 'შეკვეთის სტატუსი განახლდა.',
+            'status' => $updatedOrder->status,
+            'status_label' => $updatedOrder->status_label,
+        ]);
     }
 
     public function workshopDashboard(Request $request)
