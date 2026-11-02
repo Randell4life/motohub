@@ -652,7 +652,7 @@ class MobileExtendedController extends Controller
 
     public function updateServiceCenterTechnicianPay(Request $request, int $technician)
     {
-        $center = \\App\\Models\\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
         abort_unless($center->canUseFeature('financial_reports'), 403, $center->featureLockedMessage('financial_reports'));
         $data = $request->validate([
             'pay_type' => ['required', 'in:percentage_labor,fixed_per_order'],
