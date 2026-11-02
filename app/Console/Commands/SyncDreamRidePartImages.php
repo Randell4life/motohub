@@ -21,9 +21,9 @@ class SyncDreamRidePartImages extends Command
         $limit = max(1, (int) $this->option('limit'));
         $base = 'https://dreamride.ge/product-category/motorcycle-parts-2/';
         $pages = [
-            $base . '?per_page=36&per_row=4&shop_view=grid',
-            $base . 'page/2/?per_page=36&per_row=4&shop_view=grid',
-            $base . 'page/3/?per_page=36&per_row=4&shop_view=grid',
+            $base,
+            $base . 'page/2/',
+            $base . 'page/3/',
         ];
 
         $catalogue = [];
@@ -46,21 +46,21 @@ class SyncDreamRidePartImages extends Command
                 libxml_use_internal_errors($previous);
                 $xpath = new DOMXPath($dom);
 
-                $cards = $xpath->query(
-                    "//*[contains(concat(' ', normalize-space(@class), ' '), ' product ')]"
+                // Find product titles first, then walk up to the nearest card
+                // containing an image. This works with WooCommerce themes that
+                // do not put the generic "product" class on the card element.
+                $titleNodes = $xpath->query(
+                    "//*[contains(concat(' ', normalize-space(@class), ' '), ' woocommerce-loop-product__title ')"
+                    . " or contains(concat(' ', normalize-space(@class), ' '), ' product-title ')]"
                 );
 
-                foreach ($cards as $card) {
-                    $titleNode = $xpath->query(
-                        ".//*[contains(@class, 'woocommerce-loop-product__title') or contains(@class, 'product-title')][1]",
-                        $card
-                    )->item(0);
-
-                    if (!$titleNode) {
+                foreach ($titleNodes as $titleNode) {
+                    $title = trim(preg_replace('/\\s+/u', ' ', $titleNode->textContent));
+                    $card = $xpath->query('ancestor::*[.//img][1]', $titleNode)->item(0);
+                    if (!$card) {
                         continue;
                     }
 
-                    $title = trim(preg_replace('/\\s+/u', ' ', $titleNode->textContent));
                     $imageNode = $xpath->query('.//img[1]', $card)->item(0);
                     if (!$imageNode) {
                         continue;
@@ -68,10 +68,13 @@ class SyncDreamRidePartImages extends Command
 
                     $imageUrl = $imageNode->getAttribute('data-src')
                         ?: $imageNode->getAttribute('data-lazy-src')
+                        ?: $imageNode->getAttribute('data-original')
                         ?: $imageNode->getAttribute('src');
 
                     if (!$imageUrl || str_starts_with($imageUrl, 'data:')) {
-                        $srcset = $imageNode->getAttribute('data-srcset') ?: $imageNode->getAttribute('srcset');
+                        $srcset = $imageNode->getAttribute('data-srcset')
+                            ?: $imageNode->getAttribute('data-lazy-srcset')
+                            ?: $imageNode->getAttribute('srcset');
                         if ($srcset) {
                             $candidate = trim(explode(' ', trim(explode(',', $srcset)[0]))[0]);
                             $imageUrl = $candidate;
