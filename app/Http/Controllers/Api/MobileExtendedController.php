@@ -408,6 +408,9 @@ class MobileExtendedController extends Controller
         $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
         $orders = \App\Models\WorkOrder::where('service_center_id', $center->id)
             ->with(['serviceBooking', 'technician', 'bay', 'parts.inventoryItem', 'payments'])->latest()->limit(60)->get();
+        $payroll = $center->technicianPayroll()->with(['technician', 'workOrder'])
+            ->whereBetween('earned_at', [now()->startOfMonth(), now()->endOfMonth()])
+            ->latest('earned_at')->get();
         return response()->json([
             'center' => $center->load(['services', 'hours']),
             'subscription_plans' => \App\Models\ServiceCenter::subscriptionPlans(),
@@ -419,6 +422,23 @@ class MobileExtendedController extends Controller
             'bays' => $center->bays()->orderBy('name')->get(),
             'inventory' => $center->inventory()->orderBy('name')->get(),
             'payments' => $center->payments()->with('workOrder')->latest('paid_at')->limit(40)->get(),
+            'technician_payroll' => [
+                'earned' => round((float) $payroll->sum('amount'), 2),
+                'pending' => round((float) $payroll->where('status', 'pending')->sum('amount'), 2),
+                'paid' => round((float) $payroll->where('status', 'paid')->sum('amount'), 2),
+                'entries' => $payroll->map(fn ($entry) => [
+                    'id' => $entry->id,
+                    'technician_id' => $entry->service_center_technician_id,
+                    'technician' => $entry->technician?->name,
+                    'order_number' => $entry->workOrder?->order_number,
+                    'rate_type' => $entry->rate_type,
+                    'rate_value' => (float) $entry->rate_value,
+                    'labor_base' => (float) $entry->labor_base,
+                    'amount' => (float) $entry->amount,
+                    'status' => $entry->status,
+                    'earned_at' => $entry->earned_at?->toISOString(),
+                ])->values(),
+            ],
         ]);
     }
 
@@ -429,6 +449,18 @@ class MobileExtendedController extends Controller
         $limit = $center->technicianLimit();
         abort_if($limit !== null && $center->technicians()->count() >= $limit, 422, 'შენი პაკეტის ლიმიტია '.$limit.' ხელოსანი.');
         $data = $request->validate(['name' => ['required','string','max:160'], 'phone' => ['nullable','string','max:40'], 'specialty' => ['nullable','string','max:160']]);
+        if ($center->canUseFeature('financial_reports')) {
+            $pay = $request->validate([
+                'pay_type' => ['required', 'in:percentage_labor,fixed_per_order'],
+                'pay_rate' => ['required', 'numeric', 'min:0', 'max:1000000'],
+            ]);
+            if ($pay['pay_type'] === 'percentage_labor' && (float) $pay['pay_rate'] > 100) {
+                throw ValidationException::withMessages(['pay_rate' => 'ხელობის პროცენტი 100%-ზე მეტი ვერ იქნება.']);
+            }
+            $data = [...$data, ...$pay];
+        } else {
+            $data = [...$data, 'pay_type' => 'percentage_labor', 'pay_rate' => 0];
+        }
         return response()->json(['message' => 'ხელოსანი დაემატა.', 'technician' => $center->technicians()->create($data)], 201);
     }
 
@@ -588,6 +620,9 @@ class MobileExtendedController extends Controller
         $billed = (float) $orders->sum(fn ($order) => (float) $order->total_cost);
         $expenseTotal = (float) $expenses->sum(fn ($expense) => (float) $expense->amount);
         $paid = (float) $payments->sum(fn ($payment) => (float) $payment->amount);
+        $payroll = $center->technicianPayroll()->with(['technician', 'workOrder'])
+            ->whereBetween('earned_at', [$from, $to])->latest('earned_at')->get();
+        $payrollTotal = (float) $payroll->sum('amount');
 
         return response()->json([
             'period' => ['from' => $from->toDateString(), 'to' => $to->toDateString()],
@@ -599,12 +634,77 @@ class MobileExtendedController extends Controller
                 'parts_cost' => round($partsCost, 2),
                 'expenses' => round($expenseTotal, 2),
                 'gross_profit' => round($billed - $partsCost, 2),
-                'net_profit' => round($billed - $partsCost - $expenseTotal, 2),
+                'net_profit' => round($billed - $partsCost - $expenseTotal - $payrollTotal, 2),
+                'technician_payroll' => round($payrollTotal, 2),
                 'outstanding' => round((float) $orders->sum(fn ($order) => max(0, (float) $order->total_cost - (float) $order->payments->sum('amount'))), 2),
             ],
             'expense_categories' => $expenses->groupBy('category')->map(fn ($items) => round((float) $items->sum('amount'), 2)),
             'recent_expenses' => $expenses->sortByDesc('expense_date')->take(30)->values(),
+            'technician_payroll' => [
+                'earned' => round((float) $payroll->sum('amount'), 2),
+                'pending' => round((float) $payroll->where('status', 'pending')->sum('amount'), 2),
+                'paid' => round((float) $payroll->where('status', 'paid')->sum('amount'), 2),
+                'by_technician' => $payroll->groupBy('service_center_technician_id')->map(function ($rows) {
+                    return [
+                        'technician' => $rows->first()->technician?->name,
+                        'completed_orders' => $rows->count(),
+                        'earned' => round((float) $rows->sum('amount'), 2),
+                        'pending' => round((float) $rows->where('status', 'pending')->sum('amount'), 2),
+                        'paid' => round((float) $rows->where('status', 'paid')->sum('amount'), 2),
+                    ];
+                })->values(),
+                'entries' => $payroll->map(fn ($entry) => [
+                    'id' => $entry->id,
+                    'technician' => $entry->technician?->name,
+                    'work_order_id' => $entry->work_order_id,
+                    'order_number' => $entry->workOrder?->order_number,
+                    'rate_type' => $entry->rate_type,
+                    'rate_value' => (float) $entry->rate_value,
+                    'labor_base' => (float) $entry->labor_base,
+                    'amount' => (float) $entry->amount,
+                    'status' => $entry->status,
+                    'earned_at' => $entry->earned_at?->toISOString(),
+                    'paid_at' => $entry->paid_at?->toISOString(),
+                ])->values(),
+            ],
         ]);
+    }
+
+    public function updateServiceCenterTechnicianPay(Request $request, int $technician)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('financial_reports'), 403, $center->featureLockedMessage('financial_reports'));
+        $data = $request->validate([
+            'pay_type' => ['required', 'in:percentage_labor,fixed_per_order'],
+            'pay_rate' => ['required', 'numeric', 'min:0', 'max:1000000'],
+        ]);
+        if ($data['pay_type'] === 'percentage_labor' && (float) $data['pay_rate'] > 100) {
+            throw ValidationException::withMessages(['pay_rate' => 'ხელობის პროცენტი 100%-ზე მეტი ვერ იქნება.']);
+        }
+        $record = $center->technicians()->findOrFail($technician);
+        $record->update($data);
+        return response()->json(['message' => 'ტარიფი განახლდა.', 'technician' => $record->fresh()]);
+    }
+
+    public function markServiceCenterPayrollPaid(Request $request, int $payroll)
+    {
+        $center = \App\Models\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('financial_reports'), 403, $center->featureLockedMessage('financial_reports'));
+
+        $entry = DB::transaction(function () use ($center, $payroll, $request) {
+            $locked = \App\Models\ServiceCenterTechnicianPayroll::where('service_center_id', $center->id)
+                ->lockForUpdate()->findOrFail($payroll);
+            if ($locked->status !== 'paid') {
+                $locked->update([
+                    'status' => 'paid',
+                    'paid_at' => now(),
+                    'paid_by' => $request->user()->id,
+                ]);
+            }
+            return $locked;
+        });
+
+        return response()->json(['message' => 'ანაზღაურება გადახდილად მოინიშნა.', 'status' => $entry->fresh()->status]);
     }
 
     public function storeServiceCenterExpense(Request $request)

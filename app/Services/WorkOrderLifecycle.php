@@ -67,6 +67,35 @@ class WorkOrderLifecycle
 
             $order->update($changes);
 
+            if ($nextStatus === 'completed' && $order->service_center_technician_id) {
+                $technician = \App\Models\ServiceCenterTechnician::query()
+                    ->where('service_center_id', $order->service_center_id)
+                    ->find($order->service_center_technician_id);
+
+                if ($technician && (float) $technician->pay_rate > 0) {
+                    $base = (float) $order->labor_cost;
+                    $rate = (float) $technician->pay_rate;
+                    $amount = match ($technician->pay_type) {
+                        'fixed_per_order' => $rate,
+                        default => round($base * $rate / 100, 2),
+                    };
+
+                    \App\Models\ServiceCenterTechnicianPayroll::firstOrCreate(
+                        ['work_order_id' => $order->id],
+                        [
+                            'service_center_id' => $order->service_center_id,
+                            'service_center_technician_id' => $technician->id,
+                            'rate_type' => $technician->pay_type,
+                            'rate_value' => $rate,
+                            'labor_base' => $base,
+                            'amount' => $amount,
+                            'status' => 'pending',
+                            'earned_at' => $order->completed_at ?? now(),
+                        ]
+                    );
+                }
+            }
+
             if ($nextStatus === 'handed_over' && $order->serviceBooking) {
                 $order->serviceBooking()->update(['status' => 'completed']);
             }

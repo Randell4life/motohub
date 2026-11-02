@@ -690,9 +690,13 @@ Route::get('/my-service-center/finance', [\App\Http\Controllers\ServiceCenterOpe
     ->name('my-service-center.finance');
 Route::post('/my-service-center/expenses', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'storeExpense'])
     ->middleware('throttle:20,1')->name('my-service-center.expenses.store');
+Route::patch('/my-service-center/technician-payroll/{payroll}/paid', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'markTechnicianPayrollPaid'])
+    ->whereNumber('payroll')->middleware('throttle:20,1')->name('my-service-center.technician-payroll.paid');
 
 Route::post('/my-service-center/technicians', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'storeTechnician'])
     ->name('my-service-center.technicians.store');
+Route::patch('/my-service-center/technicians/{technician}/pay', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'updateTechnicianPay'])
+    ->whereNumber('technician')->name('my-service-center.technicians.pay');
 
 Route::post('/my-service-center/bays', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'storeBay'])
     ->name('my-service-center.bays.store');

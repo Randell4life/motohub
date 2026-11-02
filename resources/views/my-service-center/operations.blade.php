@@ -97,8 +97,21 @@
 </section>
 
 <div class="ops-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">
- <section class="ops-section"><h3>ხელოსნის დამატება</h3><form class="ops-form" method="POST" action="{{ route('my-service-center.technicians.store') }}">@csrf<input name="name" required placeholder="სახელი და გვარი"><input name="phone" placeholder="ტელეფონი"><input name="specialty" placeholder="სპეციალიზაცია"><button>დამატება</button></form>
- @foreach($technicians as $tech)<p class="ops-muted">{{ $tech->name }} · {{ $tech->specialty ?? 'სპეციალიზაცია არაა' }}</p>@endforeach</section>
+ <section class="ops-section"><h3>ხელოსნის დამატება</h3><form class="ops-form" method="POST" action="{{ route('my-service-center.technicians.store') }}">@csrf
+ <input name="name" required placeholder="სახელი და გვარი"><input name="phone" placeholder="ტელეფონი"><input name="specialty" placeholder="სპეციალიზაცია">
+ @if($center->canUseFeature('financial_reports'))
+ <select name="pay_type" required><option value="percentage_labor">ხელობის პროცენტი</option><option value="fixed_per_order">ფიქსირებული თანხა შეკვეთაზე</option></select>
+ <input name="pay_rate" type="number" min="0" max="1000000" step=".01" value="0" required placeholder="ანაზღაურება (% ან ₾)">
+ @endif
+ <button>დამატება</button></form>
+ @foreach($technicians as $tech)<p class="ops-muted">{{ $tech->name }} · {{ $tech->specialty ?? 'სპეციალიზაცია არაა' }}
+ @if($center->canUseFeature('financial_reports'))
+ · {{ $tech->pay_type === 'fixed_per_order' ? number_format((float)$tech->pay_rate,2).' ₾ / შეკვეთა' : number_format((float)$tech->pay_rate,2).'% ხელობიდან' }}
+ <form method="POST" action="{{ route('my-service-center.technicians.pay',$tech) }}" class="ops-inline" style="margin-top:7px">@csrf @method('PATCH')
+ <select name="pay_type"><option value="percentage_labor" @selected($tech->pay_type==='percentage_labor')>ხელობის პროცენტი</option><option value="fixed_per_order" @selected($tech->pay_type==='fixed_per_order')>ფიქსირებული / შეკვეთა</option></select>
+ <input type="number" name="pay_rate" min="0" max="1000000" step=".01" value="{{ $tech->pay_rate }}" required>
+ <button>ტარიფის შენახვა</button></form>
+ @else · ანაზღაურების მოდული BUSINESS პაკეტშია @endif</p>@endforeach</section>
  <section class="ops-section"><h3>სამუშაო ბოქსის დამატება</h3><form class="ops-form" method="POST" action="{{ route('my-service-center.bays.store') }}">@csrf<input name="name" required placeholder="მაგ. ბოქსი №1"><input name="description" placeholder="აღწერა"><button>დამატება</button></form>
  @foreach($bays as $bay)<p class="ops-muted">{{ $bay->name }}</p>@endforeach</section>
 </div>

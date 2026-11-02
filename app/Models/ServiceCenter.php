@@ -130,6 +130,11 @@ class ServiceCenter extends Model
         return $this->hasMany(ServiceCenterTechnician::class);
     }
 
+    public function technicianPayroll(): HasMany
+    {
+        return $this->hasMany(ServiceCenterTechnicianPayroll::class);
+    }
+
     public function bays(): HasMany
     {
         return $this->hasMany(ServiceCenterBay::class);

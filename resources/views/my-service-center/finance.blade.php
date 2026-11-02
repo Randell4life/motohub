@@ -23,7 +23,8 @@
 .fin-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .fin-form button{align-self:end}
 .fin-tag{display:inline-block;padding:4px 8px;border:1px solid #2b5685;border-radius:30px;background:#102541;color:#8fc8ff;font-size:10px}
-.fin-note{padding:12px 14px;border:1px solid #344a64;border-radius:9px;background:#0a1421;color:#a9bad0;font-size:11px;line-height:1.8}
+ .fin-note{padding:12px 14px;border:1px solid #344a64;border-radius:9px;background:#0a1421;color:#a9bad0;font-size:11px;line-height:1.8}
+@media print{body{background:#fff!important;color:#111!important}.mh-sidebar,.mh-topbar,.fin-filter,.fin-form,.fin-no-print,button{display:none!important}.mh-main,.mh-content,.mh-page{margin:0!important;padding:0!important;width:100%!important}.fin-section,.fin-card,.fin-hero{background:#fff!important;color:#111!important;border:1px solid #bbb!important;break-inside:avoid}.fin-muted,.fin-card small,.fin-note{color:#333!important}.fin-table th,.fin-table td{color:#111!important;border-color:#bbb!important}.fin-positive,.fin-negative,.fin-blue{color:#111!important}.fin-grid{grid-template-columns:repeat(3,1fr)!important}}
 @media(max-width:900px){.fin-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.fin-grid,.fin-form{grid-template-columns:1fr}.fin-section{padding:14px}.fin-filter>*{flex:1 1 130px}}
 </style>
@@ -31,6 +32,7 @@
 <section class="fin-hero">
  <div style="display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;align-items:flex-start">
   <div><div class="fin-tag">FINANCIAL CONTROL</div><h2 style="margin:10px 0 5px;font-size:23px">ფინანსური შედეგები</h2><p class="fin-muted" style="margin:0">პერიოდი: {{ $from->format('d.m.Y') }} — {{ $to->format('d.m.Y') }}</p></div>
+  <div class="fin-no-print"><button type="button" class="fin-btn" onclick="window.print()">PDF / ბეჭდვა</button></div>
   <form method="GET" action="{{ route('my-service-center.finance') }}" class="fin-filter">
    <label>დან<input type="date" name="from" value="{{ $from->toDateString() }}" required></label>
    <label>მდე<input type="date" name="to" value="{{ $to->toDateString() }}" required></label>
@@ -47,11 +49,12 @@
  <div class="fin-card"><small>ხელობის შემოსავალი</small><strong>{{ number_format($laborRevenue,2) }} ₾</strong><div class="fin-muted">შეკვეთების ხელობის ღირებულება</div></div>
  <div class="fin-card"><small>ნაწილების გაყიდვა</small><strong>{{ number_format($partsRevenue,2) }} ₾</strong><div class="fin-muted">კლიენტისთვის დარიცხული</div></div>
  <div class="fin-card"><small>მთლიანი მოგება ნაწილების შემდეგ</small><strong class="{{ $grossProfit >= 0 ? 'fin-positive' : 'fin-negative' }}">{{ number_format($grossProfit,2) }} ₾</strong><div class="fin-muted">შემოსავალი მინუს ნაწილების თვითღირებულება</div></div>
+ <div class="fin-card"><small>ხელოსნების ანაზღაურება</small><strong class="fin-negative">{{ number_format($payrollTotal,2) }} ₾</strong><div class="fin-muted">ავტომატური დარიცხვა დასრულებული შეკვეთებიდან</div></div>
  <div class="fin-card"><small>საერთო ხარჯები</small><strong class="fin-negative">{{ number_format($expenseTotal,2) }} ₾</strong><div class="fin-muted">ხელით აღრიცხული ხარჯები</div></div>
  <div class="fin-card"><small>სავარაუდო წმინდა შედეგი</small><strong class="{{ $netProfit >= 0 ? 'fin-positive' : 'fin-negative' }}">{{ number_format($netProfit,2) }} ₾</strong><div class="fin-muted">დარიცხული შემოსავალი − ნაწილების თვითღირებულება − ხარჯები</div></div>
 </div>
 
-<div class="fin-note">ანგარიში ითვლის დარიცხულ შემოსავალს იმ სამუშაო შეკვეთებიდან, რომლებიც არჩეულ პერიოდში შეიქმნა. ნაწილების თვითღირებულება ითვლება საწყობის გაცემის ჩანაწერებიდან. ხელოსნის ანაზღაურება და სხვა საოპერაციო ხარჯები უნდა აღრიცხო ქვემოთ. დაუფიქსირებელი ხარჯები მოგებაში არ აისახება; ეს არის აღრიცხული მონაცემების საფუძველზე მიღებული შედეგი და არა საბუღალტრო/საგადასახადო დეკლარაცია.</div>
+<div class="fin-note">ანგარიში ითვლის არჩეულ პერიოდში შექმნილ შეკვეთებს. წმინდა შედეგიდან ცალკე აკლდება ავტომატურად დარიცხული ხელოსნის ანაზღაურება და ქვემოთ ხელით აღრიცხული საოპერაციო ხარჯები. ერთი და იგივე ხელოსნის ანაზღაურება აღარ უნდა შეიყვანო მეორედ ხელით ხარჯებში. დაუფიქსირებელი ხარჯები მოგებაში არ აისახება; ეს არ არის საგადასახადო დეკლარაცია.</div>
 
 <section class="fin-section">
  <h3>ახალი ხარჯის აღრიცხვა</h3>
@@ -75,8 +78,31 @@
 </section>
 
 <section class="fin-section">
+ <h3>ხელოსნების პროდუქტიულობა</h3>
+ <div class="fin-grid">
+  <div class="fin-card"><small>დარიცხული ანაზღაურება</small><strong>{{ number_format($payrollTotal,2) }} ₾</strong></div>
+  <div class="fin-card"><small>გადასახდელი ხელოსნებს</small><strong class="fin-negative">{{ number_format($payrollPending,2) }} ₾</strong></div>
+  <div class="fin-card"><small>უკვე გადახდილი</small><strong class="fin-positive">{{ number_format($payrollPaid,2) }} ₾</strong></div>
+ </div>
+ <div class="fin-table-wrap"><table class="fin-table"><thead><tr><th>ხელოსანი</th><th>დასრულებული შეკვეთები</th><th>ხელობის ბაზა</th><th>დარიცხული</th><th>გადახდილი</th><th>დარჩენილი</th></tr></thead><tbody>
+ @forelse($technicianPerformance as $row)
+ <tr><td><strong>{{ $row['technician']?->name ?? 'ხელოსანი წაშლილია' }}</strong></td><td>{{ $row['completed_orders'] }}</td><td>{{ number_format($row['labor_base'],2) }} ₾</td><td>{{ number_format($row['earned'],2) }} ₾</td><td>{{ number_format($row['paid'],2) }} ₾</td><td>{{ number_format($row['pending'],2) }} ₾</td></tr>
+ @empty<tr><td colspan="6" class="fin-muted">არჩეულ პერიოდში დასრულებული შეკვეთები ან დარიცხული ანაზღაურება ჯერ არ არის.</td></tr>@endforelse
+ </tbody></table></div>
+</section>
+
+<section class="fin-section">
+ <h3>ხელოსნის ანაზღაურების რეესტრი</h3>
+ <div class="fin-table-wrap"><table class="fin-table"><thead><tr><th>თარიღი</th><th>ხელოსანი / შეკვეთა</th><th>ტარიფი</th><th>ხელობის ბაზა</th><th>ანაზღაურება</th><th>სტატუსი</th><th class="fin-no-print">მოქმედება</th></tr></thead><tbody>
+ @forelse($payroll as $entry)
+ <tr><td>{{ $entry->earned_at?->format('d.m.Y') }}</td><td>{{ $entry->technician?->name ?? 'ხელოსანი წაშლილია' }}<div class="fin-muted">{{ $entry->workOrder?->order_number }}</div></td><td>{{ $entry->rate_type === 'fixed_per_order' ? number_format((float)$entry->rate_value,2).' ₾ / შეკვეთა' : number_format((float)$entry->rate_value,2).'% ხელობიდან' }}</td><td>{{ number_format((float)$entry->labor_base,2) }} ₾</td><td><strong>{{ number_format((float)$entry->amount,2) }} ₾</strong></td><td>{{ $entry->status === 'paid' ? 'გადახდილია' : 'გადასახდელია' }} @if($entry->paid_at)<div class="fin-muted">{{ $entry->paid_at->format('d.m.Y H:i') }}</div>@endif</td><td class="fin-no-print">@if($entry->status !== 'paid')<form method="POST" action="{{ route('my-service-center.technician-payroll.paid',$entry) }}">@csrf @method('PATCH')<button class="fin-btn">გადახდილად მონიშვნა</button></form>@else — @endif</td></tr>
+ @empty<tr><td colspan="7" class="fin-muted">ანაზღაურება ჯერ არ დარიცხულა. დარიცხვა ხდება შეკვეთის დასრულებისას, თუ ხელოსანს ტარიფი აქვს მითითებული.</td></tr>@endforelse
+ </tbody></table></div>
+</section>
+
+<section class="fin-section">
  <h3>შეკვეთების მოგებიანობა</h3>
- <div class="fin-table-wrap"><table class="fin-table"><thead><tr><th>შეკვეთა / კლიენტი</th><th>სტატუსი</th><th>დარიცხული</th><th>ნაწილების თვითღ.</th><th>პირდაპირი ხარჯი</th><th>გადახდილი</th><th>სავარაუდო მოგება</th></tr></thead><tbody>
+ <div class="fin-table-wrap"><table class="fin-table"><thead><tr><th>შეკვეთა / კლიენტი</th><th>სტატუსი</th><th>დარიცხული</th><th>ნაწილების თვითღ.</th><th>პირდაპირი ხარჯი</th><th>ხელოსნის ანაზღ.</th><th>გადახდილი</th><th>სავარაუდო მოგება</th></tr></thead><tbody>
  @forelse($orderProfitability as $row)
  <tr>
   <td><strong>{{ $row['order']->order_number }}</strong><div class="fin-muted">{{ $row['order']->serviceBooking?->customer_name ?? '—' }} · {{ $row['order']->serviceBooking?->motorcycle ?? '—' }}</div></td>
@@ -84,10 +110,11 @@
   <td>{{ number_format((float)$row['order']->total_cost,2) }} ₾</td>
   <td>{{ number_format($row['parts_cost'],2) }} ₾</td>
   <td>{{ number_format($row['direct_expenses'],2) }} ₾</td>
+  <td>{{ number_format($row['technician_payroll'],2) }} ₾</td>
   <td>{{ number_format($row['paid'],2) }} ₾</td>
   <td class="{{ $row['profit'] >= 0 ? 'fin-positive' : 'fin-negative' }}"><strong>{{ number_format($row['profit'],2) }} ₾</strong></td>
  </tr>
- @empty<tr><td colspan="7" class="fin-muted">არჩეულ პერიოდში შეკვეთები არ არის.</td></tr>@endforelse
+ @empty<tr><td colspan="8" class="fin-muted">არჩეულ პერიოდში შეკვეთები არ არის.</td></tr>@endforelse
  </tbody></table></div>
 </section>
 
