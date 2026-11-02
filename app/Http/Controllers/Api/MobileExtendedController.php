@@ -146,10 +146,44 @@ class MobileExtendedController extends Controller
     public function community(Request $request)
     {
         $userId = $request->user()->id;
-        $posts = CommunityPost::with(['user:id,name,avatar_path', 'motorcycle:id,title,brand,model', 'comments.user:id,name,avatar_path'])
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:100'],
+            'sort' => ['nullable', 'in:latest,popular'],
+            'filter' => ['nullable', 'in:all,mine,photos'],
+        ]);
+
+        $search = trim($filters['q'] ?? '');
+        $sort = $filters['sort'] ?? 'latest';
+        $filter = $filters['filter'] ?? 'all';
+
+        $query = CommunityPost::with(['user:id,name,avatar_path', 'motorcycle:id,title,brand,model', 'comments.user:id,name,avatar_path'])
             ->withCount(['comments', 'likes'])
-            ->withExists(['likes as liked_by_me' => fn ($q) => $q->where('users.id', $userId)])
-            ->latest()->paginate(20);
+            ->withExists(['likes as liked_by_me' => fn ($q) => $q->where('users.id', $userId)]);
+
+        if ($search !== '') {
+            $query->where(function ($builder) use ($search) {
+                $builder->where('body', 'like', "%{$search}%")
+                    ->orWhereHas('user', fn ($user) => $user->where('name', 'like', "%{$search}%"))
+                    ->orWhereHas('motorcycle', fn ($motorcycle) => $motorcycle
+                        ->where('title', 'like', "%{$search}%")
+                        ->orWhere('brand', 'like', "%{$search}%")
+                        ->orWhere('model', 'like', "%{$search}%"));
+            });
+        }
+
+        if ($filter === 'mine') {
+            $query->where('user_id', $userId);
+        } elseif ($filter === 'photos') {
+            $query->whereNotNull('image_path');
+        }
+
+        if ($sort === 'popular') {
+            $query->orderByDesc('likes_count')->orderByDesc('comments_count')->latest('id');
+        } else {
+            $query->latest();
+        }
+
+        $posts = $query->paginate(20)->withQueryString();
         $posts->getCollection()->transform(function ($post) { $post->image_url = $post->image_path ? Storage::disk('public')->url($post->image_path) : null; return $post; });
         return response()->json($posts);
     }
