@@ -703,6 +703,10 @@ Route::post('/my-service-center/bays', [\App\Http\Controllers\ServiceCenterOpera
 
 Route::post('/my-service-center/inventory', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'storeInventory'])
     ->name('my-service-center.inventory.store');
+Route::post('/my-service-center/inventory/{item}/receive', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'receiveInventory'])
+    ->whereNumber('item')->name('my-service-center.inventory.receive');
+Route::post('/my-service-center/inventory/{item}/adjust', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'adjustInventory'])
+    ->whereNumber('item')->name('my-service-center.inventory.adjust');
 
 Route::patch('/my-service-center/work-orders/{workOrder}/assignment', [\App\Http\Controllers\ServiceCenterOperationsController::class, 'assign'])
     ->whereNumber('workOrder')->name('my-service-center.work-orders.assignment');
