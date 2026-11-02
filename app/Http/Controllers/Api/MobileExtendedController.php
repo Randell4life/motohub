@@ -588,6 +588,8 @@ class MobileExtendedController extends Controller
         $billed = (float) $orders->sum(fn ($order) => (float) $order->total_cost);
         $expenseTotal = (float) $expenses->sum(fn ($expense) => (float) $expense->amount);
         $paid = (float) $payments->sum(fn ($payment) => (float) $payment->amount);
+        $payroll = $center->technicianPayroll()->with('technician')
+            ->whereBetween('earned_at', [$from, $to])->latest('earned_at')->get();
 
         return response()->json([
             'period' => ['from' => $from->toDateString(), 'to' => $to->toDateString()],
@@ -604,7 +606,48 @@ class MobileExtendedController extends Controller
             ],
             'expense_categories' => $expenses->groupBy('category')->map(fn ($items) => round((float) $items->sum('amount'), 2)),
             'recent_expenses' => $expenses->sortByDesc('expense_date')->take(30)->values(),
+            'technician_payroll' => [
+                'earned' => round((float) $payroll->sum('amount'), 2),
+                'pending' => round((float) $payroll->where('status', 'pending')->sum('amount'), 2),
+                'paid' => round((float) $payroll->where('status', 'paid')->sum('amount'), 2),
+                'by_technician' => $payroll->groupBy('service_center_technician_id')->map(function ($rows) {
+                    return [
+                        'technician' => $rows->first()->technician?->name,
+                        'completed_orders' => $rows->count(),
+                        'earned' => round((float) $rows->sum('amount'), 2),
+                        'pending' => round((float) $rows->where('status', 'pending')->sum('amount'), 2),
+                        'paid' => round((float) $rows->where('status', 'paid')->sum('amount'), 2),
+                    ];
+                })->values(),
+                'entries' => $payroll->map(fn ($entry) => [
+                    'id' => $entry->id,
+                    'technician' => $entry->technician?->name,
+                    'work_order_id' => $entry->work_order_id,
+                    'amount' => (float) $entry->amount,
+                    'status' => $entry->status,
+                    'earned_at' => $entry->earned_at?->toISOString(),
+                    'paid_at' => $entry->paid_at?->toISOString(),
+                ])->values(),
+            ],
         ]);
+    }
+
+    public function markServiceCenterPayrollPaid(Request $request, int $payroll)
+    {
+        $center = \\App\\Models\\ServiceCenter::where('owner_id', $request->user()->id)->firstOrFail();
+        abort_unless($center->canUseFeature('financial_reports'), 403, $center->featureLockedMessage('financial_reports'));
+
+        $entry = \\App\\Models\\ServiceCenterTechnicianPayroll::where('service_center_id', $center->id)
+            ->lockForUpdate()->findOrFail($payroll);
+        if ($entry->status !== 'paid') {
+            $entry->update([
+                'status' => 'paid',
+                'paid_at' => now(),
+                'paid_by' => $request->user()->id,
+            ]);
+        }
+
+        return response()->json(['message' => 'ანაზღაურება გადახდილად მოინიშნა.', 'status' => $entry->fresh()->status]);
     }
 
     public function storeServiceCenterExpense(Request $request)
