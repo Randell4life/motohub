@@ -14,6 +14,7 @@ use App\Models\ServiceCenterWorkOrderPart;
 use App\Models\WorkOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 
 class ServiceCenterOperationsController extends Controller
@@ -370,7 +371,7 @@ class ServiceCenterOperationsController extends Controller
         abort_unless($center->canUseFeature('inventory'), 403, $center->featureLockedMessage('inventory'));
         $data = $request->validate([
             'supplier_id' => ['required', 'integer', 'exists:service_center_suppliers,id'],
-            'invoice_number' => ['required', 'string', 'max:120'],
+            'invoice_number' => ['required', 'string', 'max:120', Rule::unique('service_center_supplier_invoices', 'invoice_number')->where(fn ($query) => $query->where('supplier_id', $request->input('supplier_id')))],
             'issue_date' => ['required', 'date'],
             'due_date' => ['nullable', 'date', 'after_or_equal:issue_date'],
             'total_amount' => ['required', 'numeric', 'gt:0', 'max:999999999'],
