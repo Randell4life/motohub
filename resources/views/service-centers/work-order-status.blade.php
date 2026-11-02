@@ -56,6 +56,24 @@ $isCancelled = $order->status === 'cancelled';
 @endif
 </section>
 @endif
+<section class="panel"><h2>ხარჯთაღრიცხვის ისტორია</h2>
+@forelse($order->quoteRevisions as $revision)
+<div class="line">
+ <div class="muted">ვერსია #{{ $revision->revision_number }} · {{ $revision->type === 'initial' ? 'საწყისი შეთავაზება' : 'დამატებითი ხარჯი' }} · {{ $revision->sent_at?->format('d.m.Y H:i') }}</div>
+ <strong>{{ number_format((float)$revision->total_cost,2) }} ₾</strong>
+ <div class="muted">ხელობა {{ number_format((float)$revision->labor_cost,2) }} ₾ · ნაწილები {{ number_format((float)$revision->parts_cost,2) }} ₾ · {{ match($revision->status) { 'approved' => 'დადასტურებულია', 'declined' => 'უარყოფილია', default => 'პასუხს ელოდება' } }}</div>
+ @if($revision->status === 'pending')
+ <form method="POST" action="{{ route('service-centers.work-orders.approval',$order->public_token) }}" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+ @csrf
+ <button name="decision" value="approved" style="padding:11px 16px;border:0;border-radius:9px;background:#1677ff;color:white;font-weight:700">ვეთანხმები</button>
+ <button name="decision" value="declined" style="padding:11px 16px;border:1px solid #52647a;border-radius:9px;background:#172233;color:#f3f7ff">არ ვეთანხმები</button>
+ </form>
+ @endif
+</div>
+@empty
+<p class="muted">ხარჯთაღრიცხვის ისტორია ჯერ ცარიელია.</p>
+@endforelse
+</section>
 <section class="panel"><h2>ნაწილები</h2>@forelse($order->parts as $part)<div class="line">{{ $part->inventoryItem->name }} · {{ $part->quantity }} ც. · {{ number_format((float)$part->total,2) }} ₾</div>@empty<p class="muted">ნაწილები ჯერ არ არის დამატებული.</p>@endforelse</section>
 <section class="panel"><h2>გადახდები</h2><div class="grid"><div><small>გადახდილი</small><strong>{{ number_format((float)$order->payments->sum('amount'),2) }} ₾</strong></div><div><small>დარჩენილი</small><strong>{{ number_format(max(0,(float)$order->total_cost-(float)$order->payments->sum('amount')),2) }} ₾</strong></div><div><small>სერვის ცენტრი</small><strong>{{ $order->serviceCenter->phone }}</strong></div></div></section>
 <section class="panel"><h2>განახლებები</h2>@forelse($order->activityLogs()->latest()->get() as $log)<div class="line"><div class="muted">{{ $log->created_at->format('d.m.Y H:i') }}</div>{{ $log->message }}</div>@empty<p class="muted">განახლებები ჯერ არ არის.</p>@endforelse</section>
