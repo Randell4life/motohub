@@ -619,10 +619,8 @@ class MobileExtendedController extends Controller
         abort_unless($center->canUseFeature('bookings'), 403, $center->featureLockedMessage('bookings'));
         $item = $center->bookings()->findOrFail($booking);
         $data = $request->validate(['status'=>['required','in:confirmed,declined,cancelled,completed']]);
-        DB::transaction(function () use ($item, $data) {
-            $item->update($data);
-            if (in_array($data['status'], ['declined', 'cancelled'], true)) app(\App\Services\RewardsCheckout::class)->refundServiceBooking($item);
-        });
+        app(\App\Services\ServiceBookingAutomation::class)
+            ->updateStatus($item, $data['status']);
         return response()->json(['message'=>'ჯავშნის სტატუსი განახლდა.']);
     }
 
