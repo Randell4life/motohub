@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\\ServiceCenter;
-use App\Models\\ServiceCenterInventoryItem;
-use Illuminate\Support\Facades\\DB;
+use App\Models\ServiceCenter;
+use App\Models\ServiceCenterInventoryItem;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class ServiceCenterStockService
