@@ -515,7 +515,7 @@
     @elseif($workOrder->customer_approval_status === 'declined')
         <div class="od-empty">კლიენტმა ხარჯთაღრიცხვა უარყო. შეგიძლიათ განაახლოთ და ხელახლა გაუგზავნოთ.</div>
     @endif
-    @if(!in_array($workOrder->status, ['completed','handed_over','cancelled']))
+    @if(!in_array($workOrder->status, ['in_repair','completed','handed_over','cancelled']))
     <form method="POST" action="{{ route('my-service-center.work-orders.quote', $workOrder) }}">
         @csrf
         <label class="od-muted">დიაგნოსტიკის შედეგი</label>
