@@ -584,27 +584,12 @@ class ServiceCenterOperationsController extends Controller
             return back()->with('success', 'დამატებითი ნაწილი კლიენტს გაეგზავნა დასადასტურებლად. საწყობიდან ჩამოიწერება მხოლოდ თანხმობის შემდეგ.');
         }
 
-        DB::transaction(function () use ($center, $workOrder, $data) {
-            $lockedOrder = WorkOrder::whereKey($workOrder->id)->where('service_center_id', $center->id)->lockForUpdate()->firstOrFail();
-            $item = $center->inventory()->whereKey($data['inventory_item_id'])->lockForUpdate()->firstOrFail();
-            $quantity = (int) $data['quantity'];
-            if ($item->quantity < $quantity) {
-                throw \Illuminate\Validation\ValidationException::withMessages(['quantity' => 'საწყობში საკმარისი რაოდენობა არ არის.']);
-            }
-            $line = ServiceCenterWorkOrderPart::firstOrNew(['work_order_id' => $lockedOrder->id, 'inventory_item_id' => $item->id]);
-            $line->quantity = ($line->exists ? $line->quantity : 0) + $quantity;
-            $line->unit_price = $item->sale_price;
-            $line->total = $line->quantity * $item->sale_price;
-            $line->save();
-            $item->decrement('quantity', $quantity);
-            DB::table('service_center_inventory_movements')->insert([
-                'service_center_id' => $center->id, 'inventory_item_id' => $item->id, 'work_order_id' => $workOrder->id,
-                'user_id' => auth()->id(), 'type' => 'out', 'quantity' => $quantity, 'unit_cost' => $item->cost_price,
-                'note' => 'სამუშაო შეკვეთა '.$workOrder->order_number, 'created_at' => now(), 'updated_at' => now(),
-            ]);
-            $partsTotal = $lockedOrder->parts()->sum('total');
-            $lockedOrder->update(['parts_cost' => $partsTotal, 'total_cost' => (float) $lockedOrder->labor_cost + (float) $partsTotal]);
-        });
+        app(\\App\\Services\\WorkOrderInventoryService::class)->attachPart(
+            $workOrder,
+            (int) $data['inventory_item_id'],
+            (int) $data['quantity'],
+            auth()->id(),
+        );
         return back()->with('success', 'ნაწილი შეკვეთას მიება და საწყობიდან ჩამოიწერა.');
     }
 
