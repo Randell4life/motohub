@@ -152,6 +152,7 @@
  <div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>თარიღი</th><th>მომწოდებელი</th><th>თანხა</th><th>მეთოდი</th><th>რეფერენსი</th></tr></thead><tbody>
  @forelse($supplierPaymentHistory as $payment)<tr><td>{{ $payment->paid_at?->format('d.m.Y H:i') }}</td><td>{{ $payment->supplier?->name ?? '—' }}</td><td>{{ number_format((float)$payment->amount,2) }} ₾</td><td>{{ $payment->method }}</td><td>{{ $payment->reference ?? '—' }}</td></tr>@empty<tr><td colspan="5" class="ops-muted">გადახდების ისტორია ჯერ ცარიელია.</td></tr>@endforelse
  </tbody></table></div>
+ <p class="ops-muted">ინვოისი ინახება დოკუმენტურ რეესტრში. მომწოდებლის დავალიანება კვლავ საწყობში მომწოდებელზე მიბმული მიღებებით ითვლება, რათა ერთი შესყიდვა ორჯერ არ დაითვალოს.</p>
  <h4 style="margin-top:20px">ინვოისის რეგისტრაცია</h4>
  <form class="ops-form" method="POST" enctype="multipart/form-data" action="{{ route('my-service-center.supplier-invoices.store') }}">@csrf
   <select name="supplier_id" required><option value="">აირჩიე მომწოდებელი</option>@foreach($suppliers as $supplier)<option value="{{ $supplier->id }}">{{ $supplier->name }}</option>@endforeach</select>
