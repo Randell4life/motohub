@@ -199,7 +199,7 @@ class ServiceCenterOperationsController extends Controller
             $amount = round((float) $data['amount'], 2);
 
             if ($due <= 0 || $amount > $due) {
-                throw \\Illuminate\\Validation\\ValidationException::withMessages([
+                throw \Illuminate\Validation\ValidationException::withMessages([
                     'amount' => 'გადასახდელ ნაშთზე მეტი თანხა არ შეიძლება.',
                 ]);
             }
