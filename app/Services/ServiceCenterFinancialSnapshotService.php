@@ -111,6 +111,11 @@ class ServiceCenterFinancialSnapshotService
             ->filter(fn (array $supplier) => $supplier['invoice_count'] > 0 || $supplier['direct_debt'] > 0)
             ->values();
 
+        // Keep supplier-level balances isolated: an overpayment to one supplier
+        // must not offset another supplier's outstanding balance.
+        $directDebt = (float) $supplierBalances->sum('direct_debt');
+        $invoiceDebt = (float) $supplierBalances->sum('invoice_debt');
+
         return [
             'inventory_value' => round($inventoryValue, 2),
             'supplier_invoice_debt' => round($invoiceDebt, 2),
