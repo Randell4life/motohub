@@ -124,6 +124,11 @@ class WorkOrder extends Model
         return $this->belongsTo(ServiceCenterTechnician::class, 'service_center_technician_id');
     }
 
+    public function quoteRevisions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(WorkOrderQuoteRevision::class)->orderBy('revision_number');
+    }
+
     public function activityLogs(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(ServiceCenterActivityLog::class);
