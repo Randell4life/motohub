@@ -72,7 +72,7 @@ class DreamRidePartsSeeder extends Seeder
                     'brand' => Str::before($title, ' '),
                     'category' => $category,
                     'condition' => 'new',
-                    'part_type' => 'oem',
+                    'part_type' => null,
                     'compatible_motorcycle' => $fitment,
                     'motorcycle_brand' => null,
                     'motorcycle_model' => null,
