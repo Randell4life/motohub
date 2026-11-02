@@ -730,7 +730,7 @@
 
 <div class="od-grid">
 <section class="od-card">
- <div class="od-card-head"><div class="od-card-icon">＋</div><div><h3>ნაწილის დამატება</h3><p>საწყობიდან ჩამოწერა ავტომატურად მოხდება</p></div></div>
+ <div class="od-card-head"><div class="od-card-icon">＋</div><div><h3>ნაწილის დამატება</h3><p>{{ in_array($workOrder->status, ['in_repair', 'waiting_for_parts'], true) ? 'დამატებითი ნაწილი კლიენტის თანხმობის შემდეგ ჩამოიწერება' : 'საწყობიდან ჩამოწერა ავტომატურად მოხდება' }}</p></div></div>
  <form method="POST" action="{{ route('my-service-center.work-orders.parts',$workOrder) }}" class="od-status-form">@csrf
   <select class="od-select" name="inventory_item_id" required><option value="">აირჩიე ნაწილი</option>@foreach($inventory as $item)<option value="{{ $item->id }}">{{ $item->name }} · მარაგი {{ $item->quantity }} · {{ number_format((float)$item->sale_price,2) }} ₾</option>@endforeach</select>
   <input class="od-select" style="max-width:110px" type="number" min="1" name="quantity" value="1" required>
@@ -738,6 +738,32 @@
  </form>
  @foreach($workOrder->parts as $part)<p class="od-muted">{{ $part->inventoryItem->name }} × {{ $part->quantity }} — {{ number_format((float)$part->total,2) }} ₾</p>@endforeach
 </section>
+@if(in_array($workOrder->status, ['in_repair', 'waiting_for_parts'], true) && $workOrder->customer_approval_status === 'approved')
+<section class="od-card">
+ <div class="od-card-head"><div class="od-card-icon">＋</div><div><h3>დამატებითი სამუშაოს ხარჯი</h3><p>კლიენტის თანხმობის შემდეგ დაემატება შეკვეთის თანხას</p></div></div>
+ <form method="POST" action="{{ route('my-service-center.work-orders.supplemental-quote', $workOrder) }}">
+  @csrf
+  <label class="od-muted">დამატებითი სამუშაო / მიზეზი</label>
+  <textarea class="od-select" name="description" rows="3" required></textarea>
+  <div class="od-fields">
+   <div class="od-field"><label>დამატებითი ხელობა (₾)</label><input class="od-select" type="number" min="0" step=".01" name="labor_cost" value="0"></div>
+   <div class="od-field"><label>სხვა ნაწილები (₾)</label><input class="od-select" type="number" min="0" step=".01" name="parts_cost" value="0"></div>
+  </div>
+  <button class="od-btn primary" type="submit">დამატებითი ხარჯის გაგზავნა →</button>
+ </form>
+</section>
+@endif
+
+<section class="od-card">
+ <div class="od-card-head"><div class="od-card-icon">≡</div><div><h3>ხარჯთაღრიცხვის ისტორია</h3><p>ყველა ვერსია და კლიენტის პასუხი</p></div></div>
+ @forelse($workOrder->quoteRevisions as $revision)
+  <div class="od-cost"><span>ვერსია #{{ $revision->revision_number }} · {{ $revision->type === 'initial' ? 'საწყისი' : 'დამატებითი' }} · {{ $revision->sent_at?->format('d.m.Y H:i') }}</span><strong>{{ number_format((float)$revision->total_cost, 2) }} ₾</strong></div>
+  <p class="od-muted">ხელობა: {{ number_format((float)$revision->labor_cost, 2) }} ₾ · ნაწილები: {{ number_format((float)$revision->parts_cost, 2) }} ₾ · {{ match($revision->status) { 'approved' => 'დადასტურებულია', 'declined' => 'უარყოფილია', default => 'პასუხს ელოდება' } }}</p>
+ @empty
+  <p class="od-muted">ხარჯთაღრიცხვის ისტორია ჯერ ცარიელია.</p>
+ @endforelse
+</section>
+
 <section class="od-card">
  <div class="od-card-head"><div class="od-card-icon">₾</div><div><h3>გადახდის აღრიცხვა</h3><p>ნაწილობრივი ან სრული გადახდა</p></div></div>
  <form method="POST" action="{{ route('my-service-center.work-orders.payments',$workOrder) }}" class="od-status-form">@csrf
