@@ -39,6 +39,7 @@ Route::prefix('mobile')->group(function () {
         Route::post('/favorites/parts/{source}/{part}', [MobileExtendedController::class, 'togglePartFavorite'])->whereIn('source', ['store', 'marketplace'])->whereNumber('part');
         Route::get('/compare', [MobileExtendedController::class, 'compare']);
         Route::get('/community', [MobileExtendedController::class, 'community']);
+        Route::post('/work-orders/{workOrder}/quote-decision', [MobileExtendedController::class, 'decideCustomerWorkOrderQuote'])->whereNumber('workOrder')->middleware('throttle:10,1');
         Route::get('/notifications', [MobileExtendedController::class, 'notifications']);
         Route::post('/notifications/read', [MobileExtendedController::class, 'markNotificationsRead']);
         Route::post('/community/posts', [MobileExtendedController::class, 'storePost'])->middleware('throttle:10,1');
@@ -78,6 +79,7 @@ Route::prefix('mobile')->group(function () {
         Route::post('/service-center/work-orders/{workOrder}/parts', [MobileExtendedController::class, 'addWorkOrderPart'])->whereNumber('workOrder');
         Route::post('/service-center/work-orders/{workOrder}/payments', [MobileExtendedController::class, 'recordWorkOrderPayment'])->whereNumber('workOrder');
         Route::post('/service-center/work-orders/{workOrder}/quote', [MobileExtendedController::class, 'sendWorkOrderQuote'])->whereNumber('workOrder')->middleware('throttle:10,1');
+        Route::post('/service-center/work-orders/{workOrder}/supplemental-quote', [MobileExtendedController::class, 'sendSupplementalWorkOrderQuote'])->whereNumber('workOrder')->middleware('throttle:10,1');
         Route::patch('/service-center/work-orders/{workOrder}/status', [MobileExtendedController::class, 'updateWorkOrderStatus'])->whereNumber('workOrder');
         Route::get('/workshop/dashboard', [MobileExtendedController::class, 'workshopDashboard']);
         Route::post('/workshop/apply', [MobileExtendedController::class, 'applyWorkshop'])->middleware('throttle:3,1');
