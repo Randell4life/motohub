@@ -93,7 +93,7 @@ class ServiceCenterOperationsController extends Controller
         $orders = WorkOrder::where('service_center_id', $center->id)
             ->whereBetween('created_at', [$from, $to])
             ->whereNotIn('status', ['cancelled'])
-            ->with(['serviceBooking', 'technician', 'parts.inventoryItem', 'payments', 'expenses'])
+            ->with(['serviceBooking', 'technician', 'parts.inventoryItem', 'payments', 'expenses', 'technicianPayroll'])
             ->latest()
             ->get();
 
@@ -130,6 +130,8 @@ class ServiceCenterOperationsController extends Controller
             ->latest('earned_at')->get();
         $payrollPending = (float) $payroll->where('status', 'pending')->sum('amount');
         $payrollPaid = (float) $payroll->where('status', 'paid')->sum('amount');
+        $payrollTotal = (float) $payroll->sum('amount');
+        $netProfit = round($grossProfit - $expenseTotal - $payrollTotal, 2);
         $technicianPerformance = $payroll->groupBy('service_center_technician_id')->map(function ($rows) {
             $first = $rows->first();
             return [
@@ -158,6 +160,7 @@ class ServiceCenterOperationsController extends Controller
                 'direct_expenses' => $directExpenses,
                 'profit' => round((float) $order->total_cost - $partCost - $directExpenses, 2),
                 'paid' => (float) $order->payments->sum('amount'),
+                'technician_payroll' => (float) $order->technicianPayroll?->amount,
             ];
         });
 
@@ -165,7 +168,7 @@ class ServiceCenterOperationsController extends Controller
             'center', 'from', 'to', 'orders', 'payments', 'expenses',
             'billedRevenue', 'laborRevenue', 'partsRevenue', 'collected',
             'partsCost', 'expenseTotal', 'outstanding', 'grossProfit',
-            'netProfit', 'categoryTotals', 'orderProfitability', 'payroll', 'payrollPending', 'payrollPaid', 'technicianPerformance'
+            'netProfit', 'categoryTotals', 'orderProfitability', 'payroll', 'payrollPending', 'payrollPaid', 'payrollTotal', 'technicianPerformance'
         ));
     }
 
