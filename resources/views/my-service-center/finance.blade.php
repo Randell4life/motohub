@@ -46,6 +46,7 @@
  <div class="fin-card"><small>გაუნაღდებელი ნაშთი</small><strong>{{ number_format($outstanding,2) }} ₾</strong><div class="fin-muted">პერიოდის შეკვეთებზე</div></div>
  <div class="fin-card"><small>ხელობის შემოსავალი</small><strong>{{ number_format($laborRevenue,2) }} ₾</strong><div class="fin-muted">შეკვეთების ხელობის ღირებულება</div></div>
  <div class="fin-card"><small>ნაწილების გაყიდვა</small><strong>{{ number_format($partsRevenue,2) }} ₾</strong><div class="fin-muted">კლიენტისთვის დარიცხული</div></div>
+ <div class="fin-card"><small>მთლიანი მოგება ნაწილების შემდეგ</small><strong class="{{ $grossProfit >= 0 ? 'fin-positive' : 'fin-negative' }}">{{ number_format($grossProfit,2) }} ₾</strong><div class="fin-muted">შემოსავალი მინუს ნაწილების თვითღირებულება</div></div>
  <div class="fin-card"><small>საერთო ხარჯები</small><strong class="fin-negative">{{ number_format($expenseTotal,2) }} ₾</strong><div class="fin-muted">ხელით აღრიცხული ხარჯები</div></div>
  <div class="fin-card"><small>სავარაუდო წმინდა შედეგი</small><strong class="{{ $netProfit >= 0 ? 'fin-positive' : 'fin-negative' }}">{{ number_format($netProfit,2) }} ₾</strong><div class="fin-muted">დარიცხული შემოსავალი − ნაწილების თვითღირებულება − ხარჯები</div></div>
 </div>
