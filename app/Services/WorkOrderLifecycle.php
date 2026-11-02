@@ -33,21 +33,19 @@ class WorkOrderLifecycle
                 return [$order, $previousStatus];
             }
 
-            if (in_array($previousStatus, ['handed_over', 'cancelled'], true)) {
-                throw ValidationException::withMessages([
-                    'status' => 'დასრულებული ან გაუქმებული შეკვეთის სტატუსის შეცვლა შეუძლებელია.',
-                ]);
-            }
+            $allowedTransitions = [
+                'received' => ['diagnostics', 'cancelled'],
+                'diagnostics' => ['waiting_for_parts', 'in_repair', 'cancelled'],
+                'waiting_for_parts' => ['diagnostics', 'in_repair', 'cancelled'],
+                'in_repair' => ['waiting_for_parts', 'completed', 'cancelled'],
+                'completed' => ['handed_over'],
+                'handed_over' => [],
+                'cancelled' => [],
+            ];
 
-            if ($nextStatus === 'handed_over' && $previousStatus !== 'completed') {
+            if (! in_array($nextStatus, $allowedTransitions[$previousStatus] ?? [], true)) {
                 throw ValidationException::withMessages([
-                    'status' => 'მოტოციკლის კლიენტისთვის გადაცემა შესაძლებელია მხოლოდ შეკეთების დასრულების შემდეგ.',
-                ]);
-            }
-
-            if ($nextStatus === 'cancelled' && $previousStatus === 'completed') {
-                throw ValidationException::withMessages([
-                    'status' => 'შეკეთებული შეკვეთა პირდაპირ ვერ გაუქმდება. გამოიყენეთ გადაცემის პროცესი.',
+                    'status' => 'სტატუსების ეს ცვლილება დაუშვებელია. დაიცავით შეკვეთის სამუშაო ეტაპების თანმიმდევრობა.',
                 ]);
             }
 
