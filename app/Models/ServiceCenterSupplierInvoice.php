@@ -32,4 +32,9 @@ class ServiceCenterSupplierInvoice extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function items()
+    {
+        return $this->hasMany(ServiceCenterSupplierInvoiceItem::class, 'invoice_id')->with('inventoryItem');
+    }
 }
