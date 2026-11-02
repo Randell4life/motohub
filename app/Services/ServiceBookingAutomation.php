@@ -37,7 +37,7 @@ class ServiceBookingAutomation
             }
 
             // service_booking_id is unique, so retries cannot create duplicates.
-            return WorkOrder::firstOrCreate(
+            $order = WorkOrder::firstOrCreate(
                 ['service_booking_id' => $lockedBooking->id],
                 [
                     'order_number' => 'WO-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(4))),
@@ -48,6 +48,15 @@ class ServiceBookingAutomation
                     'total_cost' => (float) $lockedBooking->price_at_booking,
                 ]
             );
+
+            app(ServiceCenterCustomerNotifier::class)->send(
+                $order,
+                'booking_confirmed',
+                'ჯავშანი დადასტურებულია',
+                'თქვენი სერვისცენტრის ჯავშანი დადასტურდა. სამუშაო შეკვეთა: ' . $order->order_number
+            );
+
+            return $order;
         });
     }
 }
