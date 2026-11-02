@@ -133,8 +133,9 @@ class PartController extends Controller
                         ? Storage::disk('public')->url($p->image_path)
                         : null,
                     'stock' => null,
-                    'seller_name' => $p->user?->name ?? 'მომხმარებელი',
-                    'seller_phone' => $p->user?->phone,
+                    'seller_name' => $p->is_demo ? ($p->user?->name ?? 'MotoHub წევრი') : ($p->user?->name ?? 'მომხმარებელი'),
+                    'seller_phone' => $p->is_demo ? null : $p->user?->phone,
+                    'is_demo' => (bool) $p->is_demo,
                     'created_at' => $p->created_at,
                 ]);
 
@@ -261,11 +262,12 @@ class PartController extends Controller
                     ? Storage::disk('public')->url($p->image_path)
                     : null,
                 'stock' => null,
+                'is_demo' => (bool) $p->is_demo,
             ];
 
             $description = $p->description;
             $sellerName = $p->user?->name ?? 'მომხმარებელი';
-            $sellerPhone = $p->user?->phone;
+            $sellerPhone = $p->is_demo ? null : $p->user?->phone;
         }
 
         $rewardsBalance = $request->user() ? $rewards->balance($request->user()) : 0;
