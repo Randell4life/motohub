@@ -92,6 +92,12 @@ class ServiceCenterFinancialSnapshotTest extends TestCase
         $this->assertSame(100.0, $snapshot['supplier_invoice_debt']);
         $this->assertSame(50.0, $snapshot['supplier_direct_debt']);
         $this->assertSame(150.0, $snapshot['supplier_debt']);
+        $this->assertCount(1, $snapshot['supplier_balances']);
+        $this->assertSame('Snapshot Supplier', $snapshot['supplier_balances'][0]['name']);
+        $this->assertSame(1, $snapshot['supplier_balances'][0]['invoice_count']);
+        $this->assertSame(100.0, $snapshot['supplier_balances'][0]['invoice_debt']);
+        $this->assertSame(50.0, $snapshot['supplier_balances'][0]['direct_debt']);
+        $this->assertSame(150.0, $snapshot['supplier_balances'][0]['total_debt']);
     }
 
     public function test_snapshot_is_scoped_to_the_requested_service_center(): void
