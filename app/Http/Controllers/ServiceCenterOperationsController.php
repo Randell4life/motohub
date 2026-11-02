@@ -158,7 +158,7 @@ class ServiceCenterOperationsController extends Controller
                 'order' => $order,
                 'parts_cost' => $partCost,
                 'direct_expenses' => $directExpenses,
-                'profit' => round((float) $order->total_cost - $partCost - $directExpenses, 2),
+                'profit' => round((float) $order->total_cost - $partCost - $directExpenses - (float) $order->technicianPayroll?->amount, 2),
                 'paid' => (float) $order->payments->sum('amount'),
                 'technician_payroll' => (float) $order->technicianPayroll?->amount,
             ];
