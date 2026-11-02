@@ -216,11 +216,14 @@ class ServiceCenterOperationsController extends Controller
             ];
         });
 
+        $financialSnapshot = app(\App\Services\ServiceCenterFinancialSnapshotService::class)->forCenter($center);
+        $partsMargin = round($partsRevenue - $partsCost, 2);
+
         return view('my-service-center.finance', compact(
             'center', 'from', 'to', 'orders', 'payments', 'expenses',
             'billedRevenue', 'laborRevenue', 'partsRevenue', 'collected',
             'partsCost', 'expenseTotal', 'outstanding', 'grossProfit',
-            'netProfit', 'categoryTotals', 'orderProfitability', 'payroll', 'payrollPending', 'payrollPaid', 'payrollTotal', 'technicianPerformance'
+            'netProfit', 'categoryTotals', 'orderProfitability', 'payroll', 'payrollPending', 'payrollPaid', 'payrollTotal', 'technicianPerformance', 'financialSnapshot', 'partsMargin'
         ));
     }
 

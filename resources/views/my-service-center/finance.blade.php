@@ -52,6 +52,9 @@
  <div class="fin-card"><small>ხელოსნების ანაზღაურება</small><strong class="fin-negative">{{ number_format($payrollTotal,2) }} ₾</strong><div class="fin-muted">ავტომატური დარიცხვა დასრულებული შეკვეთებიდან</div></div>
  <div class="fin-card"><small>საერთო ხარჯები</small><strong class="fin-negative">{{ number_format($expenseTotal,2) }} ₾</strong><div class="fin-muted">ხელით აღრიცხული ხარჯები</div></div>
  <div class="fin-card"><small>სავარაუდო წმინდა შედეგი</small><strong class="{{ $netProfit >= 0 ? 'fin-positive' : 'fin-negative' }}">{{ number_format($netProfit,2) }} ₾</strong><div class="fin-muted">დარიცხული შემოსავალი − ნაწილების თვითღირებულება − ხარჯები</div></div>
+ <div class="fin-card"><small>მიმდინარე საწყობის ღირებულება</small><strong class="fin-blue">{{ number_format($financialSnapshot['inventory_value'],2) }} ₾</strong><div class="fin-muted">არსებული ნაშთი × საშუალო თვითღირებულება</div></div>
+ <div class="fin-card"><small>მომწოდებლების დავალიანება</small><strong class="fin-negative">{{ number_format($financialSnapshot['supplier_debt'],2) }} ₾</strong><div class="fin-muted">ინვოისები და ცალკე აღრიცხული შესყიდვები, გადახდების გამოკლებით</div></div>
+ <div class="fin-card"><small>ნაწილების მარჟა</small><strong class="{{ $partsMargin >= 0 ? 'fin-positive' : 'fin-negative' }}">{{ number_format($partsMargin,2) }} ₾</strong><div class="fin-muted">ნაწილების გაყიდვა მინუს შეკვეთებზე ჩამოწერილი თვითღირებულება</div></div>
 </div>
 
 <div class="fin-note">ანგარიში ითვლის არჩეულ პერიოდში შექმნილ შეკვეთებს. წმინდა შედეგიდან ცალკე აკლდება ავტომატურად დარიცხული ხელოსნის ანაზღაურება და ქვემოთ ხელით აღრიცხული საოპერაციო ხარჯები. ერთი და იგივე ხელოსნის ანაზღაურება აღარ უნდა შეიყვანო მეორედ ხელით ხარჯებში. დაუფიქსირებელი ხარჯები მოგებაში არ აისახება; ეს არ არის საგადასახადო დეკლარაცია.</div>
