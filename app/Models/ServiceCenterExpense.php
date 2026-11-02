@@ -9,6 +9,7 @@ class ServiceCenterExpense extends Model
 {
     public const CATEGORIES = [
         'technician' => 'ხელოსნის ანაზღაურება',
+        'external_parts' => 'საწყობის გარეთ შეძენილი ნაწილები',
         'rent' => 'ქირა',
         'utilities' => 'კომუნალური',
         'tools' => 'ინსტრუმენტები და ინვენტარი',
