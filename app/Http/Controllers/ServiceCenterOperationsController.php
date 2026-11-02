@@ -230,7 +230,7 @@ class ServiceCenterOperationsController extends Controller
         $center = $this->center();
         abort_unless($center->canUseFeature('work_orders'), 403, $center->featureLockedMessage('work_orders'));
         abort_unless($workOrder->service_center_id === $center->id, 404);
-        abort_if(in_array($workOrder->status, ['completed', 'handed_over', 'cancelled'], true), 422, 'დასრულებულ შეკვეთაზე ხარჯთაღრიცხვა ვერ გაიგზავნება.');
+        abort_if(in_array($workOrder->status, ['in_repair', 'completed', 'handed_over', 'cancelled'], true), 422, 'დასრულებულ შეკვეთაზე ხარჯთაღრიცხვა ვერ გაიგზავნება.');
 
         $data = $request->validate([
             'diagnosis' => ['required', 'string', 'max:10000'],
@@ -288,7 +288,7 @@ class ServiceCenterOperationsController extends Controller
         $message = $approved
             ? 'კლიენტმა ხარჯთაღრიცხვა დაადასტურა. სერვისცენტრს შეუძლია შეკეთების დაწყება.'
             : 'კლიენტმა ხარჯთაღრიცხვა არ დაადასტურა. შეკეთება არ დაწყებულა.';
-        app(ServiceCenterCustomerNotifier::class)->send(
+        app(\\App\\Services\\ServiceCenterCustomerNotifier::class)->send(
             $order,
             $approved ? 'quote_approved' : 'quote_declined',
             $approved ? 'ხარჯთაღრიცხვა დადასტურებულია' : 'ხარჯთაღრიცხვა უარყოფილია',
