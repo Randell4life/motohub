@@ -131,7 +131,7 @@ class WorkOrderQuoteWorkflow
                 'quote_sent_at' => now(),
                 'customer_approved_at' => null,
                 'customer_declined_at' => null,
-                'status' => 'waiting_for_parts',
+                'status' => $order->status === 'in_repair' ? 'waiting_for_parts' : $order->status,
             ]);
 
             return $revision;
