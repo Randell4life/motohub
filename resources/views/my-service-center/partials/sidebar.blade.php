@@ -14,6 +14,11 @@
             <span>▦</span> მთავარი პანელი
         </a>
 
+        <a href="{{ route('my-service-center.calendar') }}"
+           class="mh-menu-link {{ request()->routeIs('my-service-center.calendar') ? 'active' : '' }}">
+            <span>▦</span> კალენდარი
+        </a>
+
         <a href="{{ route('my-service-center.bookings') }}"
            class="mh-menu-link {{ request()->routeIs('my-service-center.bookings') ? 'active' : '' }}">
             <span>▤</span> ჯავშნები
