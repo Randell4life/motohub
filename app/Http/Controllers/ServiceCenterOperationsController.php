@@ -123,6 +123,24 @@ class ServiceCenterOperationsController extends Controller
         $netProfit = round($grossProfit - $expenseTotal, 2);
 
         $categoryTotals = $expenses->groupBy('category')->map(fn ($rows) => (float) $rows->sum('amount'));
+
+        $payroll = $center->technicianPayroll()
+            ->with(['technician', 'workOrder'])
+            ->whereBetween('earned_at', [$from, $to])
+            ->latest('earned_at')->get();
+        $payrollPending = (float) $payroll->where('status', 'pending')->sum('amount');
+        $payrollPaid = (float) $payroll->where('status', 'paid')->sum('amount');
+        $technicianPerformance = $payroll->groupBy('service_center_technician_id')->map(function ($rows) {
+            $first = $rows->first();
+            return [
+                'technician' => $first->technician,
+                'completed_orders' => $rows->count(),
+                'labor_base' => (float) $rows->sum('labor_base'),
+                'earned' => (float) $rows->sum('amount'),
+                'paid' => (float) $rows->where('status', 'paid')->sum('amount'),
+                'pending' => (float) $rows->where('status', 'pending')->sum('amount'),
+            ];
+        })->sortByDesc('earned')->values();
         $partsCostByOrder = DB::table('service_center_inventory_movements')
             ->whereIn('work_order_id', $orders->pluck('id'))
             ->where('type', 'out')
@@ -147,7 +165,7 @@ class ServiceCenterOperationsController extends Controller
             'center', 'from', 'to', 'orders', 'payments', 'expenses',
             'billedRevenue', 'laborRevenue', 'partsRevenue', 'collected',
             'partsCost', 'expenseTotal', 'outstanding', 'grossProfit',
-            'netProfit', 'categoryTotals', 'orderProfitability'
+            'netProfit', 'categoryTotals', 'orderProfitability', 'payroll', 'payrollPending', 'payrollPaid', 'technicianPerformance'
         ));
     }
 
@@ -189,9 +207,37 @@ class ServiceCenterOperationsController extends Controller
             'name' => ['required','string','max:160'],
             'phone' => ['nullable','string','max:40'],
             'specialty' => ['nullable','string','max:160'],
+            'pay_type' => ['required', 'in:percentage_labor,fixed_per_order'],
+            'pay_rate' => ['required', 'numeric', 'min:0', 'max:1000000'],
         ]);
         $center->technicians()->create($data);
         return back()->with('success', 'ხელოსანი დაემატა.');
+    }
+
+    public function markTechnicianPayrollPaid(Request $request, \\App\\Models\\ServiceCenterTechnicianPayroll $payroll)
+    {
+        $center = $this->center();
+        abort_unless($center->canUseFeature('financial_reports'), 403, $center->featureLockedMessage('financial_reports'));
+        abort_unless($payroll->service_center_id === $center->id, 404);
+
+        DB::transaction(function () use ($payroll, $center) {
+            $locked = \\App\\Models\\ServiceCenterTechnicianPayroll::query()
+                ->where('service_center_id', $center->id)
+                ->lockForUpdate()
+                ->findOrFail($payroll->id);
+
+            if ($locked->status === 'paid') {
+                return;
+            }
+
+            $locked->update([
+                'status' => 'paid',
+                'paid_at' => now(),
+                'paid_by' => auth()->id(),
+            ]);
+        });
+
+        return back()->with('success', 'ხელოსნის ანაზღაურება გადახდილად მოინიშნა.');
     }
 
     public function storeBay(Request $request)
