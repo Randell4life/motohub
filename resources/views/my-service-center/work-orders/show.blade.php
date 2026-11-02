@@ -738,7 +738,7 @@
  </form>
  @foreach($workOrder->parts as $part)<p class="od-muted">{{ $part->inventoryItem->name }} × {{ $part->quantity }} — {{ number_format((float)$part->total,2) }} ₾</p>@endforeach
 </section>
-@if(in_array($workOrder->status, ['in_repair', 'waiting_for_parts'], true) && $workOrder->customer_approval_status === 'approved')
+@if(in_array($workOrder->status, ['in_repair', 'waiting_for_parts'], true) && in_array($workOrder->customer_approval_status, ['approved', 'declined'], true) && $workOrder->quoteRevisions->contains(fn ($revision) => $revision->type === 'initial' && $revision->status === 'approved'))
 <section class="od-card">
  <div class="od-card-head"><div class="od-card-icon">＋</div><div><h3>დამატებითი სამუშაოს ხარჯი</h3><p>კლიენტის თანხმობის შემდეგ დაემატება შეკვეთის თანხას</p></div></div>
  <form method="POST" action="{{ route('my-service-center.work-orders.supplemental-quote', $workOrder) }}">
