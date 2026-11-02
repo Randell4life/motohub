@@ -214,14 +214,14 @@ class ServiceCenterOperationsController extends Controller
         return back()->with('success', 'ხელოსანი დაემატა.');
     }
 
-    public function markTechnicianPayrollPaid(Request $request, \\App\\Models\\ServiceCenterTechnicianPayroll $payroll)
+    public function markTechnicianPayrollPaid(Request $request, \App\Models\ServiceCenterTechnicianPayroll $payroll)
     {
         $center = $this->center();
         abort_unless($center->canUseFeature('financial_reports'), 403, $center->featureLockedMessage('financial_reports'));
         abort_unless($payroll->service_center_id === $center->id, 404);
 
         DB::transaction(function () use ($payroll, $center) {
-            $locked = \\App\\Models\\ServiceCenterTechnicianPayroll::query()
+            $locked = \App\Models\ServiceCenterTechnicianPayroll::query()
                 ->where('service_center_id', $center->id)
                 ->lockForUpdate()
                 ->findOrFail($payroll->id);
